@@ -145,9 +145,9 @@ export default function SignUp() {
               onChange={handleChange}
               className="w-full px-4 py-2.5 mt-1 bg-slate-800 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none transition-all duration-200 cursor-pointer"
             >
-              <option value="TECHNICIAN">EV Technician</option>
-              <option value="OWNER">Shop Owner / Manager</option>
-              <option value="USER">System Admin</option>
+              <option value="TECHNICIAN">Technician</option>
+              <option value="OWNER">Owner</option>
+            */removed user role for now to simplify roles, can be added back if needed/*
             </select>
           </div>
           

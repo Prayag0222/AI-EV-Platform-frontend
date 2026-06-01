@@ -41,7 +41,11 @@ export default function LoginPage() {
         {
           method:"POST",
         headers:{ 'Content-Type':"application/json"},
-        body: JSON.stringify(credentials)
+        credentials:"include", // Important for cookie handling in cross-origin requests
+        body: JSON.stringify({
+          email:credentials.email,
+          password:credentials.password
+        })
         });
 
         const data = await response.json()
@@ -53,17 +57,19 @@ export default function LoginPage() {
 
         console.log('🚀 Login API Response:', data);
 
-        localStorage.setItem('authtoken', data.token);
+ 
 
-        alert(`Welcome back ${data.user.name || 'User'}! Your login was successful.`);
-        if(data.user.role === 'USER'){
-          router.push('/dashboard/user');
+        alert(`Welcome back ${data.user.name }! Your login was successful.`);
+        if(data.user.role === 'OWNER'){
+          router.push('/dashboard/owner');
         }
         else if (data.user.role === 'TECHNICIAN'){
           router.push('/dashboard/technician');
         }
         else{
-          router.push('/dashboard/user');
+        console.warn('⚠️ Access Denied: Role not authorized for panel navigation.');
+          alert('Access Denied. Account does not possess dashboard credentials.');
+          router.push('/login');
         }
 
     } catch (error) {
@@ -73,9 +79,7 @@ export default function LoginPage() {
       alert((error as Error).message || 'An unknown error occurred.');
       
     }
-    console.log("🚀 FRONTEND CAPTURED PAYLOAD:", credentials);
-    
-    alert(`Form captured safely!\nEmail: ${credentials.email}\n\nReady for backend integration next.`);
+
   };
 
   return (
