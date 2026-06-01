@@ -3,6 +3,7 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import Image from 'next/image';
 import { Zap,Mail,LockKeyhole,ArrowRight,Fence} from 'lucide-react';
+import { useRouter} from 'next/navigation';
 
 // 1. Strict TypeScript interface for incoming login credentials
 interface LoginFields {
@@ -11,6 +12,9 @@ interface LoginFields {
 }
 
 export default function LoginPage() {
+
+  const router = useRouter();
+
   // 2. React state guarded strictly by our TypeScript blueprint data layer
   const [credentials, setCredentials] = useState<LoginFields>({
     email: '',
@@ -31,6 +35,44 @@ export default function LoginPage() {
     e.preventDefault(); // Intercepts normal HTML browser page reloads
 
     // Direct console isolation log to verify your data flow works flawlessly
+
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login',
+        {
+          method:"POST",
+        headers:{ 'Content-Type':"application/json"},
+        body: JSON.stringify(credentials)
+        });
+
+        const data = await response.json()
+
+        if(!response.ok){
+          throw new Error(data.message || 'Login failed.');
+
+        }
+
+        console.log('🚀 Login API Response:', data);
+
+        localStorage.setItem('authtoken', data.token);
+
+        alert(`Welcome back ${data.user.name || 'User'}! Your login was successful.`);
+        if(data.user.role === 'USER'){
+          router.push('/dashboard/user');
+        }
+        else if (data.user.role === 'TECHNICIAN'){
+          router.push('/dashboard/technician');
+        }
+        else{
+          router.push('/dashboard/user');
+        }
+
+    } catch (error) {
+      console.error('❌ Frontend Login Error:', error);
+
+      // One-liner: Force TypeScript to treat 'error' as an Error object
+      alert((error as Error).message || 'An unknown error occurred.');
+      
+    }
     console.log("🚀 FRONTEND CAPTURED PAYLOAD:", credentials);
     
     alert(`Form captured safely!\nEmail: ${credentials.email}\n\nReady for backend integration next.`);
