@@ -1,162 +1,132 @@
-"use client";
-import {useEffect, useState} from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
+import { Search, Bell, Settings } from 'lucide-react';
 
-interface userSession {
-    id:string;
-    email:string;
-    role:'OWNER' | 'TECHNICIAN';
-}
+// 1. Importing the individual Lego bricks we built in our features/components folders
+import PriorityActionCenter from '@/features/dashboard/components/PriorityActionCenter';
+import AiBriefing from '@/features/dashboard/components/AiBriefing';
+import OperationsOverview from '@/features/dashboard/components/OperationsOverview';
 
-export default function OwnerDashboard() {
+// 2. Importing our strict contract types to check our data shapes
+import { 
+  OperationalSummary, 
+  PriorityActionCard, 
+  AIBriefing, 
+  StatusColumn 
+} from '@/types/dashboard';
 
+/* ==========================================================================
+   💡 MOCK DATA ENGINE (API PLACEHOLDERS)
+   These objects comply 100% with our types. When you're ready to integrate 
+   your Port 5000 Express backend later, you will simply replace these constant 
+   variables with an API fetch() request response.
+   ========================================================================== */
 
-    const router = useRouter();
-    const [user, setUser] = useState<userSession | null>(null);
-    const[loading,setLoading] = useState(true);
+const mockSummary: OperationalSummary = {
+  active: 12,
+  urgentBatteryCases: 3
+};
 
+const mockActionCards: PriorityActionCard[] = [
+  { id: '1', title: 'Urgent Battery Cases', count: mockSummary.urgentBatteryCases, description: 'Thermal runaway risks identified in cell logs.', type: 'urgent' },
+  { id: '2', title: 'Repairs Waiting For Parts', count: 5, description: 'Smart BMS controller units delayed in customs.', type: 'parts' },
+  { id: '3', title: 'Technicians At Capacity', count: '98%', description: 'Shop floor schedule overload predicted today.', type: 'capacity' },
+  { id: '4', title: 'Warranty Expiring Soon', count: 2, description: 'Customer service follow-ups required.', type: 'warning' },
+];
 
-    useEffect(()=>{
-        const verifySession = async ()=>{
-            try{
-                const response = await fetch('http://localhost:3000/api/auth/me',
-                    {method:"GET",
-                        credentials:"include"
-                    });
+const mockAiBriefing: AIBriefing = {
+  insight: 'Controller-related component failures have spiked by',
+  metricIncrease: '17% this week.',
+  mostAffectedModel: 'VoltScoot Odyssey V2',
+  recommendedAction: 'Inspect controller cooling pads on incoming diagnostics.'
+};
 
-                    const data = await response.json();
+const mockOperationsColumns: StatusColumn[] = [
+  { label: 'NEW REPAIRS', count: 4 },
+  { label: 'IN DIAGNOSIS', count: 7 },
+  { label: 'IN REPAIR', count: 12 },
+  { label: 'AWAITING PARTS', count: 5 },
+  { label: 'COMPLETED', count: 8 },
+];
 
-                    // strict 2 role guardrail validationn check 
-                    if (response.ok && (data.user.role === 'OWNER' || data.user.role === 'TECHNICIAN')) {
-                        setUser(data.user);
-                    }else{
-                        //if token fails kick them out 
-                        console.warn('⚠️ Access Denied: Invalid session or insufficient privileges.');
-                        alert('Access Denied. Please log in with appropriate credentials.');
-                        router.push('/login'
-
-                        )
-                    }
-            } catch(error){
-                console.error('Session verification failed:', error);
-                router.push('/login');
-
-            } finally {setLoading(false)}
-        }
-        verifySession();
-    },[router]);
-
-    if(loading){
-        return(
-            <div className="min-h-screen bg-[#121416] flex items-center justify-center text-[#c0c9c1] font-tech text-sm">
-        ⚡ INITIALIZING PLATFORM TELEMETRY GRID...
-            </div>
-        );
-    }
-
-
-    return (
-    <div className="min-h-screen bg-[#121416] text-white p-6 font-body selection:bg-[#a1d1b4]/20">
-        <div className="max-w-6xl mx-auto space-y-6">
-        {/* ─── MASTER PLATFORM NAVIGATION HEADER ─── */}
-        <header className="flex items-center justify-between border-b border-[#333537]/50 pb-5">
-            <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#a1d1b4] text-3xl">
-                electric_bolt
-            </span>
-            <h1 className="font-headline text-xl font-bold tracking-tight">
-                AI-EV CORE
-            </h1>
-            </div>
-            <div className="bg-[#1e2022] border border-[#333537] px-4 py-2 rounded-xl flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-[#a1d1b4] animate-pulse" />
-            <span className="font-tech text-xs text-[#c0c9c1] tracking-wide">
-                {user?.email}
-            </span>
-            </div>
-        </header>
-
-        {/* ─── CONDITIONAL LAYOUT CONTROL TOWER ─── */}
-        {user?.role === "OWNER" ? (
-          /* 👑 OWNER EXECUTIVE OVERVIEW INTERFACE */
-        <main className="space-y-6 animate-fade-in">
-            <div className="p-1 border border-dashed border-[#a1d1b4]/30 rounded-2xl">
-            <div className="bg-[#1e2022] border border-[#333537] p-8 rounded-xl space-y-2">
-                <span className="font-tech text-xs text-[#a1d1b4] tracking-widest font-bold">
-                OPERATOR PRIVILEGES: MASTER LEVEL
-                </span>
-                <h2 className="font-headline text-3xl font-black tracking-tight text-white">
-                Owner Operations Center
-                </h2>
-                <p className="text-[#c0c9c1] text-sm max-w-xl">
-                    Welcome to the control center. You have complete global
-                    read/write visibility across charging nodes, financial logs,
-                    and active fleet ticket states.
-                </p>
-            </div>
-            </div>
-
-            {/* Micro Grid Panels for Owner */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-[#1e2022] border border-[#333537] p-5 rounded-xl">
-                <p className="font-tech text-xs text-[#c0c9c1] uppercase tracking-wider">
-                    Financial Revenue Grid
-                </p>
-                <p className="text-2xl font-headline font-bold mt-2 text-[#a1d1b4]">
-                    $14,842.50
-                </p>
-            </div>
-            <div className="bg-[#1e2022] border border-[#333537] p-5 rounded-xl">
-                <p className="font-tech text-xs text-[#c0c9c1] uppercase tracking-wider">
-                    Connected EV Stations
-                </p>
-                <p className="text-2xl font-headline font-bold mt-2 text-white">
-                    12 Nodes Online
-                </p>
-                </div>
-            </div>
-            </main>
-        ) : (
-          /* 🛠️ TECHNICIAN MAINTENANCE LOGS INTERFACE */
-            <main className="space-y-6 animate-fade-in">
-            <div className="p-1 border border-dashed border-[#c0c9c1]/20 rounded-2xl">
-                <div className="bg-[#1e2022] border border-[#333537] p-8 rounded-xl space-y-2">
-                <span className="font-tech text-xs text-[#c0c9c1] tracking-widest font-bold">
-                    OPERATOR PRIVILEGES: MAINTENANCE BAY
-                </span>
-                <h2 className="font-headline text-3xl font-black tracking-tight text-white">
-                    Technician Work Environment
-                </h2>
-                <p className="text-[#c0c9c1] text-sm max-w-xl">
-                    Station diagnostic terminal active. Use this console to
-                    evaluate system hardware fault codes, service queue tickets,
-                    and asset repair manifests.
-                </p>
-                </div>
-            </div>
-
-            {/* Micro Grid Panels for Technician */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-[#1e2022] border border-[#333537] p-5 rounded-xl">
-                <p className="font-tech text-xs text-[#c0c9c1] uppercase tracking-wider">
-                    Assigned Repair Tickets
-                </p>
-                <p className="text-2xl font-headline font-bold mt-2 text-[#a1d1b4]">
-                    4 Urgent Faults
-                </p>
-                </div>
-                <div className="bg-[#1e2022] border border-[#333537] p-5 rounded-xl">
-                <p className="font-tech text-xs text-[#c0c9c1] uppercase tracking-wider">
-                    System Temperature Core
-                </p>
-                <p className="text-2xl font-headline font-bold mt-2 text-white">
-                    42°C Optimal
-                </p>
-                </div>
-            </div>
-            </main>
-        )}
+export default function OwnerDashboardPage() {
+  return (
+    <div className="w-full min-h-screen bg-volt-background font-sans text-volt-primary antialiased">
+      
+      {/* 🏙️ MASTER TOP NAVIGATION LAYER */}
+      <header className="sticky top-0 z-40 flex h-20 w-full items-center justify-between border-b border-volt-container bg-volt-surface px-8 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)]">
+        {/* Left Side: System Title Segment */}
+        <div>
+          <h1 className="font-display text-lg font-bold tracking-tight text-volt-primary">
+            VoltOps Executive Dashboard
+          </h1>
         </div>
+        
+        {/* Right Side: Operations Tools & User Metrics */}
+        <div className="flex items-center gap-6">
+          {/* Architectural Search Bar component */}
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1-2 text-slate-400 stroke-[1.5]" />
+            <input 
+              type="text" 
+              placeholder="Search assets, tickets, logs..." 
+              className="w-full rounded-volt border border-volt-container bg-volt-background py-2 pl-10 pr-4 font-display text-sm tracking-wide text-volt-primary outline-none transition-all duration-150 focus:border-volt-secondary focus:ring-2 focus:ring-volt-secondary/10"
+            />
+          </div>
+          
+          {/* Quick Warning Bell Alert */}
+          <button className="relative p-2 text-slate-500 hover:text-volt-primary transition-colors cursor-pointer">
+            <Bell className="h-5 w-5 stroke-[1.5]" />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-volt-terracotta" />
+          </button>
+          
+          {/* Settings Node */}
+          <button className="p-2 text-slate-500 hover:text-volt-primary transition-colors cursor-pointer">
+            <Settings className="h-5 w-5 stroke-[1.5]" />
+          </button>
+          
+          {/* Minimalist Profile Anchor Badge */}
+          <div className="h-9 w-9 rounded-full bg-volt-primary border border-volt-container overflow-hidden select-none flex items-center justify-center font-display text-xs font-semibold text-white">
+            EX
+          </div>
+        </div>
+      </header>
+
+      {/* 📊 CORE OPERATIONAL LAYOUT SHEET */}
+      <div className="mx-auto max-w-[1440px] p-8 lg:p-12">
+        
+        {/* 📰 EDITORIAL HERO BANNER SECTION */}
+        <section className="mb-12 max-w-3xl">
+          <h2 className="font-display text-4xl font-bold tracking-tight text-volt-primary sm:text-5xl leading-none">
+            Good Morning, Shop Leader.
+          </h2>
+          <p className="mt-4 font-sans text-base text-slate-600 leading-relaxed">
+            Your repair operations environment currently logs <span className="font-semibold text-volt-primary">{mockSummary.active} active tickets</span> on the warehouse floor and{' '}
+            <span className="font-semibold text-volt-terracotta">{mockSummary.urgentBatteryCases} critical battery issues</span> requiring immediate supervisor sign-off.
+          </p>
+        </section>
+
+        {/* 🥊 THE COMMAND GRIDS MATRIX LAYOUT (SPLIT COLUMN LAYOUT) */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 items-stretch">
+          
+          {/* LEFT WING: PRIORITY ACTION CENTER (Spans 2 out of 3 Columns on desktop layouts) */}
+          <div className="lg:col-span-2 bg-volt-surface border border-volt-container rounded-container p-8 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.01)]">
+            <PriorityActionCenter cards={mockActionCards} />
+          </div>
+
+          {/* RIGHT WING: INTELLIGENT STREAM AI BRIEFING (Spans 1 out of 3 Columns) */}
+          <div className="flex">
+            <div className="w-full bg-volt-surface border border-volt-container rounded-container p-8 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.01)] flex flex-col">
+              <AiBriefing data={mockAiBriefing} />
+            </div>
+          </div>
+        </div>
+
+        {/* 🗺️ SOUTHERN ROW BLOCK: THE COMPREHENSIVE WORKFLOW TRACKER */}
+        <section className="mt-12 bg-volt-surface border border-volt-container rounded-container p-8 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.01)]">
+          <OperationsOverview columns={mockOperationsColumns} />
+        </section>
+
+      </div>
     </div>
-    );
+  );
 }
