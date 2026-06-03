@@ -6,6 +6,14 @@
 }
 
 @theme inline {
+  --color-volt-background: #fbf8fa;       /* Warm bone-white background canvas */
+  --color-volt-surface: #ffffff;          /* Physical elevated card layer */
+  --color-volt-primary: #091426;          /* Deep authoritative Navy text/buttons */
+  --color-volt-secondary: #006a63;        /* Sophisticated Muted Teal accent */
+  --color-volt-container: #f0edef;        /* Tonal structure borders */
+  --color-volt-darkCard: #091426;         /* Deep canvas container for AI summary */
+  --color-volt-terracotta: #ba1a1a;       /* Elegant non-vibrant error state */
+  --color-volt-sand: #fadfb8;             /* Soft warning container background */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -13,6 +21,7 @@
   --font-sora: var(--font-sora);
   --font-hanken: var(--font-hanken);
   --font-jet: var(--font-jet);
+<<<<<<< HEAD
   --color-obsidian: #111318;
   --color-obsidian-dim: #111318;
   --color-obsidian-bright: #37393e;
@@ -38,6 +47,13 @@
   --shadow-cyan-glow: 0 0 20px rgba(0, 242, 255, 0.2);
   --shadow-emerald-glow: 0 0 20px rgba(54, 255, 139, 0.2);
 
+=======
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Geist", sans-serif;
+  /* Architectural Sharp Shapes */
+  --radius-volt: 0.25rem;                 /* 4px architectural soft radius */
+  --radius-container: 0.5rem;
+>>>>>>> 667e384cc8886cfa745ea18bb051edd1d2be071e
 }
 
 @media (prefers-color-scheme: dark) {
