@@ -199,7 +199,7 @@ export default function LoginPage() {
               </button>
             </form>
           </div>
-
+ 
           {/* Bottom Footnotes & Navigation routing */}
           <footer className="text-center space-y-4">
             <p className="font-body text-sm text-[#c0c9c1]">

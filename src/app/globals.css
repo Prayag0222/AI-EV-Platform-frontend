@@ -13,6 +13,31 @@
   --font-sora: var(--font-sora);
   --font-hanken: var(--font-hanken);
   --font-jet: var(--font-jet);
+  --color-obsidian: #111318;
+  --color-obsidian-dim: #111318;
+  --color-obsidian-bright: #37393e;
+  --color-obsidian-floor: #0A0C10;
+
+  --color-neon-cyan: #00dbe7;
+  --color-neon-cyan-bright: #00f2ff;
+  --color-neon-cyan-container: #006a71;
+
+  --color-emerald-go: #00e476;
+  --color-emerald-go-bright: #36ff8b;
+  --color-emerald-go-container: #007238;
+
+  --color-electric-violet: #d1bcff;
+  --color-electric-violet-container: #e3d4ff;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-technical: 4px;
+
+  --shadow-cyan-glow: 0 0 20px rgba(0, 242, 255, 0.2);
+  --shadow-emerald-glow: 0 0 20px rgba(54, 255, 139, 0.2);
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,4 +51,40 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Core Canvas Layout Overrides */
+@layer base {
+  body {
+    background-color: var(--color-obsidian);
+    color: #e2e2e8;
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+}
+
+/* Structural Glassmorphic Stratification matching design rules */
+.glass-subsurface {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-active {
+  background: rgba(17, 19, 24, 0.75);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(0, 219, 231, 0.2);
+}
+
+.glass-modal {
+  background: rgba(17, 19, 24, 0.9);
+  backdrop-filter: blur(40px);
+  border: 1px solid var(--color-neon-cyan);
+}
+
+/* Cinematic Ambient HUD Mesh Canvas background grid layout */
+.hud-grid {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(0, 219, 231, 0.04) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 219, 231, 0.04) 1px, transparent 1px);
 }
