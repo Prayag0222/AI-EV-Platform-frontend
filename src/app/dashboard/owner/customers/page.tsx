@@ -1,15 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, Loader2, Calendar, Smartphone, Bike, Mail, MapPinHouse, UserRoundPen } from 'lucide-react';
+import { Users, Loader2, Calendar, Smartphone, Bike, Mail, MapPinHouse, UserRoundPen ,Trash2} from 'lucide-react';
+import DeleteCustomerModal from '@/components/DeleteCustomerModal';
+import EditCustomerModal from '@/components/EditCustomerModal';
 
 interface Customer {
   id: string;
   name: string;
   phone: string;
   vehicleModel: string;
-  email: string;
-  address: string;
+  email?: string;
+  address?: string;
   createdAt: string;
 }
 
@@ -17,6 +19,8 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
+  const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
 
   // ⏱️ 1. LINTER-SECURE INITIAL DATA MOUNT
   useEffect(() => {
@@ -64,6 +68,39 @@ export default function CustomersPage() {
       isMounted = false; // Clean up the mount flag tracker
     };
   }, []); // 🔒 Completely isolated from external functions, silencing ESLint!
+
+  const executeDelete = async ()=>{
+    if (!customerToDelete) return;
+
+    try {
+       console.log(customerToDelete)
+      const response = await fetch(`http://localhost:3000/api/owner/deleteCustomer/${customerToDelete}`,{
+      method:'DELETE'
+      })
+      console.log(response)
+
+      if(response.ok){
+    setCustomers((prev) => prev.filter(c => c.id !== customerToDelete));
+    } else {
+      const errData = await response.json().catch(() => ({}));
+      console.log("here is the error ", errData)
+      alert(`❌ Failed to delete: ${errData.error || 'Server error'}`);
+    }}
+
+    catch (error) {
+    console.error(error);
+    alert("💥 Network error: Make sure your backend server is alive on port 5000!");
+      }finally {
+    setCustomerToDelete(null); // 🔌 Close the custom window smoothly
+  }
+
+  }
+  // ⚡ This receives the updated customer data from the modal and swaps it inside your list instantly!
+  const handleUpdateCustomerSuccess = (updatedCustomer: Customer) => {
+    setCustomers((prevCustomers) =>
+      prevCustomers.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c))
+    );
+  };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -114,6 +151,7 @@ export default function CustomersPage() {
                   <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Vehicle Asset Model</th>
                   <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Address</th>
                   <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Registration Date</th>
+                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-volt-container font-sans text-sm">
@@ -159,6 +197,29 @@ export default function CustomersPage() {
                         })}
                       </span>
                     </td>
+                      <td className="p-4 text-slate-400 font-medium text-xs">
+                      <span className="flex items-center gap-2">
+                      <button 
+                      onClick={()=>setCustomerToDelete(customer.id)}
+                      title="Purge Customer Record"
+                      className='p-2 text-slate-500 gap-3 hover:text-red-400 rounded-volt hover:bg-red-950/20 transition-all cursor-pointer inline-flex items-center justify-center group  '>
+                        Delete<Trash2 className='className="h-4 w-4  transition-transform group-hover:scale-110 stroke-[2]'/>
+                      </button>
+                      </span>
+                    </td>
+                    
+                    <td className="p-4 text-slate-400 font-medium text-xs">
+                      <span className="flex items-center gap-2">
+                    <button
+                        onClick={() => setCustomerToEdit(customer)} // 🔌 Fills state snapshot to snap open modal
+                        className="p-2 text-slate-500 hover:text-volt-secondary rounded-volt hover:bg-volt-secondary/10 transition-all cursor-pointer inline-flex items-center justify-center"
+                          title="Edit Profile">
+                            <UserRoundPen className="h-4 w-4" />
+                          </button>
+                      </span>
+                    </td>
+                    
+                    
                   </tr>
                 ))}
               </tbody>
@@ -172,7 +233,21 @@ export default function CustomersPage() {
           </div>
         </div>
       )}
+        {/* 🛡️ REUSABLE DATA PURGE COMPONENT MODAL LAYER */}
+<DeleteCustomerModal 
+  customerId={customerToDelete}
+  onClose={() => setCustomerToDelete(null)}
+  onConfirm={executeDelete}
+/>
 
+{/* Update ONLY this tag at the very bottom of page.tsx */}
+<EditCustomerModal 
+  key={customerToEdit?.id} 
+  customer={customerToEdit}
+  onClose={() => setCustomerToEdit(null)}
+  onUpdateSuccess={handleUpdateCustomerSuccess}
+/>
     </div>
+    
   );
 }

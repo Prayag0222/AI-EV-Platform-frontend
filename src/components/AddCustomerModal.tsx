@@ -159,7 +159,6 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
             </label>
             <input 
               type="text"
-              required
               disabled={isSubmitting}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -174,7 +173,6 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
             </label>
             <input 
               type="text"
-              required
               disabled={isSubmitting}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
