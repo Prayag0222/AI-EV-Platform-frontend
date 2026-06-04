@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, RefreshCw, Loader2, Calendar, Smartphone, Bike } from 'lucide-react';
+import { Users, Loader2, Calendar, Smartphone, Bike, Mail, MapPinHouse, UserRoundPen } from 'lucide-react';
 
 interface Customer {
   id: string;
   name: string;
   phone: string;
   vehicleModel: string;
+  email: string;
+  address: string;
   createdAt: string;
 }
 
@@ -22,6 +24,7 @@ export default function CustomersPage() {
 
     async function fetchInitialData() {
       try {
+        // 🌐 Uses your exact custom frontend-proxy route endpoint mapping layout
         const response = await fetch('http://localhost:3000/api/owner/getCustomer');
         
         if (!response.ok) {
@@ -40,17 +43,15 @@ export default function CustomersPage() {
             setError("Backend returned data in an unexpected format.");
           }
         }
-      }catch (err) { // ⚡ Let TypeScript implicitly assume it's an un-typed catch layout block
-      console.error(err);
-      if (isMounted) {
-        // We cast the error safely to a standard Error instance model to read its message text safely
-        const errorMessage = err instanceof Error ? err.message : 'Could not establish synchronization link to the VoltOps backend.';
-        setError(errorMessage);
-        setCustomers([]);
-      }
-    }
-      
-      finally {
+      } catch (err) { 
+        // 🛡️ TS-SAFE METHOD: Removed 'any' type definition and casted securely via instanceof checking rules
+        console.error(err);
+        if (isMounted) {
+          const errorMessage = err instanceof Error ? err.message : 'Could not establish synchronization link to the VoltOps backend.';
+          setError(errorMessage);
+          setCustomers([]);
+        }
+      } finally {
         if (isMounted) {
           setIsLoading(false);
         }
@@ -63,36 +64,6 @@ export default function CustomersPage() {
       isMounted = false; // Clean up the mount flag tracker
     };
   }, []); // 🔒 Completely isolated from external functions, silencing ESLint!
-
-  // ⚡ 2. REFRESH BUTTON ACTION HANDLER (Completely out of useEffect)
-  const handleManualRefreshClick = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('http://localhost:3000/api/owner/getCustomer');
-      
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Server rejected the network sync operation.');
-      }
-      
-      const data = await response.json();
-      const targetArray = Array.isArray(data) ? data : data?.customers;
-
-      if (Array.isArray(targetArray)) {
-        setCustomers(targetArray);
-      } else {
-        setCustomers([]);
-        setError("Backend returned data in an unexpected format.");
-      }
-    } catch (err) {
-      console.error(err);
-      const errorMessage = err instanceof Error ? err.message : 'Could not establish synchronization link to the VoltOps backend.';
-      setError(errorMessage);
-      setCustomers([]);
-    }
-  };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -108,16 +79,6 @@ export default function CustomersPage() {
             Review and coordinate registered shop customer profiles and active vehicle assets.
           </p>
         </div>
-
-        {/* Sync/Refresh Sync Target Action */}
-        <button 
-          onClick={handleManualRefreshClick}
-          disabled={isLoading}
-          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-volt-background border border-volt-container hover:border-volt-secondary rounded-volt font-display text-xs font-semibold text-slate-400 hover:text-volt-primary transition-all duration-150 cursor-pointer disabled:opacity-40"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          <span>Refresh Records</span>
-        </button>
       </div>
 
       {/* 📊 INTERACTIVE LOWER INTERFACE CONTAINER */}
@@ -131,14 +92,14 @@ export default function CustomersPage() {
       ) : error ? (
         <div className="p-12 text-center bg-red-950/20 border border-red-500/20 text-red-200 rounded-container">
           <p className="font-sans text-sm font-semibold">{error}</p>
-          <p className="text-xs text-red-400/70 mt-1">Check if your Node terminal server process is alive on port 5000.</p>
+          <p className="text-xs text-red-400/70 mt-1">Check if your Node terminal server process is alive.</p>
         </div>
       ) : customers.length === 0 ? (
         <div className="p-20 text-center bg-volt-surface border border-volt-container rounded-container">
           <Users className="h-10 w-10 text-slate-600 mx-auto opacity-40 mb-4" />
           <h3 className="font-display text-base font-bold text-volt-primary">No Registered Customers</h3>
           <p className="text-slate-400 text-xs max-w-xs mx-auto mt-1 leading-relaxed">
-            Use the &quote;Add Customer &quote; panel tool link inside your sidebar workspace to register your shop&apos;s first profile record!
+            Use the &quote;Add Customer&quote; panel tool link inside your sidebar workspace to register your shop&apos;s first profile record!
           </p>
         </div>
       ) : (
@@ -149,7 +110,9 @@ export default function CustomersPage() {
                 <tr className="bg-volt-background border-b border-volt-container">
                   <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Customer Name</th>
                   <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Contact Info</th>
+                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Email</th>
                   <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Vehicle Asset Model</th>
+                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Address</th>
                   <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Registration Date</th>
                 </tr>
               </thead>
@@ -157,7 +120,10 @@ export default function CustomersPage() {
                 {customers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-volt-background/30 transition-colors group">
                     <td className="p-4 font-semibold text-volt-primary group-hover:text-volt-secondary transition-colors">
-                      {customer.name}
+                      <span className="flex items-center gap-2">
+                        <UserRoundPen className="h-3.5 w-3.5 text-slate-500"/>
+                        {customer.name}
+                      </span>
                     </td>
                     <td className="p-4 text-slate-400 font-medium">
                       <span className="flex items-center gap-2">
@@ -167,8 +133,20 @@ export default function CustomersPage() {
                     </td>
                     <td className="p-4 text-slate-300 font-medium">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-volt-background border border-volt-container rounded-volt text-xs text-volt-primary">
+                        <Mail className="h-3.5 w-3.5 text-volt-secondary" />
+                        {customer.email || <span className="text-slate-500 italic">Not Provided</span>}
+                      </span>
+                    </td>
+                    <td className="p-4 text-slate-300 font-medium">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-volt-background border border-volt-container rounded-volt text-xs text-volt-primary">
                         <Bike className="h-3.5 w-3.5 text-volt-secondary" />
                         {customer.vehicleModel}
+                      </span>
+                    </td>
+                    <td className="p-4 text-slate-300 font-medium">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-volt-background border border-volt-container rounded-volt text-xs text-volt-primary">
+                        <MapPinHouse className="h-3.5 w-3.5 text-volt-secondary" />
+                        {customer.address || <span className="text-slate-500 italic">Not Provided</span>}
                       </span>
                     </td>
                     <td className="p-4 text-slate-400 font-medium text-xs">

@@ -16,6 +16,8 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
   // Form Text Buckets
   const [name, setName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [address, setAddress] = useState<string>('');
   const [vehicleModel, setVehicleModel] = useState<string>('');
 
   // ⚡ NEW ADVANCED STATES: Tracking loaders and cool custom notifications
@@ -33,7 +35,7 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
       const response = await fetch('http://localhost:3000/api/owner/createCustomer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, vehicleModel }),
+        body: JSON.stringify({ name, phone, vehicleModel,email,address }),
       });
 
       const data = await response.json();
@@ -49,6 +51,8 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
         setName('');
         setPhone('');
         setVehicleModel('');
+        setEmail('');
+        setAddress('');
 
         // Wait exactly 2 seconds so the user can enjoy the success animation, then close down
         setTimeout(() => {
@@ -67,6 +71,7 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
         message: '💥 Cannot reach server. Verify Express is running on Port 5000!',
         type: 'error'
       });
+      console.log("error",error)
     } finally {
       setIsSubmitting(false); // Turn off the loading wheel animation
     }
@@ -144,6 +149,36 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g. +1234567890"
+              className="w-full rounded-volt border border-volt-container bg-volt-background px-3 py-2.5 font-sans text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all disabled:opacity-50"
+            />
+          </div>
+
+          <div>
+            <label className="block font-display text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">
+                Email
+            </label>
+            <input 
+              type="text"
+              required
+              disabled={isSubmitting}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="eg.Example@gmial.com (optional)"
+              className="w-full rounded-volt border border-volt-container bg-volt-background px-3 py-2.5 font-sans text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all disabled:opacity-50"
+            />
+          </div>
+
+                  <div>
+            <label className="block font-display text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">
+              Address
+            </label>
+            <input 
+              type="text"
+              required
+              disabled={isSubmitting}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="(optional field)"
               className="w-full rounded-volt border border-volt-container bg-volt-background px-3 py-2.5 font-sans text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all disabled:opacity-50"
             />
           </div>
