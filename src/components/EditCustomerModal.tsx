@@ -76,6 +76,8 @@ const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     } finally {
       setIsSubmitting(false);
     }
+    console.log(errorMessage);
+    
   };
 
   return (
