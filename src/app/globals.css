@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 
 :root {
@@ -21,7 +22,7 @@
   --font-sora: var(--font-sora);
   --font-hanken: var(--font-hanken);
   --font-jet: var(--font-jet);
-<<<<<<< HEAD
+
   --color-obsidian: #111318;
   --color-obsidian-dim: #111318;
   --color-obsidian-bright: #37393e;
@@ -47,13 +48,13 @@
   --shadow-cyan-glow: 0 0 20px rgba(0, 242, 255, 0.2);
   --shadow-emerald-glow: 0 0 20px rgba(54, 255, 139, 0.2);
 
-=======
+
   --font-sans: "Inter", sans-serif;
   --font-display: "Geist", sans-serif;
   /* Architectural Sharp Shapes */
   --radius-volt: 0.25rem;                 /* 4px architectural soft radius */
   --radius-container: 0.5rem;
->>>>>>> 667e384cc8886cfa745ea18bb051edd1d2be071e
+
 }
 
 @media (prefers-color-scheme: dark) {
