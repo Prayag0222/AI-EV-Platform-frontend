@@ -74,7 +74,9 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
       console.log("error",error)
     } finally {
       setIsSubmitting(false); // Turn off the loading wheel animation
+    
     }
+    
   };
 
   return (
@@ -202,7 +204,7 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
             <button 
               type="button"
               onClick={onClose}
-              disabled={isSubmitting}
+              
               className="px-4 py-2 rounded-volt font-display text-sm font-medium text-slate-400 hover:bg-volt-background transition-colors cursor-pointer disabled:opacity-30"
             >
               Cancel
