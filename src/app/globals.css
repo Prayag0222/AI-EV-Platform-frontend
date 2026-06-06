@@ -22,6 +22,7 @@
   --font-sora: var(--font-sora);
   --font-hanken: var(--font-hanken);
   --font-jet: var(--font-jet);
+  --font-roboto: var(--font-roboto)
 
   --color-obsidian: #111318;
   --color-obsidian-dim: #111318;
@@ -42,6 +43,7 @@
   --font-display: "Space Grotesk", sans-serif;
   --font-sans: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+
 
   --radius-technical: 4px;
 
@@ -104,4 +106,14 @@ body {
   background-size: 40px 40px;
   background-image: linear-gradient(to right, rgba(0, 219, 231, 0.04) 1px, transparent 1px),
                     linear-gradient(to bottom, rgba(0, 219, 231, 0.04) 1px, transparent 1px);
+}
+.ambient-shadow {
+    box-shadow: 0 4px 6px -1px rgba(30, 41, 59, 0.04), 0 2px 4px -2px rgba(30, 41, 59, 0.02);
+}
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(30, 41, 59, 0.08);
 }
