@@ -12,7 +12,8 @@ import {
   UserPlus, 
   FileSpreadsheet, 
   HelpCircle, 
-  LogOut 
+  LogOut, 
+  Receipt
 } from 'lucide-react';
 
 interface NavItem {
@@ -36,6 +37,7 @@ export default function Sidebar({ onAddCustomerClick }: SidebarProps) {
     { label: 'Customers', icon: Users, href: '/dashboard/owner/customers' },
     { label: 'Technicians', icon: ShieldAlert, href: '/dashboard/owner/technicians' },
     { label: 'Inventory', icon: Layers, href: '/dashboard/owner/inventory' },
+    { label: 'Billing', icon: Receipt, href: '/dashboard/owner/billing' },
   ];
 
   // System Utility/Quick Actions mapped from screen.jpg
