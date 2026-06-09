@@ -57,7 +57,6 @@ export default function LoginPage() {
 
         console.log('🚀 Login API Response:', data);
 
- 
 
         alert(`Welcome back ${data.user.name }! Your login was successful.`);
         if(data.user.role === 'OWNER'){
