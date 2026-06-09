@@ -178,7 +178,7 @@ export default function CreateTicketPage() {
 
           <div>
             <label className="block font-sora text-xs font-medium  text-gray-700 tracking-wide  mb-1">Primary Issue  </label>
-            <textarea required name="Primary issue" rows={1} value={formData.issueCategory} onChange={handleInputChange} placeholder="e.g. Battery thermal Warning" className="w-full px-3 py-2 bg-volt-background border border-volt-container text-volt-text placeholder:text-volt-muted text-xs rounded focus:outline-none focus:border-volt-secondary resize-none" />
+            <textarea required name="issueCategory" rows={1} value={formData.issueCategory} onChange={handleInputChange} placeholder="e.g. Battery thermal Warning" className="w-full px-3 py-2 bg-volt-background border border-volt-container text-volt-text placeholder:text-volt-muted text-xs rounded focus:outline-none focus:border-volt-secondary resize-none" />
           </div>
 
           <div>
