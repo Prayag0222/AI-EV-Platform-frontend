@@ -1,29 +1,27 @@
-
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Default browser canvas color fallback anchors */
+  --background: #FAFAF8;
+  --foreground: #091426;
 }
 
 @theme inline {
-  --color-volt-background: #fbf8fa;       /* Warm bone-white background canvas */
-  --color-volt-surface: #ffffff;          /* Physical elevated card layer */
-  --color-volt-primary: #091426;          /* Deep authoritative Navy text/buttons */
-  --color-volt-secondary: #006a63;        /* Sophisticated Muted Teal accent */
-  --color-volt-container: #f0edef;        /* Tonal structure borders */
-  --color-volt-darkCard: #091426;         /* Deep canvas container for AI summary */
-  --color-volt-terracotta: #ba1a1a;       /* Elegant non-vibrant error state */
-  --color-volt-sand: #fadfb8;             /* Soft warning container background */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-sora: var(--font-sora);
-  --font-hanken: var(--font-hanken);
-  --font-jet: var(--font-jet);
-  --font-roboto: var(--font-roboto)
+  /* 🔋 YOUR EXISTING VOLTOPS CUSTOM COLOR CONFIGURATION MAP */
+  --color-volt-background:#F9F6F1;       
+  --color-volt-surface: #ffffff;          
+  --color-volt-primary: #091426;          
+  --color-volt-secondary: #006a63;        
+  --color-volt-container: #f0edef;        
+  --color-volt-darkCard: #091426;         
+  --color-volt-terracotta: #ba1a1a;       
+  --color-volt-sand: #fadfb8;            
+  --color-primary-text: #211C17; 
+  --color-sec-text: #6F6860; 
+  --color-emerald-green: #D6EFDE; 
 
+
+  /* 🌌 YOUR OBSIDIAN & NEON HUD COLOR SPACE ASSETS */
   --color-obsidian: #111318;
   --color-obsidian-dim: #111318;
   --color-obsidian-bright: #37393e;
@@ -40,49 +38,84 @@
   --color-electric-violet: #d1bcff;
   --color-electric-violet-container: #e3d4ff;
 
-  --font-display: "Space Grotesk", sans-serif;
+  /* ⚡ THE SYSTEM FIX: CORE SEMANTIC DESIGN TOKENS FOR YOUR TEMPLATES */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-card: #FFFFFF;
+  --color-card-foreground: #091426;
+  --color-surface: #F5F3F4;
+  --color-border: #C5C6CD;
+  
+--color-card: #FFFFFF;
+  --color-card-foreground: #091426;
+  --color-surface: #F5F3F4;
+  --color-border: #C5C6CD;
+  
+  --color-muted: #F5F3F4;
+  --color-muted-foreground: #75777D;
+  --color-accent: #E4E2E3;
+  --color-accent-foreground: #091426;
+  
+  /* 🏁 CRITICAL ADDITION: Restores text visibility on dark containers & custom buttons */
+  --color-primary: #091426;
+  --color-primary-foreground: #FFFFFF;
+
+  /* 🚦 SYSTEM STATUS BADGES */
+  --color-critical: #BA1A1A;
+  --color-critical-soft: #FFDAD6;
+  --color-warning: #564427;
+  --color-warning-soft: #FADFB8;
+  --color-success: #006F67;
+  --color-success-soft: #99EFE5;
+
+  --color-muted: #F5F3F4;
+  --color-muted-foreground: #75777D;
+  --color-accent: #E4E2E3;
+  --color-accent-foreground: #091426;
+
+  /* 🚦 SYSTEM STATUS BADGES FOR THE WORK CARDS */
+  --color-critical: #BA1A1A;
+  --color-critical-soft: #FFDAD6;
+  --color-warning: #564427;
+  --color-warning-soft: #FADFB8;
+  --color-success: #006F67;
+  --color-success-soft: #99EFE5;
+
+  /* 📐 TYPOGRAPHY & RADIUS CONFIGURATION INTERFACES */
   --font-sans: "Inter", sans-serif;
+  --font-display: "Geist", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
+  --font-sans: var(--font-geist-sans), "Inter", sans-serif;
+  --font-display: var(--font-geist-sans), "Geist", sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
 
   --radius-technical: 4px;
+  --radius-volt: 0.25rem;                 
+  --radius-container: 0.5rem;
 
   --shadow-cyan-glow: 0 0 20px rgba(0, 242, 255, 0.2);
   --shadow-emerald-glow: 0 0 20px rgba(54, 255, 139, 0.2);
-
-
-  --font-sans: "Inter", sans-serif;
-  --font-display: "Geist", sans-serif;
-  /* Architectural Sharp Shapes */
-  --radius-volt: 0.25rem;                 /* 4px architectural soft radius */
-  --radius-container: 0.5rem;
-
+  
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0A0C10; /* Switches to your sleek obsidian floor profile in dark modes */
+    --foreground: #E2E2E8;
   }
 }
 
+/* 🏛️ BASE SEMANTIC OVERRIDES */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
-/* Core Canvas Layout Overrides */
-@layer base {
-  body {
-    background-color: var(--color-obsidian);
-    color: #e2e2e8;
-    font-family: var(--font-sans);
-    overflow-x: hidden;
-  }
-}
-
-/* Structural Glassmorphic Stratification matching design rules */
+/* ✨ STRUCTURAL GLASSMORPHIC STRATIFICATION WORKSPACES */
 .glass-subsurface {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
@@ -101,19 +134,22 @@ body {
   border: 1px solid var(--color-neon-cyan);
 }
 
-/* Cinematic Ambient HUD Mesh Canvas background grid layout */
+/* 🌐 CINEMATIC AMBIENT HUD MESH GRID */
 .hud-grid {
   background-size: 40px 40px;
   background-image: linear-gradient(to right, rgba(0, 219, 231, 0.04) 1px, transparent 1px),
                     linear-gradient(to bottom, rgba(0, 219, 231, 0.04) 1px, transparent 1px);
 }
+
 .ambient-shadow {
-    box-shadow: 0 4px 6px -1px rgba(30, 41, 59, 0.04), 0 2px 4px -2px rgba(30, 41, 59, 0.02);
+  box-shadow: 0 4px 6px -1px rgba(30, 41, 59, 0.04), 0 2px 4px -2px rgba(30, 41, slate, 0.02);
 }
+
 .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(30, 41, 59, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(30, 41, 59, 0.08);
 }

@@ -93,7 +93,7 @@ export default function OwnerDashboardPage() {
       </header>
 
       {/* 📊 CORE OPERATIONAL LAYOUT SHEET */}
-      <div className="mx-auto max-w-[1440px] p-8 lg:p-12">
+      <div className="mx-auto max-w-360 p-8 lg:p-12">
         
         {/* 📰 EDITORIAL HERO BANNER SECTION */}
         <section className="mb-12 max-w-3xl">
