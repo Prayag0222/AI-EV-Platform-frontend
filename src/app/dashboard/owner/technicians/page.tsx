@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface Technician {
   id: string;
@@ -15,17 +15,15 @@ interface Technician {
 }
 
 export default function OwnerTechniciansPage() {
-  // States
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Form Registration States
+  // Form Registration States — ✅ employeeId is completely removed from form intake states!
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
-    employeeId: '',
     specialization: 'GENERAL_EV',
     experienceYears: '',
     address: '',
@@ -33,7 +31,6 @@ export default function OwnerTechniciansPage() {
   const [formSuccessMessage, setFormSuccessMessage] = useState<string | null>(null);
   const [formErrorMessage, setFormErrorMessage] = useState<string | null>(null);
 
-  // States for Edit Mode
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState({
     fullName: '',
@@ -45,24 +42,27 @@ export default function OwnerTechniciansPage() {
     address: '',
   });
 
-  // Fetch list on page load
+
+
   useEffect(() => {
-    const fetchAllTechnicians = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/technician/getAllTechnicians');
-        if (!response.ok) throw new Error('Could not retrieve data from the EV server.');
-        const data = await response.json();
-        setTechnicians(data);
-      } catch (err) {
-        // Logging the error ensures it is "used", making ESLint happy!
-        console.error(err);
-        setErrorMessage(err instanceof Error ? err.message : 'An unknown error occurred.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchAllTechnicians();
+      const fetchAllTechnicians = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/technician/getAllTechnicians');
+      if (!response.ok) throw new Error('Could not retrieve data from the EV server.');
+      const data = await response.json();
+      setTechnicians(data);
+    } catch (err: unknown) {
+      const errorInstance = err instanceof Error ? err : new Error(String(err));
+      setErrorMessage(errorInstance.message || 'An unknown error occurred.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+fetchAllTechnicians();
+
   }, []);
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -78,27 +78,32 @@ export default function OwnerTechniciansPage() {
       const response = await fetch('http://localhost:3000/api/technician/createTechnician', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData), // Sends object package without manual ID keys
       });
 
       const responseData = await response.json();
       if (!response.ok) throw new Error(responseData.message || 'Failed to register technician.');
 
-      setFormSuccessMessage('Technician registered successfully into the workshop!');
-      setTechnicians((prevList) => [...prevList, responseData.technician]);
+      setFormSuccessMessage('Technician registered successfully with automated serial mapping!');
+      
+      // Inline rehydration to ensure hot-state elements are accurate
+      const refreshResponse = await fetch('http://localhost:3000/api/technician/getAllTechnicians');
+      const refreshData = await refreshResponse.json();
+      if (refreshResponse.ok) {
+        setTechnicians(refreshData);
+      }
+
       setFormData({
         fullName: '',
         email: '',
         phone: '',
-        employeeId: '',
         specialization: 'GENERAL_EV',
         experienceYears: '',
         address: '',
       });
-    } catch (err) {
-      // Fixed: Logging the registration network error
-      console.error(err);
-      setFormErrorMessage(err instanceof Error ? err.message : 'Failed to submit form.');
+    } catch (err: unknown) {
+      const errorInstance = err instanceof Error ? err : new Error(String(err));
+      setFormErrorMessage(errorInstance.message || 'Failed to submit form.');
     }
   };
 
@@ -117,10 +122,9 @@ export default function OwnerTechniciansPage() {
       }
       alert(responseData.message);
       setTechnicians((prevList) => prevList.filter((tech) => tech.id !== id));
-    } catch (err) {
-      // Fixed: Using the 'err' variable by printing it to your browser debug logs
-      console.error(err);
-      alert('Network error: Could not complete deletion request.');
+    } catch (err: unknown) {
+      const errorInstance = err instanceof Error ? err : new Error(String(err));
+      alert(`Network error: ${errorInstance.message}`);
     }
   };
 
@@ -151,7 +155,6 @@ export default function OwnerTechniciansPage() {
       });
 
       const responseData = await response.json();
-
       if (!response.ok) {
         alert(responseData.message || 'Failed to update technician record.');
         return;
@@ -163,10 +166,9 @@ export default function OwnerTechniciansPage() {
 
       setEditingId(null);
       alert('Technician changes saved successfully!');
-    } catch (err) {
-      // 🚨 FIXED HERE TOO: Logging this network error ensures the unused variable error is completely gone!
-      console.error(err);
-      alert('Network error: Failed to modify record.');
+    } catch (err: unknown) {
+      const errorInstance = err instanceof Error ? err : new Error(String(err));
+      alert(`Network error: ${errorInstance.message}`);
     }
   };
 
@@ -175,7 +177,6 @@ export default function OwnerTechniciansPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8">
-      {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Technician Ecosystem Management</h1>
         <p className="text-sm text-gray-500">Monitor and expand your shop&apos;s engineering team resources.</p>
@@ -193,18 +194,6 @@ export default function OwnerTechniciansPage() {
             <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="John Doe" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Employee ID</label>
-            <input type="text" name="employeeId" value={formData.employeeId} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="EMP-102" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
-            <input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="john@evshop.com" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
-            <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="9876543210" />
-          </div>
-          <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Specialization</label>
             <select name="specialization" value={formData.specialization} onChange={handleInputChange} className="w-full border border-gray-300 rounded p-2 text-sm bg-white">
               <option value="GENERAL_EV">General EV Maintenance</option>
@@ -214,6 +203,14 @@ export default function OwnerTechniciansPage() {
             </select>
           </div>
           <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
+            <input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="john@evshop.com" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
+            <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="9876543210" />
+          </div>
+          <div className="md:col-span-2">
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Years of Experience</label>
             <input type="number" name="experienceYears" value={formData.experienceYears} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="3" />
           </div>
@@ -243,18 +240,12 @@ export default function OwnerTechniciansPage() {
 
               return (
                 <div key={tech.id} className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                  
                   {isEditingThisCard ? (
-                    /* PANEL A: Edit Mode Form Inputs */
                     <div className="space-y-3 text-xs">
                       <h3 className="font-bold text-gray-700 border-b pb-1 mb-2">Edit Mode Form</h3>
                       <div>
                         <label className="block font-semibold text-gray-500 mb-0.5">Full Name</label>
                         <input type="text" name="fullName" value={editFormData.fullName} onChange={handleEditInputChange} className="w-full border rounded p-1 text-xs" />
-                      </div>
-                      <div>
-                        <label className="block font-semibold text-gray-500 mb-0.5">Employee ID</label>
-                        <input type="text" name="employeeId" value={editFormData.employeeId} onChange={handleEditInputChange} className="w-full border rounded p-1 text-xs" />
                       </div>
                       <div>
                         <label className="block font-semibold text-gray-500 mb-0.5">Email Address</label>
@@ -281,18 +272,12 @@ export default function OwnerTechniciansPage() {
                         <label className="block font-semibold text-gray-500 mb-0.5">Address</label>
                         <input type="text" name="address" value={editFormData.address} onChange={handleEditInputChange} className="w-full border rounded p-1 text-xs" />
                       </div>
-
                       <div className="pt-2 flex space-x-2">
-                        <button onClick={() => handleEditSaveSubmit(tech.id)} className="px-3 py-1 bg-green-600 text-white rounded font-medium text-xs hover:bg-green-700">
-                          Save
-                        </button>
-                        <button onClick={() => setEditingId(null)} className="px-3 py-1 bg-gray-300 text-gray-700 rounded font-medium text-xs hover:bg-gray-400">
-                          Cancel
-                        </button>
+                        <button onClick={() => handleEditSaveSubmit(tech.id)} className="px-3 py-1 bg-green-600 text-white rounded font-medium text-xs hover:bg-green-700">Save</button>
+                        <button onClick={() => setEditingId(null)} className="px-3 py-1 bg-gray-300 text-gray-700 rounded font-medium text-xs hover:bg-gray-400">Cancel</button>
                       </div>
                     </div>
                   ) : (
-                    /* PANEL B: Standard View Card Layout */
                     <div>
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold uppercase text-lg">
@@ -300,7 +285,8 @@ export default function OwnerTechniciansPage() {
                         </div>
                         <div>
                           <h2 className="text-md font-bold text-gray-800">{tech.fullName}</h2>
-                          <p className="text-xs text-gray-400">Emp ID: {tech.employeeId}</p>
+                          {/* ✅ Automatically displays server-generated tracking identifiers */}
+                          <p className="text-xs font-bold text-blue-600 font-mono">ID: {tech.employeeId}</p>
                         </div>
                       </div>
 
@@ -313,16 +299,11 @@ export default function OwnerTechniciansPage() {
                       </div>
 
                       <div className="mt-5 pt-3 border-t border-gray-100 flex justify-end space-x-2">
-                        <button onClick={() => startEditing(tech)} className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded text-xs transition-colors">
-                          Edit Details
-                        </button>
-                        <button onClick={() => handleDeleteTechnician(tech.id)} className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded text-xs transition-colors">
-                          Remove Staff
-                        </button>
+                        <button onClick={() => startEditing(tech)} className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded text-xs transition-colors">Edit Details</button>
+                        <button onClick={() => handleDeleteTechnician(tech.id)} className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded text-xs transition-colors">Remove Staff</button>
                       </div>
                     </div>
                   )}
-
                 </div>
               );
             })}

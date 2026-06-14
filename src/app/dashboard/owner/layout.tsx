@@ -15,7 +15,7 @@ const [isCustomerOpen, setIsCustomerOpen] = useState<boolean>(false);
     <div className="flex h-screen w-full bg-volt-background text-volt-primary overflow-hidden">
       
       {/* 🧭 PERMANENT LEFT SIDEBAR CONTROL PANEL */}
-      <aside className="w-64 h-full bg-volt-surface border-r border-volt-container hidden md:block flex-shrink-0">
+      <aside className="w-64 h-full bg-volt-surface border-r border-volt-container hidden md:block shrink-0">
         <Sidebar onAddCustomerClick={() => setIsCustomerOpen(true)} />
       </aside>
 
