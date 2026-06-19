@@ -16,7 +16,7 @@ export default function AiBriefing({ data }: AiBriefingProps) {
       </h3>
       
       {/* 🌌 THE LUXURY LUXURY DARK CANVAS CONTAINER */}
-      <div className="flex-1 p-8 bg-volt-darkCard text-white rounded-container flex flex-col justify-between shadow-lg relative overflow-hidden group min-h-[380px]">
+      <div className="flex-1 p-8 bg-volt-darkCard text-white rounded-container flex flex-col justify-between shadow-lg relative overflow-hidden group min-h-95">
         
         {/* ✨ STEP 2: SUBTLE BACKGROUND GLOW (AMBIENT LIGHT EFFECT) */}
         <div className="absolute -top-10 -right-10 h-40 w-40 bg-volt-secondary/20 rounded-full blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-125" />

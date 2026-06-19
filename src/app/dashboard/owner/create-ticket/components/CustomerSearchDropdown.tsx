@@ -11,6 +11,7 @@ export interface CustomerRecord {
   vehicleModel: string;
   email: string | null;
   address: string | null;
+  vin?:string;
 }
 
 interface SearchDropdownProps {

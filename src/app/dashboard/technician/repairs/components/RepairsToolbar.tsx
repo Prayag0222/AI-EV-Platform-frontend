@@ -20,7 +20,7 @@ export default function RepairsToolbar({
 }: RepairsToolbarProps) {
   
   // Strict workflow filter options mapping directly to database values
-  const filterOptions = ["All", "Waiting", "In Service", "Parts Ordered", "Ready"];
+  const filterOptions = ["All", "PENDING", "DIAGNOSING", "IN_SERVICE", "DELIVERED"];
 
   return (
     <div className="w-full bg-white rounded-2xl border border-border/70 p-4 shadow-sm flex flex-col gap-4 md:flex-row md:items-center md:justify-between transition-all duration-200">

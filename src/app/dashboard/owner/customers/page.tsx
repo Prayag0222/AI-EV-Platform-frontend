@@ -1,253 +1,145 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, Loader2, Calendar, Smartphone, Bike, Mail, MapPinHouse, UserRoundPen ,Trash2} from 'lucide-react';
+import { Users, Loader2, UserRoundPen, Trash2, Search } from 'lucide-react';
 import DeleteCustomerModal from '@/components/DeleteCustomerModal';
 import EditCustomerModal from '@/components/EditCustomerModal';
-
-interface Customer {
-  id: string;
-  name: string;
-  phone: string;
-  vehicleModel: string;
-  email?: string;
-  address?: string;
-  createdAt: string;
-}
+import CustomerDetailPanel from './components/CustomerDetailPanel';
+import { API_BASE } from '@/config/api';
+import { Customer } from '@/app/dashboard/owner/types/customer';
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  // ⏱️ 1. LINTER-SECURE INITIAL DATA MOUNT
   useEffect(() => {
-    let isMounted = true; // Prevents race conditions if the user navigates away fast
-
-    async function fetchInitialData() {
+    async function fetchData() {
       try {
-        // 🌐 Uses your exact custom frontend-proxy route endpoint mapping layout
-        const response = await fetch('http://localhost:3000/api/owner/getCustomer');
-        
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || 'Server rejected the network sync operation.');
-        }
-        
-        const data = await response.json();
-        const targetArray = Array.isArray(data) ? data : data?.customers;
-
-        if (isMounted) {
-          if (Array.isArray(targetArray)) {
-            setCustomers(targetArray);
-          } else {
-            setCustomers([]);
-            setError("Backend returned data in an unexpected format.");
-          }
-        }
-      } catch (err) { 
-        // 🛡️ TS-SAFE METHOD: Removed 'any' type definition and casted securely via instanceof checking rules
-        console.error(err);
-        if (isMounted) {
-          const errorMessage = err instanceof Error ? err.message : 'Could not establish synchronization link to the VoltOps backend.';
-          setError(errorMessage);
-          setCustomers([]);
-        }
+        const res = await fetch(`${API_BASE}/owner/getCustomer`);
+        const data = await res.json();
+        setCustomers(Array.isArray(data) ? data : data.customers || []);
+      } catch (err) {
+        console.error("Fetch failed", err);
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     }
+    fetchData();
+  }, []);
 
-    fetchInitialData();
-
-    return () => {
-      isMounted = false; // Clean up the mount flag tracker
-    };
-  }, []); // 🔒 Completely isolated from external functions, silencing ESLint!
-
-  const executeDelete = async ()=>{
+  const executeDelete = async () => {
     if (!customerToDelete) return;
-
-    try {
-       console.log(customerToDelete)
-      const response = await fetch(`http://localhost:3000/api/owner/deleteCustomer/${customerToDelete}`,{
-      method:'DELETE'
-      })
-      console.log(response)
-
-      if(response.ok){
-    setCustomers((prev) => prev.filter(c => c.id !== customerToDelete));
-    } else {
-      const errData = await response.json().catch(() => ({}));
-      console.log("here is the error ", errData)
-      alert(`❌ Failed to delete: ${errData.error || 'Server error'}`);
-    }}
-
-    catch (error) {
-    console.error(error);
-    alert("💥 Network error: Make sure your backend server is alive on port 5000!");
-      }finally {
-    setCustomerToDelete(null); // 🔌 Close the custom window smoothly
-  }
-
-  }
-  // ⚡ This receives the updated customer data from the modal and swaps it inside your list instantly!
-  const handleUpdateCustomerSuccess = (updatedCustomer: Customer) => {
-    setCustomers((prevCustomers) =>
-      prevCustomers.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c))
-    );
+    const res = await fetch(`${API_BASE}/owner/deleteCustomer/${customerToDelete}`, { method: 'DELETE' });
+    if (res.ok) {
+      setCustomers(prev => prev.filter(c => c.id !== customerToDelete));
+    }
+    setCustomerToDelete(null);
   };
 
+  const filteredCustomers = customers.filter(c =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.phone.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      
-      {/* 🚀 PAGE HEADER ROW CONTROL HERO LAYER */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-volt-surface border border-volt-container rounded-container p-6 shadow-sm">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b shadow-sm px-8 py-6 flex items-center justify-between">
         <div>
-          <h1 className="font-display text-xl font-bold text-volt-primary flex items-center gap-2.5">
-            <Users className="h-5 w-5 text-volt-secondary" />
-            Customer Directory Ledger
+          <h1 className="font-display text-2xl font-bold text-volt-primary flex items-center gap-2">
+            <Users className="h-6 w-6 text-volt-secondary" /> Customer Directory
           </h1>
-          <p className="text-slate-400 text-xs font-medium mt-1">
-            Review and coordinate registered shop customer profiles and active vehicle assets.
-          </p>
+          <p className="text-sm text-gray-500 mt-1">A connected view of all your customers</p>
+        </div>
+        <div className="flex items-center gap-2 bg-gray-100 border rounded-lg px-3 py-2">
+          <Search className="h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search customers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="outline-none text-sm bg-transparent"
+          />
         </div>
       </div>
 
-      {/* 📊 INTERACTIVE LOWER INTERFACE CONTAINER */}
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center p-24 bg-volt-surface border border-volt-container rounded-container">
-          <Loader2 className="h-8 w-8 text-volt-secondary animate-spin" />
-          <p className="text-slate-400 font-sans text-xs font-medium mt-3 tracking-wide">
-            Syncing Ledger Entries with Database...
-          </p>
-        </div>
-      ) : error ? (
-        <div className="p-12 text-center bg-red-950/20 border border-red-500/20 text-red-200 rounded-container">
-          <p className="font-sans text-sm font-semibold">{error}</p>
-          <p className="text-xs text-red-400/70 mt-1">Check if your Node terminal server process is alive.</p>
-        </div>
-      ) : customers.length === 0 ? (
-        <div className="p-20 text-center bg-volt-surface border border-volt-container rounded-container">
-          <Users className="h-10 w-10 text-slate-600 mx-auto opacity-40 mb-4" />
-          <h3 className="font-display text-base font-bold text-volt-primary">No Registered Customers</h3>
-          <p className="text-slate-400 text-xs max-w-xs mx-auto mt-1 leading-relaxed">
-            Use the &quote;Add Customer&quote; panel tool link inside your sidebar workspace to register your shop&apos;s first profile record!
-          </p>
-        </div>
-      ) : (
-        <div className="bg-volt-surface border border-volt-container rounded-container shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-volt-background border-b border-volt-container">
-                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Customer Name</th>
-                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Contact Info</th>
-                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Email</th>
-                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Vehicle Asset Model</th>
-                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Address</th>
-                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase">Registration Date</th>
-                  <th className="p-4 font-display text-[11px] font-bold tracking-widest text-slate-500 uppercase text-center">Actions</th>
+      {/* Content */}
+      <div className="px-8 py-10">
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="animate-spin h-10 w-10 text-volt-primary" />
+          </div>
+        ) : filteredCustomers.length === 0 ? (
+          <div className="bg-white border rounded-xl shadow-sm p-20 text-center text-gray-400">
+            No customers found.
+          </div>
+        ) : (
+          <div className="bg-white border rounded-xl shadow-lg overflow-hidden">
+            <table className="w-full text-left">
+              <thead className="bg-gray-100 text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="p-4">Customer</th>
+                  <th className="p-4">Contact</th>
+                  <th className="p-4">Vehicles</th>
+                  <th className="p-4 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-volt-container font-sans text-sm">
-                {customers.map((customer) => (
-                  <tr key={customer.id} className="hover:bg-volt-background/30 transition-colors group">
-                    <td className="p-4 font-semibold text-volt-primary group-hover:text-volt-secondary transition-colors">
-                      <span className="flex items-center gap-2">
-                        <UserRoundPen className="h-3.5 w-3.5 text-slate-500"/>
-                        {customer.name}
-                      </span>
-                    </td>
-                    <td className="p-4 text-slate-400 font-medium">
-                      <span className="flex items-center gap-2">
-                        <Smartphone className="h-3.5 w-3.5 text-slate-500" />
-                        {customer.phone}
-                      </span>
-                    </td>
-                    <td className="p-4 text-slate-300 font-medium">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-volt-background border border-volt-container rounded-volt text-xs text-volt-primary">
-                        <Mail className="h-3.5 w-3.5 text-volt-secondary" />
-                        {customer.email || <span className="text-slate-500 italic">Not Provided</span>}
-                      </span>
-                    </td>
-                    <td className="p-4 text-slate-300 font-medium">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-volt-background border border-volt-container rounded-volt text-xs text-volt-primary">
-                        <Bike className="h-3.5 w-3.5 text-volt-secondary" />
-                        {customer.vehicleModel}
-                      </span>
-                    </td>
-                    <td className="p-4 text-slate-300 font-medium">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-volt-background border border-volt-container rounded-volt text-xs text-volt-primary">
-                        <MapPinHouse className="h-3.5 w-3.5 text-volt-secondary" />
-                        {customer.address || <span className="text-slate-500 italic">Not Provided</span>}
-                      </span>
-                    </td>
-                    <td className="p-4 text-slate-400 font-medium text-xs">
-                      <span className="flex items-center gap-2">
-                        <Calendar className="h-3.5 w-3.5 text-slate-500" />
-                        {new Date(customer.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </td>
-                      <td className="p-4 text-slate-400 font-medium text-xs">
-                      <span className="flex items-center gap-2">
-                      <button 
-                      onClick={()=>setCustomerToDelete(customer.id)}
-                      title="Purge Customer Record"
-                      className='p-2 text-slate-500 gap-3 hover:text-red-400 rounded-volt hover:bg-red-950/20 transition-all cursor-pointer inline-flex items-center justify-center group  '>
-                        Delete<Trash2 className='className="h-4 w-4  transition-transform group-hover:scale-110 stroke-[2]'/>
+              <tbody className="divide-y">
+                {filteredCustomers.map((c) => (
+                  <tr
+                    key={c.id}
+                    className="hover:bg-gray-50 transition cursor-pointer"
+                    onClick={() => setSelectedCustomer(c)}
+                  >
+                    <td className="p-4 font-semibold text-volt-primary">{c.name}</td>
+                    <td className="p-4 text-sm text-gray-600">{c.phone}</td>
+                    <td className="p-4 text-sm text-gray-500">{c.vehicles.length} Registered</td>
+                    <td className="p-4 flex justify-center gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setCustomerToEdit(c); }}
+                        className="p-2 hover:bg-blue-50 rounded text-blue-600"
+                      >
+                        <UserRoundPen className="h-4 w-4" />
                       </button>
-                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setCustomerToDelete(c.id); }}
+                        className="p-2 hover:bg-red-50 rounded text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </td>
-                    
-                    <td className="p-4 text-slate-400 font-medium text-xs">
-                      <span className="flex items-center gap-2">
-                    <button
-                        onClick={() => setCustomerToEdit(customer)} // 🔌 Fills state snapshot to snap open modal
-                        className="p-2 text-slate-500 hover:text-volt-secondary rounded-volt hover:bg-volt-secondary/10 transition-all cursor-pointer inline-flex items-center justify-center"
-                          title="Edit Profile">
-                            <UserRoundPen className="h-4 w-4" />
-                          </button>
-                      </span>
-                    </td>
-                    
-                    
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="bg-volt-background border-t border-volt-container p-4 px-6 flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Total Logged Assets Ledger Count:</span>
-            <span className="text-volt-secondary font-bold text-sm bg-volt-secondary/10 px-2 py-0.5 rounded-volt">
-              {customers.length} Entries
-            </span>
-          </div>
-        </div>
-      )}
-        {/* 🛡️ REUSABLE DATA PURGE COMPONENT MODAL LAYER */}
-<DeleteCustomerModal 
-  customerId={customerToDelete}
-  onClose={() => setCustomerToDelete(null)}
-  onConfirm={executeDelete}
-/>
+        )}
+      </div>
 
-{/* Update ONLY this tag at the very bottom of page.tsx */}
-<EditCustomerModal 
-  key={customerToEdit?.id} 
-  customer={customerToEdit}
-  onClose={() => setCustomerToEdit(null)}
-  onUpdateSuccess={handleUpdateCustomerSuccess}
-/>
+      {/* Detail Slide-out Panel */}
+      {selectedCustomer && (
+        <CustomerDetailPanel
+          customer={selectedCustomer}
+          onClose={() => setSelectedCustomer(null)}
+        />
+      )}
+
+      <DeleteCustomerModal
+        customerId={customerToDelete}
+        onClose={() => setCustomerToDelete(null)}
+        onConfirm={executeDelete}
+      />
+      <EditCustomerModal
+        customer={customerToEdit}
+        onClose={() => setCustomerToEdit(null)}
+        onUpdateSuccess={(updated) =>
+          setCustomers(p => p.map(c => c.id === updated.id ? updated : c))
+        }
+      />
     </div>
-    
   );
 }

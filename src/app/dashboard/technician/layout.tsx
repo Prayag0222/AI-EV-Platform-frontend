@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Workspace", path: "/dashboard/technician", icon: Grid2X2 }, 
   { label: "Repairs", path: "/dashboard/technician/repairs", icon: Wrench }, 
-  { label: "Vehicles", path: "#", icon: BatteryCharging }, 
+  { label: "Vehicles", path: "/dashboard/technician/vehicles", icon: BatteryCharging }, 
   { label: "Parts", path: "#", icon: PackageOpen }, 
   { label: "History", path: "#", icon: History }
 ];

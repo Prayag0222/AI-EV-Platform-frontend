@@ -1,7 +1,7 @@
 // 📋 1. STRICT WORKBENCH WORKFLOW TYPES
 // Using a literal string union locks down the dropdown selection choices
 // so it is physically impossible to save a typo status string to the database.
-export type WorkbenchStatus = "Waiting" | "In Service" | "Parts Ordered" | "Ready";
+export type WorkbenchStatus = "PENDING" | "DIAGNOSING" | "IN_SERVICE" | "RESOLVED" | "DELIVERED";
 
 // 👥 2. NESTED RELATIONAL CUSTOMER MODEL
 export interface CustomerInfo {
