@@ -1,5 +1,6 @@
 import { API_BASE } from '@/config/api';
 import type { BillingTicket, CreateInvoicePayload, InvoiceRecord } from '../types/billing';
+import { deductStockFromItems } from './inventoryApi';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, init);
@@ -20,6 +21,25 @@ export async function createInvoice(payload: CreateInvoicePayload) {
   const data = await request<{ invoice: InvoiceRecord }>('/invoice', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   });
+
+  // Deduct stock for counter sales
+  if (!payload.ticketId) {
+const stockDeductions = payload.items
+  .filter(item => item.inventoryId)
+  .map(item => ({
+    id: item.inventoryId!,
+    quantity: item.qty
+  }));
+
+    if (stockDeductions.length > 0) {
+      try {
+        await deductStockFromItems(stockDeductions);
+      } catch (err) {
+        console.error('Stock deduction failed but invoice was created:', err);
+      }
+    }
+  }
+
   return data.invoice;
 }
 

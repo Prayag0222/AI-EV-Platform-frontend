@@ -20,6 +20,7 @@ import {
   getBillingWorkspace,
   updateInvoicePayment,
 } from "./services/billingApi";
+import { downloadInvoicePDF, printInvoice } from "./services/pdfService";
 import type {
   BillingTicket,
   InvoiceDraft,
@@ -28,7 +29,11 @@ import type {
 
 const ticketToDraft = (ticket: BillingTicket): InvoiceDraft => ({
   ticketId: ticket.id,
+  shopName: "VoltOps",
+  shopAddress: "",
+  gstNumber: "",
   customerName: ticket.customer.name,
+  customerAddress: ticket.customer.address || "",
   customerPhone: ticket.customer.phone,
   vehicle: ticket.vehicle?.vehicleModel || "",
   vin: ticket.vehicle?.vin || "",
@@ -37,14 +42,16 @@ const ticketToDraft = (ticket: BillingTicket): InvoiceDraft => ({
     ticket.aiSummary ||
     ticket.notes?.at(-1)?.structuredText ||
     ticket.description,
-  items:
-    ticket.parts?.map((part) => ({
-      name: part.inventoryItem.partName,
-      sku: part.inventoryItem.sku,
-      qty: part.quantity,
-      price: part.inventoryItem.retailPrice,
-    })) || [],
+items:
+  ticket.parts?.map((part) => ({
+    inventoryId: part.inventoryItem.id,
+    name: part.inventoryItem.partName,
+    sku: part.inventoryItem.sku,
+    qty: part.quantity,
+    price: part.inventoryItem.retailPrice,
+  })) || [],
   laborCharge: ticket.finalCost || 0,
+  tax: 0,
   discount: 0,
   paymentMethod: "CASH",
   paymentStatus: "UNPAID",
@@ -102,26 +109,19 @@ export default function BillingPage() {
     setSaving(true);
     setError("");
     try {
-      const metadata = value.notes
-        ? [{ name: value.notes, sku: "VOLTOPS-NOTE", qty: 1, price: 0 }]
-        : [];
-      const discount =
-        value.discount > 0
-          ? [
-              {
-                name: "Invoice discount",
-                sku: "VOLTOPS-DISCOUNT",
-                qty: 1,
-                price: -Math.abs(value.discount),
-              },
-            ]
-          : [];
       const invoice = await createInvoice({
         customerName: value.customerName,
+        customerAddress: value.customerAddress,
         customerPhone: value.customerPhone,
+        shopName: value.shopName,
+        shopAddress: value.shopAddress,
+        gstNumber: value.gstNumber,
         ticketId: value.ticketId,
-        items: [...value.items, ...discount, ...metadata],
+        items: value.items,
         laborCharge: value.laborCharge,
+        tax: value.tax,
+        discount: value.discount,
+        notes: value.notes,
         paymentStatus: value.paymentStatus,
         paymentMethod: value.paymentMethod,
       });
@@ -168,7 +168,11 @@ export default function BillingPage() {
   };
   const print = (invoice?: InvoiceRecord) => {
     if (invoice) setPreview(invoice);
-    window.setTimeout(() => window.print(), 80);
+    window.setTimeout(() => printInvoice(), 80);
+  };
+
+  const download = (invoice: InvoiceRecord) => {
+    downloadInvoicePDF(invoice);
   };
   const share = (invoice: InvoiceRecord) => {
     const message = `VoltOps invoice ${invoice.invoiceNo}\nCustomer: ${invoice.customerName}\nTotal: ₹${invoice.grandTotal.toFixed(2)}\nStatus: ${invoice.paymentStatus}`;
@@ -281,7 +285,7 @@ export default function BillingPage() {
                 Print PDF
               </button>
               <button
-                onClick={() => print()}
+                onClick={() => download(preview)}
                 className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold"
               >
                 <Download size={15} />
