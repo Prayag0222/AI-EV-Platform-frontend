@@ -1,7 +1,7 @@
 'use client';
 import { Plus, Search, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { InvoiceDraft, InvoiceItem } from '../types/billing';
+import type { InvoiceDraft, } from '../types/billing';
 import { searchInventory, type InventoryItem } from '../services/inventoryApi';
 import { calculateInvoice, formatCurrency } from '../utils/calculateInvoice';
 import PaymentPanel from './PaymentPanel';
@@ -75,7 +75,7 @@ export default function CounterSaleModal({ open, saving, onClose, onSave }: { op
     <div className="mx-auto my-4 max-w-3xl rounded-2xl bg-[#faf9f7] shadow-2xl">
       <div className="flex items-center justify-between border-b p-5">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-[#006a63]">Quick checkout</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-volt-secondary">Quick checkout</p>
           <h2 className="text-xl font-black text-[#091426]">New counter sale</h2>
         </div>
         <button onClick={onClose} className="rounded-lg p-2 hover:bg-[#eeeae7]"><X size={19}/></button>
@@ -117,7 +117,7 @@ export default function CounterSaleModal({ open, saving, onClose, onSave }: { op
               )}
 
               {selectedItem && (
-                <div className="mt-3 p-3 rounded-lg bg-[#e8f7f4] border border-[#006a63]">
+                <div className="mt-3 p-3 rounded-lg bg-[#e8f7f4] border text-volt-secondary">
                   <p className="font-semibold text-sm">{selectedItem.partName}</p>
                   <p className="text-xs text-[#61636a] mt-1">{selectedItem.sku} • {formatCurrency(selectedItem.retailPrice)} • Available: {selectedItem.stockLevel}</p>
                   <div className="mt-3 flex gap-2">
@@ -147,7 +147,7 @@ export default function CounterSaleModal({ open, saving, onClose, onSave }: { op
                     <b>{row.name}</b>
                     <small className="block text-[#75777d]">{row.qty} × {formatCurrency(row.price)}</small>
                   </span>
-                  <button onClick={() => setDraft({ ...draft, items: draft.items.filter((_, index) => index !== i) })} className="p-2 text-[#ba1a1a]"><Trash2 size={16}/></button>
+                  <button onClick={() => setDraft({ ...draft, items: draft.items.filter((_, index) => index !== i) })} className="p-2 text-volt-terracotta"><Trash2 size={16}/></button>
                 </div>
               ))}
             </div>
@@ -168,6 +168,11 @@ export default function CounterSaleModal({ open, saving, onClose, onSave }: { op
         </div>
       </div>
     </div>
+    {isSearching && (
+  <div className="p-2 text-xs text-gray-500">
+    Searching...
+  </div>
+)}
   </div>;
 }
 

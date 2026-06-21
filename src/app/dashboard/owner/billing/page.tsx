@@ -194,10 +194,10 @@ export default function BillingPage() {
     );
   return (
     <main className="min-h-full bg-[#faf9f7] px-4 py-6 sm:px-6 lg:px-10 lg:py-9">
-      <div className="mx-auto max-w-[1500px] space-y-9">
+      <div className="mx-auto max-w-375 space-y-9">
         <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#006a63]">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-volt-secondary">
               Revenue operations
             </p>
             <h1 className="mt-1 text-3xl font-black tracking-tight text-[#091426] sm:text-4xl">
@@ -225,7 +225,7 @@ export default function BillingPage() {
           </div>
         )}
         {notice && (
-          <div className="fixed right-5 top-5 z-[70] flex items-center gap-2 rounded-xl bg-[#053b36] px-4 py-3 text-sm font-bold text-white shadow-xl">
+          <div className="fixed right-5 top-5 z-70 flex items-center gap-2 rounded-xl bg-[#053b36] px-4 py-3 text-sm font-bold text-white shadow-xl">
             <CheckCircle2 size={17} className="text-[#63e6d8]" />
             {notice}
           </div>
