@@ -4,7 +4,7 @@ const API_URL =
 
 export async function login(email: string, password: string) {
   const response = await fetch(
-    `${API_URL}/api/auth/login`,
+    `${API_URL}/auth/login`,
     {
       method: "POST",
       headers: {
@@ -29,7 +29,7 @@ export async function login(email: string, password: string) {
 
 export async function getCurrentUser() {
   const response = await fetch(
-    `${API_URL}/api/auth/me`,
+    `${API_URL}/auth/me`,
     {
       credentials: "include",
     }

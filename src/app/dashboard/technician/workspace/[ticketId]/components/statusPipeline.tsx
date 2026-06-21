@@ -8,6 +8,7 @@ import type { TicketStatus } from "../types/index";
 interface StatusPipelineProps {
   currentStatus: TicketStatus;
   onStatusChange: (status: TicketStatus) => void;
+  isSaving?: boolean;
 }
 
 const STATUSES: TicketStatus[] = [
@@ -18,7 +19,7 @@ const STATUSES: TicketStatus[] = [
   "DELIVERED",
 ];
 
-export function StatusPipeline({ currentStatus, onStatusChange }: StatusPipelineProps) {
+export function StatusPipeline({ currentStatus, onStatusChange, isSaving = false }: StatusPipelineProps) {
   const currentIdx = STATUSES.indexOf(currentStatus);
 
   return (
@@ -34,6 +35,7 @@ export function StatusPipeline({ currentStatus, onStatusChange }: StatusPipeline
               <div key={status} className="flex items-center gap-1.5">
                 <button
                   onClick={() => onStatusChange(status)}
+                  disabled={isSaving || isActive}
                   className={`h-9 px-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all border ${
                     isActive
                       ? "bg-slate-900 text-white border-slate-900 shadow-sm font-medium"
@@ -54,7 +56,7 @@ export function StatusPipeline({ currentStatus, onStatusChange }: StatusPipeline
                       />
                     )}
                   </span>
-                  {status}
+                  {status.replace("_", " ")}
                 </button>
 
                 {/* Draw clear, clean separators between the pipeline milestones */}

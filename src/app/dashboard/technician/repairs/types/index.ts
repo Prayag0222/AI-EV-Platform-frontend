@@ -2,6 +2,8 @@
 // Using a literal string union locks down the dropdown selection choices
 // so it is physically impossible to save a typo status string to the database.
 export type WorkbenchStatus = "PENDING" | "DIAGNOSING" | "IN_SERVICE" | "RESOLVED" | "DELIVERED";
+export type StatusFilter = "All" | WorkbenchStatus;
+export type TicketPriority = "LOW" | "STANDARD" | "HIGH" | "URGENT";
 
 // 👥 2. NESTED RELATIONAL CUSTOMER MODEL
 export interface CustomerInfo {
@@ -9,17 +11,35 @@ export interface CustomerInfo {
   phone: string;
 }
 
+export interface TicketVehicle {
+  vehicleModel: string;
+  vin: string;
+}
+
+export interface AssignedTechnician {
+  id: string;
+  fullName: string;
+  employeeId: string;
+}
+
 // 🔧 3. CORE HIGH-DENSITY REPAIR TICKET CONTRACT
 // This strictly maps to your live PostgreSQL database columns streaming over the network
 export interface RepairTicket {
   id: number;
-  vehicleModel: string;
+  vehicleModel?: string;
+  vehicle?: TicketVehicle | null;
   issueCategory: string;
   description: string;
-  technicianNotes: string | null;
+  technicianNotes?: string | null;
   status: WorkbenchStatus; // Enforces our strict workflow type constraints!
   customer: CustomerInfo;
-  bay: string;
+  technician?: AssignedTechnician | null;
+  technicianId?: string | null;
+  priority: TicketPriority;
+  bay?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  closedAt?: string | null;
 }
 
 // ✨ 4. PRE-BUILT STAGE 2 AI ANALYSIS STATE CONTRACT
@@ -42,4 +62,11 @@ export interface RepairsEngineState {
   isLoading: boolean;
   saveSuccess: boolean;
   notice: string;
+}
+
+export interface RepairPagination {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
 }

@@ -1,162 +1,151 @@
-import { useState, useEffect, useMemo } from 'react';
-import { RepairTicket, WorkbenchStatus } from '../types';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { API_BASE } from "@/config/api";
+import type { RepairTicket, StatusFilter, WorkbenchStatus } from "../types";
+
+const PAGE_SIZE = 8;
 
 export const useRepairsManager = () => {
-  // 📥 CORE DATA STORAGE STREAMS
-  const [tickets, setRepairs] = useState<RepairTicket[]>([]);
+  const [repairs, setRepairs] = useState<RepairTicket[]>([]);
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [activeUser, setActiveUser] = useState<{ id: string; name: string; role: string } | null>(null);
+  const [searchQuery, setSearchQueryState] = useState("");
+  const [statusFilter, setStatusFilterState] = useState<StatusFilter>("All");
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
-  // 🎛️ CONTROLLER RUNTIME FILTERS
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("All");
+  const fetchWorkspaceData = useCallback(async (refresh = false) => {
+    if (refresh) setIsRefreshing(true);
+    else setIsLoading(true);
+    setError("");
 
-  // 🚨 UI SYSTEM BANNERS & DELAYS
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
-  const [notice, setNotice] = useState<string>("");
-  const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);
+    try {
+      const profileResponse = await fetch(`${API_BASE}/auth/me`, {
+        method: "GET",
+        credentials: "include",
+      });
+      const profileData = await profileResponse.json();
 
-  // 🔄 1. AUTOMATED WORKSPACE SYNCHRONIZATION PIPELINE
-  useEffect(() => {
-    const fetchWorkspaceData = async () => {
-      try {
-        setIsLoading(true);
-        
-        const profileResponse = await fetch("http://localhost:3000/api/auth/me", {
-          method: "GET",
-          credentials: "include"
-        });
-        const profileData = await profileResponse.json();
-
-        if (!profileData.success) {
-          setNotice("Authentication lease terminated. Re-routing to entry gate.");
-          setIsSessionExpired(true);
-          return;
-        }
-
-        const userAccount = profileData.user;
-        setActiveUser(userAccount);
-
-        const ticketsResponse = await fetch(`http://localhost:3000/api/technician/dashboard?technicianId=${userAccount.id}`);
-        const ticketsData = await ticketsResponse.json();
-
-        if (ticketsData.success) {
-          const fetchedTickets = ticketsData.tickets || [];
-          setRepairs(fetchedTickets);
-          if (fetchedTickets.length > 0) {
-            setSelectedTicketId(fetchedTickets[0].id);
-          }
-        }
-      } catch (err) {
-        console.error("Critical error syncing workspace grids:", err);
-        setNotice("Network connection drop registered. Database sync offline.");
-      } finally {
-        setIsLoading(false);
+      if (!profileResponse.ok || !profileData.success) {
+        setIsSessionExpired(true);
+        throw new Error(profileData.error || "Your session has expired. Please sign in again.");
       }
-    };
 
-    fetchWorkspaceData();
+      const userAccount = profileData.user as { id: string; name: string; role: string };
+      setActiveUser(userAccount);
+
+      const ticketsResponse = await fetch(
+        `${API_BASE}/technician/dashboard?technicianId=${encodeURIComponent(userAccount.id)}`,
+      );
+      const ticketsData = await ticketsResponse.json();
+
+      if (!ticketsResponse.ok || !ticketsData.success) {
+        throw new Error(ticketsData.error || "Unable to load the repair queue.");
+      }
+
+      const fetchedTickets = (ticketsData.tickets || []) as RepairTicket[];
+      setRepairs(fetchedTickets);
+      setSelectedTicketId((current) =>
+        current && fetchedTickets.some((ticket) => ticket.id === current)
+          ? current
+          : fetchedTickets[0]?.id ?? null,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "The repair queue could not be synchronized.");
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
   }, []);
 
-  // 🔧 2. REAL-TIME MANUAL RE-ROUTING TRANSACTION PIPELINE
-  const updateTicketStatus = async (ticketId: number, newStatus: string) => {
+  useEffect(() => {
+    const initialLoad = window.setTimeout(() => void fetchWorkspaceData(), 0);
+    return () => window.clearTimeout(initialLoad);
+  }, [fetchWorkspaceData]);
+
+  const updateTicketStatus = async (ticketId: number, newStatus: WorkbenchStatus) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/technician/tickets/${ticketId}`, {
+      const response = await fetch(`${API_BASE}/technician/tickets/${ticketId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
       });
-
       const data = await response.json();
-
-      if (data.success) {
-        setRepairs((prevTickets) =>
-          prevTickets.map((ticket: RepairTicket) =>
-            ticket.id === ticketId ? { ...ticket, status: newStatus as WorkbenchStatus } : ticket
-          )
-        );
-      } else {
-        setNotice(data.message || "Server validation rejected workflow change.");
-      }
+      if (!response.ok || !data.success) throw new Error(data.message || "Status update was rejected.");
+      setRepairs((current) =>
+        current.map((ticket) => ticket.id === ticketId ? { ...ticket, status: newStatus, updatedAt: new Date().toISOString() } : ticket),
+      );
     } catch (err) {
-      console.error("Failed to commit status change:", err);
-      setNotice("Logistics update failed. Connection timeout.");
+      setNotice(err instanceof Error ? err.message : "Status update failed.");
     }
   };
 
-  // 📝 3. TECHNICAL PROGRESS LOG COMMIT PIPELINE
   const saveTechnicianNotes = async (ticketId: number, notes: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/technician/tickets/${ticketId}`, {
+      const response = await fetch(`${API_BASE}/technician/tickets/${ticketId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ technicianNotes: notes })
+        body: JSON.stringify({ technicianNotes: notes }),
       });
-
       const data = await response.json();
-
-      if (data.success) {
-        setRepairs((prevTickets) =>
-          prevTickets.map((ticket: RepairTicket) =>
-            ticket.id === ticketId ? { ...ticket, technicianNotes: notes } : ticket
-          )
-        );
-        setNotice("Workbench notes saved successfully.");
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
-      } else {
-        setNotice("Database failed to process technical logs.");
-      }
+      if (!response.ok || !data.success) throw new Error(data.message || "Notes could not be saved.");
+      setRepairs((current) => current.map((ticket) => ticket.id === ticketId ? { ...ticket, technicianNotes: notes } : ticket));
+      setSaveSuccess(true);
+      window.setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      console.error("Notes execution failure:", err);
-      setNotice("Network frame dropped. Unable to save text log progress.");
+      setNotice(err instanceof Error ? err.message : "Notes could not be saved.");
     }
   };
 
-  // ⚡ 4. HIGH-PERFORMANCE DATA FILTER ENGINE
   const filteredTickets = useMemo(() => {
-    return tickets.filter((ticket: RepairTicket) => {
-      if (!ticket) return false;
-
-      // Filter Element Step 1: Match workflow status choice criteria
+    const query = searchQuery.toLowerCase().trim();
+    return repairs.filter((ticket) => {
       const matchesStatus = statusFilter === "All" || ticket.status === statusFilter;
-
-      // Filter Element Step 2: Run clean multi-target search matching rules
-      const normQuery = searchQuery.toLowerCase().trim();
-      
-      // 🛡️ BULLETPROOF FALLBACKS: We wrap every string in (property || "") to prevent undefined crashes!
-      const matchesSearch =
-        normQuery === "" ||
-        (ticket.id?.toString() || "").includes(normQuery) ||
-        (ticket.vehicleModel || "").toLowerCase().includes(normQuery) ||
-        (ticket.issueCategory || "").toLowerCase().includes(normQuery) ||
-        (ticket.customer?.name || "").toLowerCase().includes(normQuery);
-
-      return matchesStatus && matchesSearch;
+      const searchableValues = [
+        ticket.id.toString(),
+        `EV-${ticket.id.toString().padStart(4, "0")}`,
+        ticket.customer?.name,
+        ticket.customer?.phone,
+        ticket.vehicle?.vehicleModel || ticket.vehicleModel,
+        ticket.vehicle?.vin,
+      ];
+      return matchesStatus && (!query || searchableValues.some((value) => value?.toLowerCase().includes(query)));
     });
-  }, [tickets, statusFilter, searchQuery]);
+  }, [repairs, searchQuery, statusFilter]);
 
-  const currentSelectedTicket = useMemo(() => {
-    return tickets.find((t: RepairTicket) => t.id === selectedTicketId) || null;
-  }, [tickets, selectedTicketId]);
+  const totalPages = Math.max(1, Math.ceil(filteredTickets.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginatedTickets = filteredTickets.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const selectedTicket = useMemo(() => repairs.find((ticket) => ticket.id === selectedTicketId) || null, [repairs, selectedTicketId]);
+
+  const setSearchQuery = (value: string) => { setSearchQueryState(value); setPage(1); };
+  const setStatusFilter = (value: string) => { setStatusFilterState(value as StatusFilter); setPage(1); };
 
   return {
-    tickets: filteredTickets,
-    rawTickets: tickets,
-    selectedTicket: currentSelectedTicket,
+    tickets: paginatedTickets,
+    rawTickets: repairs,
+    selectedTicket,
     activeUser,
     searchQuery,
     statusFilter,
     isLoading,
+    isRefreshing,
+    error,
     saveSuccess,
     notice,
     isSessionExpired,
+    pagination: { page: safePage, pageSize: PAGE_SIZE, totalItems: filteredTickets.length, totalPages },
+    setPage,
     setSearchQuery,
     setStatusFilter,
     setSelectedTicketId,
     setNotice,
+    refresh: () => fetchWorkspaceData(true),
     updateTicketStatus,
-    saveTechnicianNotes
+    saveTechnicianNotes,
   };
 };

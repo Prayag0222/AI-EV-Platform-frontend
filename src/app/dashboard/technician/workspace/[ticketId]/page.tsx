@@ -13,6 +13,8 @@ import { InspectionGallery } from "./components/InspectionGallery";
 import { TimelineFeed } from "./components/TimelineFeed";
 import { CustomerCard } from "./components/CustomerCard";
 import { AICopilot } from "./components/AICopilot";
+import { PartsAllocation } from "./components/PartsAllocation";
+import { RepairCostPanel } from "./components/RepairCostPanel";
 
 // Quick Actions Icons for Mobile Sticky Bar
 import { Activity, StickyNote, Mic, Camera, Package, CircleCheck } from "lucide-react";
@@ -24,10 +26,22 @@ export default function WorkspacePage() {
     notes,
     isLoading,
     isRecording,
+    error,
+    isSavingStatus,
+    isSavingPart,
+    isSavingCosts,
+    inventory,
+    partsTotal,
     startRecording,
     stopRecording,
     changeStatus,
     addQuickChip,
+    addManualNote,
+    updateNote,
+    deleteNote,
+    addPart,
+    removePart,
+    saveRepairCosts,
   } = useRepairWorkspace();
 
   // A. Dynamic Loading State Mask
@@ -69,10 +83,13 @@ export default function WorkspacePage() {
         </div>
 
         {/* 1. Master Context Header */}
-        <TicketHeader ticket={ticket} />
+        {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
+        <TicketHeader ticket={ticket} onComplete={() => {
+          if (window.confirm("Mark this repair as resolved?")) void changeStatus("RESOLVED");
+        }} />
 
         {/* 2. Horizontal Milestone Slider */}
-        <StatusPipeline currentStatus={ticket.status} onStatusChange={changeStatus} />
+        <StatusPipeline currentStatus={ticket.status} onStatusChange={changeStatus} isSaving={isSavingStatus} />
 
         {/* 3. Splitted Column Matrix */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -87,10 +104,17 @@ export default function WorkspacePage() {
               isRecording={isRecording}
               onStartRecord={startRecording}
               onStopRecord={stopRecording}
+              parts={ticket.parts}
+              onSubmitManualNote={addManualNote}
+              onDeleteNote={deleteNote}
+              onUpdateNote={updateNote}
             />
+
+            <PartsAllocation inventory={inventory} parts={ticket.parts} total={partsTotal} saving={isSavingPart} onAdd={addPart} onRemove={removePart} />
+            <RepairCostPanel ticket={ticket} partsTotal={partsTotal} saving={isSavingCosts} onSave={saveRepairCosts} />
             
             <InspectionGallery />
-            <TimelineFeed notes={notes} ticketId={ticket.id} />
+            <TimelineFeed events={ticket.timeline} />
           </div>
 
           {/* Side Intelligence Panel Rail (Right 4 Columns) */}

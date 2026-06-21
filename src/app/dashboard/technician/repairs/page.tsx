@@ -9,38 +9,38 @@ import RepairsToolbar from './components/RepairsToolbar';
 import RepairListGrid from './components/RepairListGrid';
 import DiagnosticConsole from './components/DiagnosticConsole';
 import AiCoPilotPanel from './components/AiCoPilotPanel';
-
-// We import Lucide icons for our loading state
-import { Loader2 } from 'lucide-react';
+import { RepairQueueError, RepairQueueSkeleton } from './components/RepairQueueStates';
 
 export default function TechnicianRepairsPage() {
   // 🧠 1. MOUNT THE ENGINE
   // One single hook call brings in all the data, filters, and update functions!
   const {
     tickets,
+    rawTickets,
     selectedTicket,
     searchQuery,
     statusFilter,
     isLoading,
+    isRefreshing,
+    error,
+    isSessionExpired,
     saveSuccess,
+    pagination,
     setSearchQuery,
     setStatusFilter,
+    setPage,
     setSelectedTicketId,
+    refresh,
     saveTechnicianNotes,
   } = useRepairsManager();
 
   // 🛡️ 2. HANDLE NETWORK LOADING STATE
   if (isLoading) {
-    return (
-      <div className="w-full min-h-[calc(100vh-4.5rem)] bg-[#F9F6F1] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="size-8 animate-spin text-[#0C5C3C]" />
-          <p className="text-sm font-bold text-muted-foreground animate-pulse">
-            Syncing workspace data matrix...
-          </p>
-        </div>
-      </div>
-    );
+    return <RepairQueueSkeleton />;
+  }
+
+  if (error && rawTickets.length === 0) {
+    return <RepairQueueError message={error} onRetry={() => void refresh()} sessionExpired={isSessionExpired} />;
   }
 
   // 🧩 3. ASSEMBLE THE LEGO BLOCKS
@@ -51,6 +51,8 @@ export default function TechnicianRepairsPage() {
       onSearchChange={setSearchQuery}
       statusFilter={statusFilter}
       onFilterChange={setStatusFilter}
+      onRefresh={() => void refresh()}
+      isRefreshing={isRefreshing}
     />
   );
 
@@ -59,6 +61,13 @@ export default function TechnicianRepairsPage() {
       tickets={tickets}
       selectedTicketId={selectedTicket?.id || null}
       onTicketSelect={setSelectedTicketId}
+      pagination={pagination}
+      onPageChange={setPage}
+      isFiltered={Boolean(searchQuery.trim()) || statusFilter !== 'All'}
+      onClearFilters={() => {
+        setSearchQuery('');
+        setStatusFilter('All');
+      }}
     />
   );
 

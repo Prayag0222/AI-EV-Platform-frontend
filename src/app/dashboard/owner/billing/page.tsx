@@ -1,289 +1,318 @@
-'use client';
+"use client";
+import {
+  CheckCircle2,
+  Download,
+  Plus,
+  Printer,
+  RefreshCw,
+  Send,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import CounterSaleModal from "./components/CounterSaleModal";
+import InvoiceBuilder from "./components/InvoiceBuilder";
+import InvoiceHistory from "./components/InvoiceHistory";
+import InvoicePreview from "./components/InvoicePreview";
+import PendingTickets from "./components/PendingTickets";
+import {
+  createInvoice,
+  deleteInvoice,
+  getBillingWorkspace,
+  updateInvoicePayment,
+} from "./services/billingApi";
+import type {
+  BillingTicket,
+  InvoiceDraft,
+  InvoiceRecord,
+} from "./types/billing";
 
-import React, { useState, useEffect } from 'react';
+const ticketToDraft = (ticket: BillingTicket): InvoiceDraft => ({
+  ticketId: ticket.id,
+  customerName: ticket.customer.name,
+  customerPhone: ticket.customer.phone,
+  vehicle: ticket.vehicle?.vehicleModel || "",
+  vin: ticket.vehicle?.vin || "",
+  technician: ticket.technician?.fullName || "Unassigned",
+  repairSummary:
+    ticket.aiSummary ||
+    ticket.notes?.at(-1)?.structuredText ||
+    ticket.description,
+  items:
+    ticket.parts?.map((part) => ({
+      name: part.inventoryItem.partName,
+      sku: part.inventoryItem.sku,
+      qty: part.quantity,
+      price: part.inventoryItem.retailPrice,
+    })) || [],
+  laborCharge: ticket.finalCost || 0,
+  discount: 0,
+  paymentMethod: "CASH",
+  paymentStatus: "UNPAID",
+  notes: "",
+});
 
-interface InvoiceItem {
-  name: string;
-  sku: string;
-  qty: number;
-  price: number;
-}
-
-interface InvoiceRecord {
-  id: number;
-  invoiceNo: string;
-  customerName: string;
-  customerPhone: string;
-  ticketId: number | null;
-  items: unknown; // Safe unknown definition for PostgreSQL json columns
-  laborCharge: number;
-  grandTotal: number;
-  paymentStatus: string;
-  paymentMethod: string;
-}
-
-// ✅ NEXT.JS CRITICAL: Explicit default export declaration matches router contract rules
-export default function FunctionalBillingPage() {
+export default function BillingPage() {
+  const [tickets, setTickets] = useState<BillingTicket[]>([]);
   const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
-  const [loading, setLoading] = useState<boolean>(true); // Keeps loaders running safely on mount
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Form Fields State Block
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [ticketId, setTicketId] = useState('');
-  const [laborCharge, setLaborCharge] = useState('0');
-  const [paymentStatus, setPaymentStatus] = useState('UNPAID');
-  const [paymentMethod, setPaymentMethod] = useState('CASH');
-
-  // Temporary Row Element State Parameters
-  const [lineItems, setLineItems] = useState<InvoiceItem[]>([]);
-  const [tempItemName, setTempItemName] = useState('');
-  const [tempItemSku, setTempItemSku] = useState('');
-  const [tempItemQty, setTempItemQty] = useState('1');
-  const [tempItemPrice, setTempItemPrice] = useState('');
-
-  // 🛰️ Isolated Network Synchronization Engine
+  const [draft, setDraft] = useState<InvoiceDraft | null>(null);
+  const [preview, setPreview] = useState<InvoiceRecord | null>(null);
+  const [counterOpen, setCounterOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        setErrorMessage(null);
-        const response = await fetch('http://127.0.0.1:3000/api/invoice');
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to sync ledger.');
-        }
-        setInvoices(data.invoices || []);
-      } catch (err: unknown) {
-        const errorInstance = err instanceof Error ? err : new Error(String(err));
-        setErrorMessage(errorInstance.message || 'Could not downlink transaction histories.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    let cancelled = false;
 
-    fetchInvoices();
-  }, []); // Fires strictly on view initialize
-
-  // ➕ Add temporary transaction item to local basket list array
-  const handleAddLineItem = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!tempItemName || !tempItemPrice) {
-      alert('Please fill out Name and Price arrays before pushing entry.');
-      return;
-    }
-
-    const newItem: InvoiceItem = {
-      name: tempItemName,
-      sku: tempItemSku || 'COUNTER-SALE',
-      qty: Number(tempItemQty) || 1,
-      price: Number(tempItemPrice) || 0
-    };
-
-    setLineItems([...lineItems, newItem]);
-    setTempItemName('');
-    setTempItemSku('');
-    setTempItemQty('1');
-    setTempItemPrice('');
-  };
-
-  // 💾 Commit final document data payload through REST protocol routing hooks
-  const handleCreateInvoice = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (lineItems.length === 0) {
-      alert('Cannot execute an empty invoice tracking manifest.');
-      return;
-    }
-
-    try {
-      const response = await fetch('http://127.0.0.1:3000/api/invoice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerName,
-          customerPhone,
-          ticketId: ticketId ? Number(ticketId) : null,
-          items: lineItems,
-          laborCharge: Number(laborCharge),
-          paymentStatus,
-          paymentMethod
-        })
+    getBillingWorkspace()
+      .then((data) => {
+        if (cancelled) return;
+        setTickets(data.tickets);
+        setInvoices(data.invoices);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Could not load billing.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Server rejected invoice record storage logic.');
-      }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 3500);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+  const pending = useMemo(
+    () =>
+      tickets.filter(
+        (ticket) =>
+          ticket.status === "RESOLVED" &&
+          !ticket.invoice &&
+          !invoices.some((invoice) => invoice.ticketId === ticket.id),
+      ),
+    [tickets, invoices],
+  );
 
-      // 🔄 Rehydrate local lists asynchronously
-      const refreshResponse = await fetch('http://127.0.0.1:3000/api/invoice');
-      const refreshData = await refreshResponse.json();
-      if (refreshResponse.ok) {
-        setInvoices(refreshData.invoices || []);
-      }
-
-      setCustomerName('');
-      setCustomerPhone('');
-      setTicketId('');
-      setLaborCharge('0');
-      setPaymentStatus('UNPAID');
-      setPaymentMethod('CASH');
-      setLineItems([]);
-      alert(`Invoice created! Code key assigned: ${String(data.invoice?.invoiceNo)}`);
-    } catch (err: unknown) {
-      const errorInstance = err instanceof Error ? err : new Error(String(err));
-      alert(`Transaction aborted: ${errorInstance.message}`);
+  const saveDraft = async (value: InvoiceDraft) => {
+    setSaving(true);
+    setError("");
+    try {
+      const metadata = value.notes
+        ? [{ name: value.notes, sku: "VOLTOPS-NOTE", qty: 1, price: 0 }]
+        : [];
+      const discount =
+        value.discount > 0
+          ? [
+              {
+                name: "Invoice discount",
+                sku: "VOLTOPS-DISCOUNT",
+                qty: 1,
+                price: -Math.abs(value.discount),
+              },
+            ]
+          : [];
+      const invoice = await createInvoice({
+        customerName: value.customerName,
+        customerPhone: value.customerPhone,
+        ticketId: value.ticketId,
+        items: [...value.items, ...discount, ...metadata],
+        laborCharge: value.laborCharge,
+        paymentStatus: value.paymentStatus,
+        paymentMethod: value.paymentMethod,
+      });
+      setInvoices((current) => [invoice, ...current]);
+      setDraft(null);
+      setCounterOpen(false);
+      setPreview(invoice);
+      setNotice(`${invoice.invoiceNo} generated successfully.`);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Invoice could not be saved.",
+      );
+    } finally {
+      setSaving(false);
     }
   };
+  const markPaid = async (invoice: InvoiceRecord) => {
+    try {
+      const updated = await updateInvoicePayment(
+        invoice.id,
+        "PAID",
+        invoice.paymentMethod === "NONE" ? "CASH" : invoice.paymentMethod,
+      );
+      setInvoices((list) =>
+        list.map((row) => (row.id === invoice.id ? updated : row)),
+      );
+      setPreview((row) => (row?.id === updated.id ? updated : row));
+      setNotice(`${invoice.invoiceNo} marked paid.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Payment update failed.");
+    }
+  };
+  const remove = async (invoice: InvoiceRecord) => {
+    if (!window.confirm(`Delete ${invoice.invoiceNo}? This cannot be undone.`))
+      return;
+    try {
+      await deleteInvoice(invoice.id);
+      setInvoices((list) => list.filter((row) => row.id !== invoice.id));
+      setPreview(null);
+      setNotice("Invoice deleted.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed.");
+    }
+  };
+  const print = (invoice?: InvoiceRecord) => {
+    if (invoice) setPreview(invoice);
+    window.setTimeout(() => window.print(), 80);
+  };
+  const share = (invoice: InvoiceRecord) => {
+    const message = `VoltOps invoice ${invoice.invoiceNo}\nCustomer: ${invoice.customerName}\nTotal: ₹${invoice.grandTotal.toFixed(2)}\nStatus: ${invoice.paymentStatus}`;
+    window.open(
+      `https://wa.me/${invoice.customerPhone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
 
-  if (loading) return <div className="p-6 font-mono text-sm">Synchronizing billing matrix histories...</div>;
-  if (errorMessage) return <div className="p-6 font-mono text-sm text-red-500">⚠️ Error: {errorMessage}</div>;
-
-  return (
-    <main className="p-8 space-y-10 max-w-6xl mx-auto">
-      
-      <div>
-        <h1 className="text-2xl font-bold">Billing & Invoicing Utility</h1>
-        <p className="text-sm text-gray-500">Direct invoice execution terminal mapping transactional ledger rows to your database.</p>
-      </div>
-
-      {/* 📥 FORM TRANSACTION BUILD PANEL */}
-      <section className="p-6 border border-gray-300 rounded bg-white space-y-6">
-        <h2 className="text-lg font-bold">Generate Direct Customer Receipt</h2>
-        
-        <div className="p-4 bg-gray-50 border rounded space-y-4">
-          <h3 className="text-xs uppercase font-bold tracking-wider text-gray-600">Step 1: Add Parts/Items to Basket</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-xs font-bold mb-1">Item / Part Name</label>
-              <input type="text" value={tempItemName} onChange={(e) => setTempItemName(e.target.value)} className="w-full border p-2 rounded text-sm bg-white" placeholder="e.g. Ather Charger" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1">SKU Code (Optional)</label>
-              <input type="text" value={tempItemSku} onChange={(e) => setTempItemSku(e.target.value)} className="w-full border p-2 rounded text-sm bg-white" placeholder="COUNTER-SALE" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1">Quantity</label>
-              <input type="number" min="1" value={tempItemQty} onChange={(e) => setTempItemQty(e.target.value)} className="w-full border p-2 rounded text-sm bg-white" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1">Unit Price (₹)</label>
-              <input type="number" value={tempItemPrice} onChange={(e) => setTempItemPrice(e.target.value)} className="w-full border p-2 rounded text-sm bg-white" placeholder="0.00" />
-            </div>
-          </div>
-          <button type="button" onClick={handleAddLineItem} className="px-3 py-1.5 bg-gray-800 text-white font-bold text-xs rounded hover:bg-gray-700 transition cursor-pointer">
-            + Push Item into Basket ({lineItems.length} Added)
-          </button>
-
-          {lineItems.length > 0 && (
-            <div className="text-xs bg-white border rounded p-2 font-mono divide-y">
-              {lineItems.map((basketItem, idx) => (
-                <div key={idx} className="py-1 flex justify-between">
-                  <span>{basketItem.name} ({basketItem.sku}) x{basketItem.qty}</span>
-                  <span className="font-bold">₹{(basketItem.price * basketItem.qty).toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          )}
+  if (loading)
+    return (
+      <main className="grid min-h-full place-items-center bg-[#faf9f7]">
+        <div className="flex items-center gap-3 text-sm font-semibold text-[#61636a]">
+          <RefreshCw className="animate-spin" size={18} />
+          Loading billing workspace…
         </div>
-
-        <form onSubmit={handleCreateInvoice} className="space-y-4">
-          <h3 className="text-xs uppercase font-bold tracking-wider text-gray-600">Step 2: Customer & Labor Parameters</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold mb-1">Customer Name</label>
-              <input type="text" required value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full border p-2 rounded text-sm bg-gray-50" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1">Customer Phone</label>
-              <input type="text" required value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full border p-2 rounded text-sm bg-gray-50" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1">Ticket ID Link (Optional)</label>
-              <input type="number" value={ticketId} onChange={(e) => setTicketId(e.target.value)} className="w-full border p-2 rounded text-sm bg-gray-50" placeholder="Null if Counter Sale" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1">Flat Labor Charges (₹)</label>
-              <input type="number" value={laborCharge} onChange={(e) => setLaborCharge(e.target.value)} className="w-full border p-2 rounded text-sm bg-gray-50" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1">Payment Status</label>
-              <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} className="w-full border p-2 rounded text-sm bg-gray-50">
-                <option value="UNPAID">UNPAID</option>
-                <option value="PAID">PAID</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold mb-1">Payment Method Reference</label>
-              <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="w-full border p-2 rounded text-sm bg-gray-50">
-                <option value="CASH">CASH</option>
-                <option value="UPI">UPI</option>
-                <option value="CARD">CARD</option>
-                <option value="NONE">NONE</option>
-              </select>
-            </div>
+      </main>
+    );
+  return (
+    <main className="min-h-full bg-[#faf9f7] px-4 py-6 sm:px-6 lg:px-10 lg:py-9">
+      <div className="mx-auto max-w-[1500px] space-y-9">
+        <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#006a63]">
+              Revenue operations
+            </p>
+            <h1 className="mt-1 text-3xl font-black tracking-tight text-[#091426] sm:text-4xl">
+              Billing & invoices
+            </h1>
+            <p className="mt-2 max-w-xl text-sm text-[#61636a]">
+              Turn completed repair tickets into accurate invoices—with workshop
+              data already filled in.
+            </p>
           </div>
-
-          <div className="pt-2">
-            <button type="submit" className="w-full md:w-auto px-6 py-2.5 bg-blue-600 text-white rounded font-bold text-sm hover:bg-blue-700 transition status-sync cursor-pointer">
-              Compile Invoice Statement & Commit
+          <button
+            onClick={() => setCounterOpen(true)}
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#091426] px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5"
+          >
+            <Plus size={17} />
+            New counter sale
+          </button>
+        </header>
+        {error && (
+          <div className="flex items-center justify-between rounded-xl border border-[#ffb4ab] bg-[#fff1ef] px-4 py-3 text-sm font-semibold text-[#93000a]">
+            <span>{error}</span>
+            <button onClick={() => setError("")}>
+              <X size={17} />
             </button>
           </div>
-        </form>
-      </section>
-
-      {/* 📊 LEDGER ARCHIVE DATA GRID */}
-      <section className="border border-gray-300 rounded bg-white overflow-hidden">
-        <div className="p-4 bg-gray-100 border-b border-gray-300">
-          <h2 className="font-bold">Historical Financial Invoicing Ledger</h2>
-        </div>
-        
-        {invoices.length === 0 ? (
-          <div className="p-6 text-center text-sm text-gray-400">Financial database contains zero transaction records.</div>
-        ) : (
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 font-bold text-xs text-gray-600">
-                <th className="p-3">Invoice Code</th>
-                <th className="p-3">Client</th>
-                <th className="p-3">Reference Scope</th>
-                <th className="p-3">Labor Fee</th>
-                <th className="p-3">Grand Total</th>
-                <th className="p-3">State</th>
-                <th className="p-3">Method</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((inv) => (
-                <tr key={inv.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="p-3 font-mono text-xs font-bold text-blue-600">{inv.invoiceNo}</td>
-                  <td className="p-3">
-                    <div className="font-medium">{inv.customerName}</div>
-                    <div className="text-[11px] text-gray-400 font-mono">{inv.customerPhone}</div>
-                  </td>
-                  <td className="p-3">
-                    {inv.ticketId ? (
-                      <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-mono">Ticket #{inv.ticketId}</span>
-                    ) : (
-                      <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-mono">Counter Sale</span>
-                    )}
-                  </td>
-                  <td className="p-3 font-mono text-gray-500">₹{inv.laborCharge.toFixed(2)}</td>
-                  <td className="p-3 font-mono font-bold text-gray-900">₹{inv.grandTotal.toFixed(2)}</td>
-                  <td className="p-3">
-                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${inv.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {inv.paymentStatus}
-                    </span>
-                  </td>
-                  <td className="p-3 text-xs font-mono font-bold text-gray-500">{inv.paymentMethod}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         )}
-      </section>
-
+        {notice && (
+          <div className="fixed right-5 top-5 z-[70] flex items-center gap-2 rounded-xl bg-[#053b36] px-4 py-3 text-sm font-bold text-white shadow-xl">
+            <CheckCircle2 size={17} className="text-[#63e6d8]" />
+            {notice}
+          </div>
+        )}
+        <PendingTickets
+          tickets={pending}
+          selectedId={draft?.ticketId}
+          onSelect={(ticket) => {
+            setDraft(ticketToDraft(ticket));
+            window.setTimeout(
+              () =>
+                document
+                  .getElementById("invoice-builder")
+                  ?.scrollIntoView({ behavior: "smooth" }),
+              10,
+            );
+          }}
+        />
+        {draft && (
+          <div id="invoice-builder">
+            <InvoiceBuilder
+              draft={draft}
+              saving={saving}
+              onChange={(patch) =>
+                setDraft((current) =>
+                  current ? { ...current, ...patch } : current,
+                )
+              }
+              onSave={() => void saveDraft(draft)}
+              onCancel={() => setDraft(null)}
+            />
+          </div>
+        )}
+        <InvoiceHistory
+          invoices={invoices}
+          onView={setPreview}
+          onPrint={print}
+          onMarkPaid={(invoice) => void markPaid(invoice)}
+          onDelete={(invoice) => void remove(invoice)}
+        />
+      </div>
+      <CounterSaleModal
+        open={counterOpen}
+        saving={saving}
+        onClose={() => setCounterOpen(false)}
+        onSave={(value) => void saveDraft(value)}
+      />
+      {preview && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[#091426]/70 p-4 backdrop-blur-sm print:static print:bg-white print:p-0">
+          <div className="mx-auto my-4 max-w-3xl print:m-0 print:max-w-none">
+            <div className="mb-3 flex flex-wrap justify-end gap-2 print:hidden">
+              <button
+                onClick={() => print()}
+                className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold"
+              >
+                <Printer size={15} />
+                Print PDF
+              </button>
+              <button
+                onClick={() => print()}
+                className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold"
+              >
+                <Download size={15} />
+                Download PDF
+              </button>
+              <button
+                onClick={() => share(preview)}
+                className="flex items-center gap-2 rounded-lg bg-[#25d366] px-3 py-2 text-xs font-bold text-[#063b1a]"
+              >
+                <Send size={15} />
+                Share WhatsApp
+              </button>
+              {preview.paymentStatus !== "PAID" && (
+                <button
+                  onClick={() => void markPaid(preview)}
+                  className="rounded-lg bg-[#63e6d8] px-3 py-2 text-xs font-bold text-[#052b28]"
+                >
+                  Mark paid
+                </button>
+              )}
+              <button
+                onClick={() => setPreview(null)}
+                className="rounded-lg bg-white p-2"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <InvoicePreview invoice={preview} />
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -46,7 +46,6 @@ export default function LoginPage() {
         const data = await login(credentials.email, credentials.password
         )
 
-        console.log(data);
         
 
         toast.success(`Welcome back ${data.user.name }! Your login was successful.`);
