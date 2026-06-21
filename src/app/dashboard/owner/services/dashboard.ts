@@ -8,7 +8,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/a
  * Fully compliant with strict linting guidelines, ensuring type safety without any loss of data precision.
  */
 export async function fetchOwnerDashboardMetrics(): Promise<OwnerDashboardPayload> {
-  const response = await fetch('http://localhost:3000/api/owner/dashboard', {
+  const response = await fetch(`${API_BASE_URL}/owner/dashboard`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -23,6 +23,8 @@ export async function fetchOwnerDashboardMetrics(): Promise<OwnerDashboardPayloa
       errorPayload.message || 'Failed to establish synchronization link with VoltOps database streams.'
     );
   }
+
+  
 
   return response.json();
 }

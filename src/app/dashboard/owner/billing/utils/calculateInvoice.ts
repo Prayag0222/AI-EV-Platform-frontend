@@ -10,12 +10,49 @@ export const normalizeItems = (items: unknown): InvoiceItem[] => {
   });
 };
 
-export const calculateInvoice = (draft: Pick<InvoiceDraft, 'items' | 'laborCharge' | 'discount' | 'tax'>): InvoiceTotals => {
-  const subtotal = draft.items.reduce((sum, item) => sum + Math.max(0, item.qty) * item.price, 0);
-  const labor = Math.max(0, Number(draft.laborCharge) || 0);
-  const discount = Math.min(Math.max(0, Number(draft.discount) || 0), subtotal + labor);
-  const tax = Math.max(0, Number(draft.tax) || 0);
-  return { subtotal, labor, tax, discount, grandTotal: subtotal + labor + tax - discount };
+export const calculateInvoice = (
+  draft: Pick<
+    InvoiceDraft,
+    "items" |
+    "laborCharge" |
+    "taxPercent" |
+    "discountPercent"
+  >
+): InvoiceTotals => {
+
+  const subtotal = draft.items.reduce(
+    (sum, item) =>
+      sum + Math.max(0, item.qty) * item.price,
+    0
+  );
+
+  const labor =
+    Math.max(
+      0,
+      Number(draft.laborCharge) || 0
+    );
+
+  const taxableAmount =
+    subtotal + labor;
+
+  const tax =
+    taxableAmount *
+    ((draft.taxPercent || 0) / 100);
+
+  const discount =
+    taxableAmount *
+    ((draft.discountPercent || 0) / 100);
+
+  return {
+    subtotal,
+    labor,
+    tax,
+    discount,
+    grandTotal:
+      taxableAmount +
+      tax -
+      discount,
+  };
 };
 
 export const formatCurrency = (amount: number) =>

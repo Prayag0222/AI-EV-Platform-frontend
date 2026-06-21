@@ -1,7 +1,10 @@
 'use client';
 
 import React from 'react';
-import { User, Mail, Phone, MapPin, Briefcase, Settings, X, Save, Hash } from 'lucide-react';
+import {
+  User, Mail, Phone, MapPin, Briefcase,
+  X, Save, UserPlus, PencilLine,
+} from 'lucide-react';
 
 export interface TechnicianFormData {
   fullName: string;
@@ -35,6 +38,26 @@ interface TechnicianFormConsoleProps {
   onCancelEdit: () => void;
 }
 
+const inputClass =
+  'w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-[#C5C6CD] placeholder:font-normal focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition';
+
+const inputWithIconClass =
+  'w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background pl-9 pr-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-[#C5C6CD] placeholder:font-normal focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition';
+
+const selectClass =
+  'w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary focus:border-volt-secondary focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition h-[42px]';
+
+const labelClass =
+  'block text-[11px] font-bold tracking-widest uppercase text-sec-text mb-1.5';
+
+function IconWrap({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sec-text pointer-events-none">
+      {children}
+    </span>
+  );
+}
+
 export default function TechnicianFormConsole({
   editingId,
   formData,
@@ -45,145 +68,291 @@ export default function TechnicianFormConsole({
   onEditInputChange,
   onFormSubmit,
   onEditSave,
-  onCancelEdit
+  onCancelEdit,
 }: TechnicianFormConsoleProps) {
   return (
-    <div className="bg-volt-surface border border-volt-container rounded-container p-6 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.01)] sticky top-24">
-      {editingId ? (
-        <div className="space-y-5 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between border-b border-volt-container pb-3">
-            <div className="flex items-center gap-2">
-              <Settings className="h-4 w-4 text-volt-secondary animate-spin stroke-[1.5]" />
-              <h2 className="font-display text-sm font-bold uppercase tracking-wider text-slate-400">Edit Staff Profile</h2>
-            </div>
-            <button type="button" onClick={onCancelEdit} className="p-1 text-slate-400 hover:text-volt-primary rounded hover:bg-volt-background transition-colors">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+    <div className="bg-white rounded-2xl border border-[rgba(9,20,38,0.08)] overflow-hidden sticky top-6">
 
-          <div className="space-y-4 text-sm font-sans">
-            <div className="p-3 bg-volt-background rounded-volt border border-volt-container flex items-center justify-between font-mono text-[11px]">
-              <span className="text-slate-400 font-display font-bold uppercase tracking-wide">Tracking Token:</span>
-              <span className="text-volt-secondary font-bold select-all flex items-center gap-1">
-                <Hash className="h-3 w-3" /> {editFormData.employeeId}
+      {/* ── Panel header ── */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(9,20,38,0.06)] bg-[#FAFAF8]">
+        <div className="flex items-center gap-2">
+          {editingId ? (
+            <PencilLine className="w-4 h-4 text-volt-secondary" />
+          ) : (
+            <UserPlus className="w-4 h-4 text-volt-secondary" />
+          )}
+          <h2 className="text-[11px] font-bold tracking-widest uppercase text-sec-text">
+            {editingId ? 'Edit technician' : 'Register technician'}
+          </h2>
+        </div>
+        {editingId && (
+          <button
+            type="button"
+            onClick={onCancelEdit}
+            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-volt-container text-sec-text hover:text-volt-primary transition"
+            aria-label="Cancel edit"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      <div className="p-5 space-y-4">
+
+        {/* ── Edit mode ── */}
+        {editingId ? (
+          <>
+            {/* Employee ID pill */}
+            <div className="flex items-center justify-between bg-volt-background border border-[rgba(9,20,38,0.08)] rounded-lg px-3 py-2">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-sec-text">Employee ID</span>
+              <span className="font-mono text-[12px] font-bold text-volt-secondary tracking-wider">
+                #{editFormData.employeeId}
               </span>
             </div>
 
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Full Name</label>
-              <input type="text" name="fullName" value={editFormData.fullName} onChange={onEditInputChange} className="w-full rounded-volt border border-volt-container bg-volt-background px-3 py-2 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" />
-            </div>
+            <FormField label="Full name">
+              <input
+                type="text"
+                name="fullName"
+                value={editFormData.fullName}
+                onChange={onEditInputChange}
+                className={inputClass}
+                placeholder="Full name"
+              />
+            </FormField>
 
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Specialization Track</label>
-              <select name="specialization" value={editFormData.specialization} onChange={onEditInputChange} className="w-full rounded-volt border border-volt-container bg-white px-3 py-2 text-sm text-gray-800 outline-none h-[38px] focus:border-volt-secondary">
-                <option value="GENERAL">General EV Systems</option>
-                <option value="BATTERY">High-Voltage Battery Pack</option>
-                <option value="BMS">Smart BMS Systems</option>
-                <option value="CONTROLLER">Digital Controller Architectures</option>
-                <option value="MOTOR">Powertrain Mechanical Motor</option>
+            <FormField label="Specialization">
+              <select
+                name="specialization"
+                value={editFormData.specialization}
+                onChange={onEditInputChange}
+                className={selectClass}
+              >
+                <SpecOptions />
               </select>
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Email Address</label>
-              <input type="email" name="email" value={editFormData.email} onChange={onEditInputChange} className="w-full rounded-volt border border-volt-container bg-volt-background px-3 py-2 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" />
-            </div>
+            <FormField label="Email address">
+              <div className="relative">
+                <IconWrap><Mail className="w-3.5 h-3.5" /></IconWrap>
+                <input
+                  type="email"
+                  name="email"
+                  value={editFormData.email}
+                  onChange={onEditInputChange}
+                  className={inputWithIconClass}
+                  placeholder="email@voltops.in"
+                />
+              </div>
+            </FormField>
 
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Phone Contact</label>
-              <input type="text" name="phone" value={editFormData.phone} onChange={onEditInputChange} className="w-full rounded-volt border border-volt-container bg-volt-background px-3 py-2 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" />
-            </div>
+            <FormField label="Phone number">
+              <div className="relative">
+                <IconWrap><Phone className="w-3.5 h-3.5" /></IconWrap>
+                <input
+                  type="text"
+                  name="phone"
+                  value={editFormData.phone}
+                  onChange={onEditInputChange}
+                  className={inputWithIconClass}
+                  placeholder="+91 XXXXX XXXXX"
+                />
+              </div>
+            </FormField>
 
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Experience (Years)</label>
-              <input type="number" name="experienceYears" value={editFormData.experienceYears} onChange={onEditInputChange} className="w-full rounded-volt border border-volt-container bg-volt-background px-3 py-2 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" />
-            </div>
+            <FormField label="Years of experience">
+              <div className="relative">
+                <IconWrap><Briefcase className="w-3.5 h-3.5" /></IconWrap>
+                <input
+                  type="number"
+                  name="experienceYears"
+                  value={editFormData.experienceYears}
+                  onChange={onEditInputChange}
+                  className={inputWithIconClass}
+                  placeholder="e.g. 5"
+                  min="0"
+                />
+              </div>
+            </FormField>
 
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Address Location</label>
-              <input type="text" name="address" value={editFormData.address} onChange={onEditInputChange} className="w-full rounded-volt border border-volt-container bg-volt-background px-3 py-2 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" />
-            </div>
+            <FormField label="Address (optional)">
+              <div className="relative">
+                <IconWrap><MapPin className="w-3.5 h-3.5" /></IconWrap>
+                <input
+                  type="text"
+                  name="address"
+                  value={editFormData.address}
+                  onChange={onEditInputChange}
+                  className={inputWithIconClass}
+                  placeholder="Street, area, city"
+                />
+              </div>
+            </FormField>
 
-            <div className="pt-2 flex gap-3">
-              <button type="button" onClick={() => onEditSave(editingId || '')} className="flex-1 flex items-center justify-center gap-1.5 bg-volt-secondary text-volt-background font-display text-xs font-bold uppercase tracking-wider py-2.5 rounded-volt hover:bg-volt-secondary/90 shadow transition-all cursor-pointer">
-                <Save className="h-3.5 w-3.5" /> Save Changes
+            {/* Edit actions */}
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => onEditSave(editingId)}
+                className="flex-1 flex items-center justify-center gap-2 bg-volt-primary text-white text-xs font-bold uppercase tracking-wider py-3 rounded-xl hover:bg-[#1a2d47] transition active:scale-[0.98]"
+              >
+                <Save className="w-3.5 h-3.5" />
+                Save changes
               </button>
-              <button type="button" onClick={onCancelEdit} className="px-4 border border-volt-container text-slate-500 hover:text-volt-primary font-display text-xs font-bold uppercase tracking-wider py-2.5 rounded-volt hover:bg-volt-background transition-all cursor-pointer">
+              <button
+                type="button"
+                onClick={onCancelEdit}
+                className="px-4 border border-[rgba(9,20,38,0.12)] text-sec-text hover:text-volt-primary hover:bg-volt-background text-xs font-bold uppercase tracking-wider py-3 rounded-xl transition"
+              >
                 Cancel
               </button>
             </div>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-5">
-          <div className="border-b border-volt-container pb-3">
-            <h2 className="font-display text-xs font-bold uppercase tracking-wider text-slate-400">Register New Team Member</h2>
-          </div>
-
-          {formSuccessMessage && <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium rounded-volt text-xs leading-relaxed">{formSuccessMessage}</div>}
-          {formErrorMessage && <div className="p-3 bg-volt-terracotta/10 border border-volt-terracotta/20 text-volt-terracotta font-medium rounded-volt text-xs leading-relaxed">{formErrorMessage}</div>}
-
-          <form onSubmit={onFormSubmit} className="space-y-4 font-sans text-sm">
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Full Name *</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 stroke-[1.5]" />
-                <input type="text" name="fullName" value={formData.fullName} onChange={onInputChange} required className="w-full rounded-volt border border-volt-container bg-volt-background pl-9 pr-3 py-2.5 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" placeholder="e.g. Anand Kumar" />
+          </>
+        ) : (
+          /* ── Register mode ── */
+          <>
+            {/* Status messages */}
+            {formSuccessMessage && (
+              <div className="flex items-center gap-2 rounded-xl border border-volt-secondary/20 bg-emerald-green px-3.5 py-2.5 text-xs font-semibold text-volt-secondary">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {formSuccessMessage}
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Specialization *</label>
-              <select name="specialization" value={formData.specialization} onChange={onInputChange} className="w-full rounded-volt border border-volt-container bg-white px-3 py-2.5 text-sm text-gray-800 outline-none h-[42px] focus:border-volt-secondary">
-                <option value="GENERAL">General EV Systems</option>
-                <option value="BATTERY">High-Voltage Battery Pack</option>
-                <option value="BMS">Smart BMS Systems</option>
-                <option value="CONTROLLER">Digital Controller Architectures</option>
-                <option value="MOTOR">Powertrain Mechanical Motor</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Email Address *</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 stroke-[1.5]" />
-                <input type="email" name="email" value={formData.email} onChange={onInputChange} required className="w-full rounded-volt border border-volt-container bg-volt-background pl-9 pr-3 py-2.5 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" placeholder="anand@voltops.io" />
+            {formErrorMessage && (
+              <div className="flex items-center gap-2 rounded-xl border border-volt-terracotta/20 bg-[#FFDAD6] px-3.5 py-2.5 text-xs font-semibold text-volt-terracotta">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                {formErrorMessage}
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Phone Number *</label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 stroke-[1.5]" />
-                <input type="text" name="phone" value={formData.phone} onChange={onInputChange} required className="w-full rounded-volt border border-volt-container bg-volt-background pl-9 pr-3 py-2.5 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" placeholder="e.g. 9876543210" />
+            <form onSubmit={onFormSubmit} className="space-y-4">
+              <FormField label="Full name *">
+                <div className="relative">
+                  <IconWrap><User className="w-3.5 h-3.5" /></IconWrap>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={onInputChange}
+                    required
+                    className={inputWithIconClass}
+                    placeholder="e.g. Anand Kumar"
+                  />
+                </div>
+              </FormField>
+
+              <FormField label="Specialization *">
+                <select
+                  name="specialization"
+                  value={formData.specialization}
+                  onChange={onInputChange}
+                  className={selectClass}
+                >
+                  <SpecOptions />
+                </select>
+              </FormField>
+
+              <FormField label="Email address *">
+                <div className="relative">
+                  <IconWrap><Mail className="w-3.5 h-3.5" /></IconWrap>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={onInputChange}
+                    required
+                    className={inputWithIconClass}
+                    placeholder="anand@voltops.in"
+                  />
+                </div>
+              </FormField>
+
+              <FormField label="Phone number *">
+                <div className="relative">
+                  <IconWrap><Phone className="w-3.5 h-3.5" /></IconWrap>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={onInputChange}
+                    required
+                    className={inputWithIconClass}
+                    placeholder="e.g. 9876543210"
+                  />
+                </div>
+              </FormField>
+
+              <FormField label="Years of experience *">
+                <div className="relative">
+                  <IconWrap><Briefcase className="w-3.5 h-3.5" /></IconWrap>
+                  <input
+                    type="number"
+                    name="experienceYears"
+                    value={formData.experienceYears}
+                    onChange={onInputChange}
+                    required
+                    className={inputWithIconClass}
+                    placeholder="e.g. 5"
+                    min="0"
+                  />
+                </div>
+              </FormField>
+
+              <FormField label="Address (optional)">
+                <div className="relative">
+                  <IconWrap><MapPin className="w-3.5 h-3.5" /></IconWrap>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={onInputChange}
+                    className={inputWithIconClass}
+                    placeholder="Street, area, city"
+                  />
+                </div>
+              </FormField>
+
+              <div className="pt-1">
+                <button
+                  type="submit"
+                  className="w-full flex items-center justify-center gap-2 bg-volt-primary text-white text-xs font-bold uppercase tracking-wider py-3.5 rounded-xl hover:bg-[#1a2d47] transition active:scale-[0.98]"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  Register technician
+                </button>
               </div>
-            </div>
-
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Years of Experience *</label>
-              <div className="relative">
-                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 stroke-[1.5]" />
-                <input type="number" name="experienceYears" value={formData.experienceYears} onChange={onInputChange} required className="w-full rounded-volt border border-volt-container bg-volt-background pl-9 pr-3 py-2.5 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" placeholder="e.g. 5" min="0" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block font-display text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1.5">Shop Address (Optional)</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 stroke-[1.5]" />
-                <input type="text" name="address" value={formData.address} onChange={onInputChange} className="w-full rounded-volt border border-volt-container bg-volt-background pl-9 pr-3 py-2.5 text-sm text-volt-primary outline-none focus:border-volt-secondary transition-all" placeholder="Bays floor sector location code..." />
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button type="submit" className="w-full bg-volt-primary text-white font-display text-xs font-bold uppercase tracking-widest py-3.5 rounded shadow-md hover:opacity-90 transition-all cursor-pointer">
-                Commit Register Clearances
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+            </form>
+          </>
+        )}
+      </div>
     </div>
+  );
+}
+
+/* ── Shared sub-components ── */
+
+function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className={labelClass}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function SpecOptions() {
+  return (
+    <>
+      <option value="GENERAL">General EV Systems</option>
+      <option value="BATTERY">High-Voltage Battery Pack</option>
+      <option value="BMS">Smart BMS Systems</option>
+      <option value="CONTROLLER">Digital Controller Architecture</option>
+      <option value="MOTOR">Powertrain Motor</option>
+    </>
   );
 }

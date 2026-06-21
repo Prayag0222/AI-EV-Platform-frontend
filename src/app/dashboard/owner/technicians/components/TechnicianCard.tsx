@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Mail, Phone, MapPin, Edit3, Trash2, Hash } from 'lucide-react';
+import { Mail, Phone, MapPin, UserRoundPen, Trash2 } from 'lucide-react';
 
 interface Technician {
   id: string;
@@ -22,84 +22,157 @@ interface TechnicianCardProps {
   onDelete: (id: string) => void;
 }
 
-export default function TechnicianCard({ tech, isEditing, onStartEdit, onDelete }: TechnicianCardProps) {
-  const getSpecialtyBadgeStyle = (spec: string) => {
-    switch (spec) {
-      case 'BATTERY': return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400';
-      case 'BMS': return 'bg-volt-secondary/10 border-volt-secondary/20 text-volt-secondary';
-      case 'CONTROLLER': return 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400';
-      case 'MOTOR': return 'bg-amber-500/10 border-amber-500/20 text-amber-400';
-      default: return 'bg-slate-500/10 border-slate-500/20 text-slate-400';
-    }
-  };
+const SPEC_CONFIG: Record<
+  Technician['specialization'],
+  { label: string; bg: string; text: string; dot: string }
+> = {
+  BATTERY: {
+    label: 'Battery Pack',
+    bg: 'bg-emerald-green',
+    text: 'text-volt-secondary',
+    dot: 'bg-volt-secondary',
+  },
+  BMS: {
+    label: 'BMS Systems',
+    bg: 'bg-[#D6EFDE]',
+    text: 'text-[#006F67]',
+    dot: 'bg-[#006F67]',
+  },
+  CONTROLLER: {
+    label: 'Controller',
+    bg: 'bg-[#EDE9FE]',
+    text: 'text-[#5B21B6]',
+    dot: 'bg-[#5B21B6]',
+  },
+  MOTOR: {
+    label: 'Powertrain Motor',
+    bg: 'bg-volt-sand',
+    text: 'text-[#564427]',
+    dot: 'bg-[#564427]',
+  },
+  GENERAL: {
+    label: 'General EV',
+    bg: 'bg-volt-container',
+    text: 'text-sec-text',
+    dot: 'bg-sec-text',
+  },
+};
+
+function getInitials(name: string) {
+  const parts = name.trim().split(' ').filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return parts[0].substring(0, 2).toUpperCase();
+}
+
+export default function TechnicianCard({
+  tech,
+  isEditing,
+  onStartEdit,
+  onDelete,
+}: TechnicianCardProps) {
+  const spec = SPEC_CONFIG[tech.specialization];
 
   return (
-    <div className={`bg-volt-surface border rounded-container p-5 shadow-[0_2px_4px_rgba(0,0,0,0.01)] hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between group ${
-      isEditing ? 'border-volt-secondary ring-2 ring-volt-secondary/10' : 'border-volt-container'
-    }`}>
-      <div>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center space-x-3.5">
-            <div className="w-11 h-9 bg-volt-primary border border-volt-container text-white rounded-full flex items-center justify-center font-display font-bold uppercase text-sm select-none shadow-inner group-hover:bg-volt-secondary group-hover:text-volt-background transition-colors duration-150">
-              {tech.fullName.charAt(0)}
+    <div
+      className={`bg-white rounded-2xl border flex flex-col justify-between transition-all ${
+        isEditing
+          ? 'border-volt-secondary ring-2 ring-volt-secondary/10'
+          : 'border-[rgba(9,20,38,0.08)] hover:border-[rgba(9,20,38,0.16)]'
+      }`}
+    >
+      {/* ── Card top ── */}
+      <div className="p-5">
+
+        {/* Identity row */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-full bg-volt-primary flex items-center justify-center text-white text-sm font-black select-none flex-shrink-0">
+              {getInitials(tech.fullName)}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-volt-primary font-sans group-hover:text-volt-secondary transition-colors leading-tight">
+              <h3 className="text-sm font-black text-volt-primary leading-tight">
                 {tech.fullName}
               </h3>
-              <p className="text-[10px] font-bold text-slate-400 font-mono mt-0.5 tracking-wider uppercase inline-flex items-center gap-1">
-                <Hash className="h-3 w-3 text-slate-400" /> {tech.employeeId}
+              <p className="text-[11px] font-mono font-semibold text-sec-text mt-0.5 tracking-wider">
+                #{tech.employeeId}
               </p>
             </div>
           </div>
-          {isEditing && <span className="animate-pulse h-2 w-2 rounded-full bg-volt-secondary" />}
+
+          {/* Specialization badge */}
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold flex-shrink-0 ${spec.bg} ${spec.text}`}>
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${spec.dot}`} />
+            {spec.label}
+          </div>
         </div>
 
-        <div className="mt-5 pt-3 border-t border-volt-container/60 space-y-2.5 font-sans text-xs text-slate-600">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-400 font-medium">Expertise Track:</span>
-            <span className={`px-2 py-0.5 border rounded font-display text-[9px] font-bold tracking-wider uppercase ${getSpecialtyBadgeStyle(tech.specialization)}`}>
-              {tech.specialization}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-slate-400 font-medium">Experience Buffer:</span>
-            <span className="text-volt-primary font-semibold">{tech.experienceYears} Years Status</span>
-          </div>
-          <div className="flex items-center gap-2 border-t border-volt-container/30 pt-2.5 mt-1 select-all">
-            <Mail className="h-3.5 w-3.5 text-slate-400 stroke-[1.5]" />
-            <span className="truncate">{tech.email}</span>
-          </div>
-          <div className="flex items-center gap-2 select-all">
-            <Phone className="h-3.5 w-3.5 text-slate-400 stroke-[1.5]" />
-            <span>{tech.phone}</span>
-          </div>
+        {/* Divider */}
+        <div className="h-px bg-[rgba(9,20,38,0.06)] mb-4" />
+
+        {/* Meta row — experience */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[11px] font-semibold text-sec-text uppercase tracking-wide">Experience</span>
+          <span className="text-sm font-black text-volt-primary">{tech.experienceYears} yrs</span>
+        </div>
+
+        {/* Contact details */}
+        <div className="space-y-2.5">
+          <ContactLine icon={<Mail className="w-3.5 h-3.5" />} value={tech.email} />
+          <ContactLine icon={<Phone className="w-3.5 h-3.5" />} value={tech.phone} />
           {tech.address && (
-            <div className="flex items-center gap-2 text-slate-500">
-              <MapPin className="h-3.5 w-3.5 text-slate-400 stroke-[1.5] flex-shrink-0" />
-              <span className="truncate">{tech.address}</span>
-            </div>
+            <ContactLine icon={<MapPin className="w-3.5 h-3.5" />} value={tech.address} truncate />
           )}
         </div>
       </div>
 
-      <div className="mt-6 pt-3 border-t border-volt-container/60 flex items-center justify-end gap-2.5">
-        <button 
+      {/* ── Card footer ── */}
+      <div className="flex items-center gap-2 px-5 py-3.5 border-t border-[rgba(9,20,38,0.06)] bg-[#FAFAF8] rounded-b-2xl">
+        {isEditing && (
+          <span className="flex items-center gap-1.5 text-[11px] font-bold text-volt-secondary mr-auto">
+            <span className="w-1.5 h-1.5 rounded-full bg-volt-secondary animate-pulse" />
+            Editing…
+          </span>
+        )}
+
+        <button
           type="button"
-          onClick={() => onStartEdit(tech)} 
+          onClick={() => onStartEdit(tech)}
           disabled={isEditing}
-          className="px-3 py-1.5 border border-volt-container rounded-volt font-display text-[10px] font-bold tracking-wide uppercase text-slate-500 hover:text-volt-primary hover:border-slate-400 hover:bg-volt-background transition-all disabled:opacity-30 flex items-center gap-1"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[rgba(9,20,38,0.10)] bg-white text-sec-text hover:text-volt-primary hover:border-[rgba(9,20,38,0.2)] text-[11px] font-bold uppercase tracking-wide transition disabled:opacity-30 disabled:cursor-not-allowed ml-auto"
         >
-          <Edit3 className="h-3 w-3" /> Edit Details
+          <UserRoundPen className="w-3.5 h-3.5" />
+          Edit
         </button>
-        <button 
+
+        <button
           type="button"
-          onClick={() => onDelete(tech.id)} 
-          className="px-3 py-1.5 bg-volt-terracotta/5 border border-volt-terracotta/10 text-volt-terracotta hover:bg-volt-terracotta hover:text-white rounded-volt font-display text-[10px] font-bold tracking-wide uppercase transition-all flex items-center gap-1"
+          onClick={() => onDelete(tech.id)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[rgba(186,26,26,0.12)] bg-[#FFF5F5] text-volt-terracotta hover:bg-volt-terracotta hover:text-white text-[11px] font-bold uppercase tracking-wide transition"
         >
-          <Trash2 className="h-3 w-3" /> Remove Staff
+          <Trash2 className="w-3.5 h-3.5" />
+          Remove
         </button>
       </div>
+    </div>
+  );
+}
+
+/* ── Sub-component ── */
+function ContactLine({
+  icon,
+  value,
+  truncate = false,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  truncate?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="text-volt-secondary flex-shrink-0">{icon}</span>
+      <span className={`text-[12.5px] text-primary-text font-medium ${truncate ? 'truncate' : ''}`}>
+        {value}
+      </span>
     </div>
   );
 }

@@ -27,6 +27,7 @@ import OperationsOverview from '@/features/dashboard/components/OperationsOvervi
 // 2. Import types and backend connection service
 import { OwnerDashboardPayload } from './types/ownerDashboard';
 import { fetchOwnerDashboardMetrics } from './services/dashboard';
+import Link from 'next/link';
 
 export default function OwnerDashboardPage() {
   const [data, setData] = useState<OwnerDashboardPayload | null>(null);
@@ -46,6 +47,8 @@ export default function OwnerDashboardPage() {
         setError(null);
 
         const livePayload = await fetchOwnerDashboardMetrics();
+
+        
         
         if (isMounted) {
           setData(livePayload);
@@ -164,9 +167,13 @@ export default function OwnerDashboardPage() {
             <Settings className="h-5 w-5 stroke-[1.5]" />
           </button>
           
+         <Link
+         href={'owner/profile'}
+         >
           <div className="h-9 w-9 rounded-full bg-volt-primary border border-volt-container overflow-hidden select-none flex items-center justify-center font-display text-xs font-semibold text-white">
             PR
           </div>
+         </Link>
         </div>
       </header>
 
@@ -332,7 +339,7 @@ export default function OwnerDashboardPage() {
                 <h3 className="font-display text-xs font-bold uppercase tracking-wider text-slate-400">Inventory Alerts</h3>
                 <span className="text-[11px] font-sans text-slate-400">Asset Value: {formatINR(quickMetrics.totalInventoryValue)}</span>
               </div>
-              <div className="space-y-3 overflow-y-auto max-h-[260px] pr-1">
+              <div className="space-y-3 overflow-y-auto max-h-65 pr-1">
                 {inventoryAlerts.length === 0 ? (
                   <div className="text-center py-8 text-xs text-slate-400 font-medium">
                     All core components are sitting comfortably within safe shelf safety margins.
@@ -406,7 +413,7 @@ export default function OwnerDashboardPage() {
                 <Sparkles className="h-4 w-4 text-volt-secondary stroke-[1.5]" />
                 <h3 className="font-display text-xs font-bold uppercase tracking-wider text-slate-400">AI Briefing</h3>
               </div>
-              <div className="flex-grow flex flex-col justify-center">
+              <div className="grow flex flex-col justify-center">
                 <AiBriefing data={aiBriefing} />
               </div>
             </div>

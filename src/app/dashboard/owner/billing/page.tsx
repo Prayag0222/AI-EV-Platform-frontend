@@ -11,9 +11,10 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import CounterSaleModal from "./components/CounterSaleModal";
 import InvoiceBuilder from "./components/InvoiceBuilder";
-import InvoiceHistory from "./components/InvoiceHistory";
+import InvoiceHistory from "./components/InvoiceHistory"; 
 import InvoicePreview from "./components/InvoicePreview";
 import PendingTickets from "./components/PendingTickets";
+import { calculateInvoice } from "./utils/calculateInvoice";
 import {
   createInvoice,
   deleteInvoice,
@@ -26,12 +27,15 @@ import type {
   InvoiceDraft,
   InvoiceRecord,
 } from "./types/billing";
+import { getProfile, type Profile } from "../services/profileApi";
 
-const ticketToDraft = (ticket: BillingTicket): InvoiceDraft => ({
+
+
+const ticketToDraft = (ticket: BillingTicket, profile: Profile | null): InvoiceDraft => ({
   ticketId: ticket.id,
-  shopName: "VoltOps",
-  shopAddress: "",
-  gstNumber: "",
+ shopName: profile?.shopName || "VoltOps",
+shopAddress: profile?.shopAddress || "",
+gstNumber: profile?.gstNumber || "",
   customerName: ticket.customer.name,
   customerAddress: ticket.customer.address || "",
   customerPhone: ticket.customer.phone,
@@ -42,17 +46,17 @@ const ticketToDraft = (ticket: BillingTicket): InvoiceDraft => ({
     ticket.aiSummary ||
     ticket.notes?.at(-1)?.structuredText ||
     ticket.description,
-items:
-  ticket.parts?.map((part) => ({
-    inventoryId: part.inventoryItem.id,
-    name: part.inventoryItem.partName,
-    sku: part.inventoryItem.sku,
-    qty: part.quantity,
-    price: part.inventoryItem.retailPrice,
-  })) || [],
-  laborCharge: ticket.finalCost || 0,
-  tax: 0,
-  discount: 0,
+  items:
+    ticket.parts?.map((part) => ({
+      inventoryId: part.inventoryItem.id,
+      name: part.inventoryItem.partName,
+      sku: part.inventoryItem.sku,
+      qty: part.quantity,
+      price: part.inventoryItem.retailPrice,
+    })) || [],
+  laborCharge: ticket.finalCost || null,
+taxPercent: 0,
+discountPercent: 0,
   paymentMethod: "CASH",
   paymentStatus: "UNPAID",
   notes: "",
@@ -68,6 +72,7 @@ export default function BillingPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [profile, setProfile] = useState<Profile | null>(null);
   useEffect(() => {
     let cancelled = false;
 
@@ -79,11 +84,17 @@ export default function BillingPage() {
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Could not load billing.");
+        setError(
+          err instanceof Error ? err.message : "Could not load billing.",
+        );
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
+      getProfile()
+  .then(setProfile)
+  .catch(console.error);
 
     return () => {
       cancelled = true;
@@ -118,9 +129,9 @@ export default function BillingPage() {
         gstNumber: value.gstNumber,
         ticketId: value.ticketId,
         items: value.items,
-        laborCharge: value.laborCharge,
-        tax: value.tax,
-        discount: value.discount,
+        laborCharge: value.laborCharge || null,
+       tax: calculateInvoice(value).tax,
+discount: calculateInvoice(value).discount,
         notes: value.notes,
         paymentStatus: value.paymentStatus,
         paymentMethod: value.paymentMethod,
@@ -234,7 +245,7 @@ export default function BillingPage() {
           tickets={pending}
           selectedId={draft?.ticketId}
           onSelect={(ticket) => {
-            setDraft(ticketToDraft(ticket));
+            setDraft(ticketToDraft(ticket,profile));
             window.setTimeout(
               () =>
                 document

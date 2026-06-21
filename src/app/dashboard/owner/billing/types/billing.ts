@@ -68,9 +68,9 @@ export interface InvoiceDraft {
   technician: string;
   repairSummary: string;
   items: InvoiceItem[];
-  laborCharge: number;
-  tax: number;
-  discount: number;
+  laborCharge: number | null;
+taxPercent: number;
+discountPercent: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   notes: string;
@@ -93,7 +93,7 @@ export interface CreateInvoicePayload {
   gstNumber?: string;
   ticketId: number | null;
   items: InvoiceItem[];
-  laborCharge: number;
+  laborCharge: number | null;
   tax: number;
   discount: number;
   notes?: string;
