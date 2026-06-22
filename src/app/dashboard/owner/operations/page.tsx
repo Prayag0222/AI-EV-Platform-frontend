@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Loader2, AlertTriangle, Wrench, CheckCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
 import OperationJobCard from './components/OperationJobCard';
 
 interface CustomerInfo {
@@ -11,11 +12,11 @@ interface CustomerInfo {
 interface Technician {
   id: string;
   fullName: string;
-  email: string;          
+  email: string;
   phone: string;
-  employeeId: string;          
+  employeeId: string;
   specialization: string;
-  status: string;      
+  status: string;
   experienceYears: string;
   address: string | null;
 }
@@ -26,12 +27,25 @@ interface RepairTicket {
   issueCategory: string;
   description: string;
   technicianNotes: string | null;
-  status: string; 
+  status: string;
   customer: CustomerInfo;
   technicianId?: string | null;
   createdAt: string;
   updatedAt?: string;
-  technician?: Technician | null; 
+  technician?: Technician | null;
+}
+
+const STATUS_CONFIG: Record<string, { bg: string; text: string; dot: string }> = {
+  ready:           { bg: 'bg-emerald-green',  text: 'text-volt-secondary',  dot: 'bg-volt-secondary'  },
+  delivered:       { bg: 'bg-emerald-green',  text: 'text-volt-secondary',  dot: 'bg-volt-secondary'  },
+  'in service':    { bg: 'bg-[#D6EFDE]',      text: 'text-[#006F67]',       dot: 'bg-[#006F67]'       },
+  working:         { bg: 'bg-[#D6EFDE]',      text: 'text-[#006F67]',       dot: 'bg-[#006F67]'       },
+  'parts ordered': { bg: 'bg-[#FFDAD6]',      text: 'text-volt-terracotta', dot: 'bg-volt-terracotta' },
+  waiting:         { bg: 'bg-volt-sand',       text: 'text-[#564427]',       dot: 'bg-[#564427]'       },
+};
+
+function getStatusConfig(status: string) {
+  return STATUS_CONFIG[status?.toLowerCase()] ?? STATUS_CONFIG['waiting'];
 }
 
 export default function OperationsDeckPage() {
@@ -39,137 +53,302 @@ export default function OperationsDeckPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<RepairTicket | null>(null);
+  const [historyOpen, setHistoryOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    const initializeDeckLog = async () => {
+    const fetchTickets = async () => {
       try {
-        setErrorMessage(null);
         const response = await fetch('http://127.0.0.1:3000/api/operation/tickets');
         const data = await response.json();
-        
-        if (!response.ok) throw new Error(data.error || 'Failed to downlink operations data streams.');
-        
+        if (!response.ok) throw new Error(data.error || 'Failed to load tickets.');
         setTickets(data.tickets || []);
-        
       } catch (err) {
-        console.error('Operations UI connection drop:', err);
-        setErrorMessage('Could not establish secure network links with the active Express ledger engine.');
+        setErrorMessage(err instanceof Error ? err.message : 'Failed to connect to server.');
       } finally {
         setLoading(false);
       }
     };
-
-    initializeDeckLog();
+    fetchTickets();
   }, []);
 
-  // ⚡ THE SYSTEM FIX: State-driven synchronization loop function
   const handleTicketDeleted = (deletedId: number) => {
-    // 1. Recalculate State: filter out the old matching ID instantly
-    setTickets((prevTickets) => prevTickets.filter((ticket) => ticket.id !== deletedId));
-    
-    // 2. Modal Safety Check: If the user is currently viewing this exact modal layout, dismiss it gracefully
-    if (selectedTicket?.id === deletedId) {
-      setSelectedTicket(null);
-    }
+    setTickets((prev) => prev.filter((t) => t.id !== deletedId));
+    if (selectedTicket?.id === deletedId) setSelectedTicket(null);
   };
 
-  if (loading) return <div className="p-10 text-xs font-mono text-[#75777d] bg-[#FAFAF8] min-h-screen">Synchronizing VoltOps Executive Viewport Matrix...</div>;
-  if (errorMessage) return <div className="p-10 text-xs font-mono text-volt-terracotta bg-[#FAFAF8] min-h-screen">⚠️ {errorMessage}</div>;
+  const activeTickets = tickets.filter((t) => t.status?.toLowerCase() !== 'delivered');
+  const deliveredTickets = tickets.filter((t) => t.status?.toLowerCase() === 'delivered');
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen bg-volt-background flex flex-col items-center justify-center gap-3">
+        <Loader2 className="h-7 w-7 text-volt-secondary animate-spin" />
+        <p className="text-sm font-medium text-sec-text">Loading operations…</p>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="w-full min-h-screen bg-volt-background flex items-center justify-center p-6">
+        <div className="w-full max-w-sm bg-white border border-[rgba(186,26,26,0.15)] rounded-2xl p-8 text-center">
+          <div className="w-12 h-12 rounded-xl bg-[#FFDAD6] flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="h-5 w-5 text-volt-terracotta" />
+          </div>
+          <h3 className="font-black text-base text-volt-primary mb-1.5">Failed to load</h3>
+          <p className="text-sm text-sec-text leading-relaxed">{errorMessage}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <main className="flex-1 bg-[#FAFAF8] p-6 lg:p-10 w-full min-h-screen relative">
-      
-      {/* Top Header Text Bracket Frame */}
-      <div className="mb-10 max-w-360 mx-auto">
-        <h2 className="text-4xl font-bold tracking-tight text-[#091426] mb-2 font-sans">
-          Operations
-        </h2>
-        <p className="text-lg text-[#45474c] font-sans font-normal">
-          Live status of all vehicles currently in operation.
-        </p>
+    <main className="min-h-screen bg-volt-background">
+
+      {/* Page Header */}
+      <div className="bg-white border-b border-[rgba(9,20,38,0.08)] px-6 lg:px-10 py-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-sec-text mb-2">
+              <Wrench className="w-3.5 h-3.5 text-volt-secondary" />
+              <span>Workshop</span>
+              <span className="text-[#C5C6CD]">/</span>
+              <span className="text-volt-primary">Operations</span>
+            </div>
+            <h1 className="text-[26px] font-black text-volt-primary tracking-tight leading-tight">
+              Operations Deck
+            </h1>
+            <p className="text-sm text-sec-text mt-1">
+              Live view of all vehicles currently in the workshop.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <StatPill
+              icon={<Wrench className="w-3.5 h-3.5" />}
+              label="Active jobs"
+              value={activeTickets.length}
+              accent
+            />
+            <StatPill
+              icon={<CheckCircle className="w-3.5 h-3.5" />}
+              label="Delivered"
+              value={deliveredTickets.length}
+              accent={false}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* THE RESPONSIVE VEHICLE CONTAINER GRID */}
-      <div className="max-w-360 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {tickets.length === 0 ? (
-          <div className="col-span-full p-12 border border-dashed border-[#c5c6cd] bg-white text-center text-xs font-medium text-[#75777d]" style={{ borderRadius: '0.75rem' }}>
-            Zero active asset matrices registered inside shop tracking logs.
-          </div>
-        ) : (
-          tickets.map((ticketItem) => (
-            <OperationJobCard
-              key={ticketItem.id}
-              ticket={ticketItem}
-              onOpenDetails={(ticket) => setSelectedTicket(ticket)}
-              // ⚡ CONNECTED: Links the parent filter function into the card execution engine prop slot
-              onDeleteSuccess={handleTicketDeleted} 
-            />
-          ))
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-10">
+
+        {/* ACTIVE JOBS */}
+        <section>
+          <SectionLabel
+            icon={<Wrench className="w-3.5 h-3.5" />}
+            label="Active jobs"
+            count={activeTickets.length}
+            accent
+          />
+
+          {activeTickets.length === 0 ? (
+            <div className="mt-4 flex flex-col items-center justify-center py-20 border-2 border-dashed border-[rgba(9,20,38,0.08)] rounded-2xl bg-white">
+              <div className="w-12 h-12 rounded-xl bg-volt-container flex items-center justify-center mb-3">
+                <CheckCircle className="w-5 h-5 text-volt-secondary" />
+              </div>
+              <p className="font-bold text-volt-primary text-sm">All clear</p>
+              <p className="text-xs text-sec-text mt-1">No vehicles are currently in service.</p>
+            </div>
+          ) : (
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {activeTickets.map((ticket) => (
+                <OperationJobCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  onOpenDetails={setSelectedTicket}
+                  onDeleteSuccess={handleTicketDeleted}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* DELIVERY HISTORY */}
+        {deliveredTickets.length > 0 && (
+          <section>
+            <button
+              onClick={() => setHistoryOpen((p) => !p)}
+              className="w-full flex items-center gap-3 group"
+            >
+              <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-sec-text">
+                <CheckCircle className="w-3.5 h-3.5 text-volt-secondary" />
+                Delivery history
+              </div>
+              <div className="flex-1 h-px bg-[rgba(9,20,38,0.07)]" />
+              <span className="text-[11px] font-bold text-sec-text bg-volt-container px-2.5 py-0.5 rounded-full">
+                {deliveredTickets.length} vehicles
+              </span>
+              <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-volt-container text-sec-text group-hover:text-volt-primary transition flex-shrink-0">
+                {historyOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </span>
+            </button>
+
+            {historyOpen && (
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {deliveredTickets.map((ticket) => (
+                  <OperationJobCard
+                    key={ticket.id}
+                    ticket={ticket}
+                    onOpenDetails={setSelectedTicket}
+                    onDeleteSuccess={handleTicketDeleted}
+                    delivered
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         )}
       </div>
 
-      {/* 🏛️ THE CENTRALIZED SINGLE MODAL CONTAINER */}
+      {/* DETAIL MODAL */}
       {selectedTicket && (
-        <div 
-          className="fixed inset-0 bg-[#091426]/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all"
-          onClick={() => setSelectedTicket(null)} 
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[rgba(9,20,38,0.5)]"
+          onClick={() => setSelectedTicket(null)}
         >
-          <div 
-            className="bg-white border border-[#c5c6cd] rounded-2xl max-w-lg w-full shadow-2xl p-6 relative max-h-[85vh] overflow-y-auto flex flex-col justify-between"
-            onClick={(e) => e.stopPropagation()} 
+          <div
+            className="bg-white rounded-2xl w-full max-w-lg shadow-2xl max-h-[88vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Header Title Section */}
-            <div className="flex justify-between items-center border-b pb-3 mb-4">
-              <div>
-                <span className="text-2xl font-black text-[#091426] font-sans">
-                  EV-{selectedTicket.id.toString().padStart(4, '0')}
-                </span>
-                <span className="text-xs ml-2 text-gray-400 font-mono">Detailed Operational View</span>
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(9,20,38,0.08)] bg-[#FAFAF8] sticky top-0 rounded-t-2xl z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-volt-primary flex items-center justify-center">
+                  <Wrench className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold tracking-widest uppercase text-sec-text">Job details</p>
+                  <p className="text-lg font-black text-volt-primary leading-tight">
+                    EV-{selectedTicket.id.toString().padStart(4, '0')}
+                  </p>
+                </div>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedTicket(null)}
-                className="text-gray-400 hover:text-gray-900 transition-colors text-xl font-bold font-mono"
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-volt-container text-sec-text hover:text-volt-primary transition"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Core Metadata Specifications Parameters list Layout */}
-            <div className="space-y-4 text-sm font-sans text-gray-700">
-              <p><strong className="text-gray-500 uppercase text-xs">Customer Name:</strong> <span className="text-[#091426] font-bold">{selectedTicket.customer?.name || 'Walk-In Profile'}</span></p>
-              <p><strong className="text-gray-500 uppercase text-xs">Contact Phone:</strong> {selectedTicket.customer?.phone || 'N/A'}</p>
-              <p><strong className="text-gray-500 uppercase text-xs">Scooter Model:</strong> <span className="text-blue-600 font-semibold">{selectedTicket.vehicleModel}</span></p>
-              <p><strong className="text-gray-500 uppercase text-xs">Primary Fault Flag:</strong> <span className="underline decoration-red-400 font-bold">{selectedTicket.issueCategory}</span></p>
-              
-              <div className="bg-slate-50 border border-gray-200 p-3 rounded-xl">
-                <span className="block text-gray-400 uppercase text-[10px] font-bold mb-1">Diagnostic Intake Symptoms</span>
-                <p className="italic text-gray-700 font-medium">`{selectedTicket.description}`</p>
+            <div className="px-6 py-5 space-y-4">
+
+              {/* Status */}
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold tracking-widest uppercase text-sec-text">Status</span>
+                <StatusBadge status={selectedTicket.status} />
               </div>
 
-              <div className="bg-[#f5f3f4] p-3 rounded-xl border border-gray-200 font-mono text-xs text-[#45474c]">
-                <span className="block text-gray-500 uppercase text-[10px] font-bold mb-1 font-sans">Progress Notes</span>
-                <p>{selectedTicket.technicianNotes || 'Awaiting mechanic verification notes logs.'}</p>
+              {/* Grid meta */}
+              <div className="grid grid-cols-2 gap-3">
+                <ModalMetaCell label="Customer" value={selectedTicket.customer?.name || 'Walk-in'} />
+                <ModalMetaCell label="Phone" value={selectedTicket.customer?.phone || '—'} />
+                <ModalMetaCell label="Vehicle model" value={selectedTicket.vehicleModel} accent />
+                <ModalMetaCell label="Issue category" value={selectedTicket.issueCategory} />
               </div>
 
-              <p><strong className="text-gray-500 uppercase text-xs">Current Workshop Status:</strong> <span className="ml-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 uppercase">{selectedTicket.status}</span></p>
-              
-              <div className="border-t pt-3 flex flex-col text-xs space-y-1 font-mono text-gray-400">
-                <p><strong>Assigned Staff:</strong> {selectedTicket.technician ? `${selectedTicket.technician.fullName} (${selectedTicket.technician.employeeId})` : 'Unassigned Pool'}</p>
-                <p><strong>Database Log Entry:</strong> {new Date(selectedTicket.createdAt).toLocaleString()}</p>
+              {/* Description */}
+              <div className="bg-volt-background border border-[rgba(9,20,38,0.08)] rounded-xl p-4">
+                <p className="text-[10.5px] font-bold tracking-widest uppercase text-sec-text mb-2">Description</p>
+                <p className="text-sm text-primary-text leading-relaxed">{selectedTicket.description || '—'}</p>
+              </div>
+
+              {/* Technician notes */}
+              <div className="bg-volt-background border border-[rgba(9,20,38,0.08)] rounded-xl p-4">
+                <p className="text-[10.5px] font-bold tracking-widest uppercase text-sec-text mb-2">Technician notes</p>
+                <p className="text-sm text-primary-text leading-relaxed font-mono">
+                  {selectedTicket.technicianNotes || 'No notes yet.'}
+                </p>
+              </div>
+
+              {/* Technician + date */}
+              <div className="grid grid-cols-2 gap-3">
+                <ModalMetaCell
+                  label="Assigned technician"
+                  value={
+                    selectedTicket.technician
+                      ? `${selectedTicket.technician.fullName} (#${selectedTicket.technician.employeeId})`
+                      : 'Unassigned'
+                  }
+                />
+                <ModalMetaCell
+                  label="Created"
+                  value={new Date(selectedTicket.createdAt).toLocaleDateString('en-IN', {
+                    day: 'numeric', month: 'short', year: 'numeric',
+                  })}
+                />
               </div>
             </div>
 
-            <div className='flex flex-col gap-3 bg-red-100 p-4 rounded-lg mt-5'>
-              <button 
+            <div className="px-6 pb-6">
+              <button
                 onClick={() => setSelectedTicket(null)}
-                className="w-full py-2.5 bg-[#091426] text-white font-bold text-xs uppercase tracking-wider rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-volt-primary text-white text-sm font-bold py-3 hover:bg-[#1a2d47] transition active:scale-[0.98]"
               >
-                Dismiss Detailed Log View
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
     </main>
+  );
+}
+
+function StatPill({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: number; accent: boolean }) {
+  return (
+    <div className="flex items-center gap-2 bg-white border border-[rgba(9,20,38,0.08)] rounded-xl px-4 py-2.5">
+      <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${accent ? 'bg-emerald-green text-volt-secondary' : 'bg-volt-container text-sec-text'}`}>
+        {icon}
+      </div>
+      <div>
+        <p className="text-[10px] font-bold tracking-widest uppercase text-sec-text">{label}</p>
+        <p className="text-base font-black text-volt-primary leading-none">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function SectionLabel({ icon, label, count, accent }: { icon: React.ReactNode; label: string; count: number; accent: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-sec-text">
+        <span className="text-volt-secondary">{icon}</span>
+        {label}
+      </div>
+      <div className="flex-1 h-px bg-[rgba(9,20,38,0.07)]" />
+      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${accent ? 'bg-emerald-green text-volt-secondary' : 'bg-volt-container text-sec-text'}`}>
+        {count}
+      </span>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const cfg = getStatusConfig(status);
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ${cfg.bg} ${cfg.text}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+      {status}
+    </span>
+  );
+}
+
+function ModalMetaCell({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="bg-volt-background border border-[rgba(9,20,38,0.08)] rounded-xl px-3.5 py-3">
+      <p className="text-[10px] font-bold tracking-widest uppercase text-sec-text mb-0.5">{label}</p>
+      <p className={`text-sm font-semibold leading-snug ${accent ? 'text-volt-secondary' : 'text-volt-primary'}`}>{value}</p>
+    </div>
   );
 }
