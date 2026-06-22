@@ -2,17 +2,12 @@
 
 import React, { useState } from 'react';
 import { X, User, Smartphone, Bike,MapPinHouse,Mail } from 'lucide-react';
+import { Customer } from '@/app/dashboard/owner/types/customer';
 
 // 📋 1. Simple definition of what a customer object looks like
-interface Customer {
-  id: string;
-  name: string;
-  phone: string;
-  vehicleModel: string;
-  email?: string;
-  address?: string;
-  createdAt: string;
-}
+
+
+
 
 // 🔌 2. The configuration properties passed from the parent page
 interface EditCustomerModalProps {
@@ -23,6 +18,10 @@ interface EditCustomerModalProps {
 
 export default function EditCustomerModal({ customer, onClose, onUpdateSuccess }: EditCustomerModalProps) {
 
+  const firstVehicle = (customer?.vehicles && customer.vehicles.length > 0) 
+    ? customer.vehicles[0] 
+    : { vehicleModel: '', vin: '', manufacturer: '', modelYear: '' };
+
     
 const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -31,7 +30,7 @@ const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     name: customer?.name || '',
     phone: customer?.phone || '',
-    vehicleModel: customer?.vehicleModel || '',
+    vehicleModel:firstVehicle.vehicleModel || '',
     email: customer?.email|| '',
     address: customer?.address|| '',
   });

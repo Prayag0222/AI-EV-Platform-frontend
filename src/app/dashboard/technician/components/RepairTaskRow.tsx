@@ -26,8 +26,8 @@ interface RepairTaskRowProps {
 export default function RepairTaskRow({ repair, expanded, onExpand, onAdvance, onOpenDetails }: RepairTaskRowProps) {
   
   // 🔒 1. SAFELY INITIALIZE STATE (Using ?. prevents the undefined property crash completely)
-  const [localStatus, setLocalStatus] = useState<string>(repair?.status || "Waiting");
-  const [prevPropStatus, setPrevPropStatus] = useState<string>(repair?.status || "Waiting");
+  const [localStatus, setLocalStatus] = useState<string>(repair?.status || "PENDING");
+  const [prevPropStatus, setPrevPropStatus] = useState<string>(repair?.status || "PENDING");
 
   // 🛡️ 2. DEFENSIVE GUARD CLAUSE (Safely return null if the object is missing after hooks run)
   if (!repair) return null;
@@ -40,19 +40,23 @@ export default function RepairTaskRow({ repair, expanded, onExpand, onAdvance, o
 
   // 🎨 Status Color Mapping Engine
   const statusColorMap: Record<string, { badge: string; text: string }> = {
-    "Waiting": { 
+    "PENDING": { 
       badge: "bg-slate-100 text-slate-700 border-slate-200", 
       text: "text-slate-600" 
     },
-    "In Service": { 
-      badge: "bg-amber-50 border border-amber-200 text-amber-700 shadow-sm", 
+    "DIAGNOSING": { 
+      badge: "bg-yelloe-50 border border-amber-200 text-amber-700 shadow-sm", 
       text: "text-amber-600" 
     },
-    "Parts Ordered": { 
-      badge: "bg-orange-50 border border-orange-200 text-orange-700 shadow-sm", 
+    "IN_SERVICE": { 
+      badge: "bg-amber-50 border border-orange-200 text-orange-700 shadow-sm", 
       text: "text-orange-600" 
     },
-    "Ready": { 
+    "RESOLVED": { 
+      badge: "bg-orange-50 border border-emerald-200 text-emerald-700 font-bold shadow-sm", 
+      text: "text-emerald-600" 
+    },
+    "DELIVERED": { 
       badge: "bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold shadow-sm", 
       text: "text-emerald-600" 
     }
@@ -110,10 +114,11 @@ export default function RepairTaskRow({ repair, expanded, onExpand, onAdvance, o
               onChange={handleStatusChange}
               className="h-10 text-xs font-bold rounded-xl px-3 bg-surface border border-border text-primary-text focus:outline-none focus:border-emerald-600 transition-colors cursor-pointer min-w-37.5 shadow-sm"
             >
-              <option value="Waiting" className="text-slate-700 font-medium">Waiting</option>
-              <option value="In Service" className="text-amber-700 font-medium">In Service</option>
-              <option value="Parts Ordered" className="text-orange-700 font-medium">Parts Ordered</option>
-              <option value="Ready" className="text-emerald-700 font-bold">Ready</option>
+              <option value="PENDING" className="text-slate-700 font-medium">PENDING</option>
+              <option value="DIAGNOSING" className="text-yellow-700 font-medium">DIAGNOSING</option>
+              <option value="IN_SERVICE" className="text-amber-700 font-medium">IN_SERVICE</option>
+              <option value="RESOLVED" className="text-orange-700 font-bold">RESOLVED</option>
+              <option value="DELIVERED" className="text-emerald-700 font-bold">DELIVERED</option>
             </select>
           </div>
 

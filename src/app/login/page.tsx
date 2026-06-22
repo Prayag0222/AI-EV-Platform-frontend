@@ -2,8 +2,11 @@
 
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Zap,Mail,LockKeyhole,ArrowRight,Fence} from 'lucide-react';
 import { useRouter} from 'next/navigation';
+import {toast} from 'react-toastify'
+import { login } from '@/services/auth';
 
 // 1. Strict TypeScript interface for incoming login credentials
 interface LoginFields {
@@ -16,6 +19,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   // 2. React state guarded strictly by our TypeScript blueprint data layer
+  const [loading,setLoading] = useState(false);
   const [credentials, setCredentials] = useState<LoginFields>({
     email: '',
     password: '',
@@ -37,28 +41,14 @@ export default function LoginPage() {
     // Direct console isolation log to verify your data flow works flawlessly
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login',
-        {
-          method:"POST",
-        headers:{ 'Content-Type':"application/json"},
-        credentials:"include", // Important for cookie handling in cross-origin requests
-        body: JSON.stringify({
-          email:credentials.email,
-          password:credentials.password
-        })
-        });
+      setLoading(true);
 
-        const data = await response.json()
+        const data = await login(credentials.email, credentials.password
+        )
 
-        if(!response.ok){
-          throw new Error(data.message || 'Login failed.');
+        
 
-        }
-
-        console.log('🚀 Login API Response:', data);
-
-
-        alert(`Welcome back ${data.user.name }! Your login was successful.`);
+        toast.success(`Welcome back ${data.user.name }! Your login was successful.`);
         if(data.user.role === 'OWNER'){
           router.push('/dashboard/owner');
         }
@@ -66,7 +56,7 @@ export default function LoginPage() {
           router.push('/dashboard/technician');
         }
         else{
-        console.warn('⚠️ Access Denied: Role not authorized for panel navigation.');
+          console.warn('⚠️ Access Denied: Role not authorized for panel navigation.');
           alert('Access Denied. Account does not possess dashboard credentials.');
           router.push('/login');
         }
@@ -76,7 +66,8 @@ export default function LoginPage() {
 
       // One-liner: Force TypeScript to treat 'error' as an Error object
       alert((error as Error).message || 'An unknown error occurred.');
-      
+    } finally {
+      setLoading(false);
     }
 
   };
@@ -192,9 +183,10 @@ export default function LoginPage() {
               <button 
                 className="w-full bg-[#2d5a43] text-[#9fcfb2] hover:brightness-110 active:scale-[0.98] transition-all duration-200 font-semibold font-hanken py-3.5 rounded-lg flex items-center justify-center gap-4 text-md" 
                 type="submit"
+                disabled={loading}
               >
-                Sign In
-              <ArrowRight className="text-[#9fcfb2]  " />
+                {loading ? 'Signing in...' : 'Sign in'}
+                <ArrowRight className="text-[#9fcfb2]  " />
               </button>
             </form>
           </div>
@@ -203,7 +195,7 @@ export default function LoginPage() {
           <footer className="text-center space-y-4">
             <p className="font-body text-sm text-[#c0c9c1]">
               Don&apos;t have an account?{' '}
-              <a className="text-[#a1d1b4] font-semibold hover:underline" href="/signup">Create an Account</a>
+              <Link className="text-[#a1d1b4] font-semibold hover:underline" href="/signup">Create an Account</Link>
             </p>
             <div className="flex  font-hanken items-center justify-center gap-4">
               <a className="text-[#8b938c] hover:text-[#a1d1b4] transition-colors text-xs" href="#">Privacy Policy</a>

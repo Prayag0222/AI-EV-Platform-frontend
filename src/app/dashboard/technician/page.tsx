@@ -166,7 +166,7 @@ export default function TechnicianWorkspacePage() {
         <div>
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Thursday · June 11</p>
           <h1 className="max-w-3xl font-display text-4xl text-primary-text font-semibold leading-[1.05] tracking-[-0.055em] md:text-5xl lg:text-[3.5rem]">
-            Good morning, {activeUser?.name || 'Technician'}.<br />
+            Hello, {activeUser?.name || 'Technician'}.<br />
             <span className="text-sec-text">Repairs need your attention.</span>
           </h1>
         </div>

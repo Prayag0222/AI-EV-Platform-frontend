@@ -1,6 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { Loader2, AlertTriangle, Users } from 'lucide-react';
+import TechnicianCard from './components/TechnicianCard';
+import TechnicianFormConsole, {
+  TechnicianFormData,
+  TechnicianEditFormData,
+} from './components/TechnicianFormConsole';
 
 interface Technician {
   id: string;
@@ -8,7 +14,7 @@ interface Technician {
   email: string;
   phone: string;
   employeeId: string;
-  specialization: 'BATTERY' | 'MOTOR' | 'CONTROLLER' | 'GENERAL_EV';
+  specialization: 'BATTERY' | 'BMS' | 'CONTROLLER' | 'MOTOR' | 'GENERAL';
   experienceYears: string;
   address?: string | null;
   profileImage?: string | null;
@@ -18,51 +24,56 @@ export default function OwnerTechniciansPage() {
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [triggerRefresh, setTriggerRefresh] = useState<number>(0);
 
-  // Form Registration States — ✅ employeeId is completely removed from form intake states!
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TechnicianFormData>({
     fullName: '',
     email: '',
     phone: '',
-    specialization: 'GENERAL_EV',
+    specialization: 'GENERAL',
     experienceYears: '',
     address: '',
   });
+
   const [formSuccessMessage, setFormSuccessMessage] = useState<string | null>(null);
   const [formErrorMessage, setFormErrorMessage] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editFormData, setEditFormData] = useState({
+  const [editFormData, setEditFormData] = useState<TechnicianEditFormData>({
     fullName: '',
     email: '',
     phone: '',
     employeeId: '',
-    specialization: 'GENERAL_EV',
+    specialization: 'GENERAL',
     experienceYears: '',
     address: '',
   });
 
-
-
   useEffect(() => {
-      const fetchAllTechnicians = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/technician/getAllTechnicians');
-      if (!response.ok) throw new Error('Could not retrieve data from the EV server.');
-      const data = await response.json();
-      setTechnicians(data);
-    } catch (err: unknown) {
-      const errorInstance = err instanceof Error ? err : new Error(String(err));
-      setErrorMessage(errorInstance.message || 'An unknown error occurred.');
-    } finally {
-      setIsLoading(false);
+    let isMounted = true;
+
+    async function loadTechnicians() {
+      try {
+        const response = await fetch('http://localhost:3000/api/technician/getAllTechnicians');
+        if (!response.ok) throw new Error('Could not load technicians from the server.');
+        const data = await response.json();
+        if (isMounted) {
+          setTechnicians(data);
+          setErrorMessage(null);
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          const e = err instanceof Error ? err : new Error(String(err));
+          setErrorMessage(e.message);
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
     }
-  };
 
-fetchAllTechnicians();
-
-  }, []);
-  
+    loadTechnicians();
+    return () => { isMounted = false; };
+  }, [triggerRefresh]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -78,53 +89,45 @@ fetchAllTechnicians();
       const response = await fetch('http://localhost:3000/api/technician/createTechnician', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData), // Sends object package without manual ID keys
+        body: JSON.stringify(formData),
       });
 
       const responseData = await response.json();
       if (!response.ok) throw new Error(responseData.message || 'Failed to register technician.');
 
-      setFormSuccessMessage('Technician registered successfully with automated serial mapping!');
-      
-      // Inline rehydration to ensure hot-state elements are accurate
-      const refreshResponse = await fetch('http://localhost:3000/api/technician/getAllTechnicians');
-      const refreshData = await refreshResponse.json();
-      if (refreshResponse.ok) {
-        setTechnicians(refreshData);
-      }
-
+      setFormSuccessMessage('Technician registered successfully.');
+      setTriggerRefresh((prev) => prev + 1);
       setFormData({
         fullName: '',
         email: '',
         phone: '',
-        specialization: 'GENERAL_EV',
+        specialization: 'GENERAL',
         experienceYears: '',
         address: '',
       });
     } catch (err: unknown) {
-      const errorInstance = err instanceof Error ? err : new Error(String(err));
-      setFormErrorMessage(errorInstance.message || 'Failed to submit form.');
+      const e = err instanceof Error ? err : new Error(String(err));
+      setFormErrorMessage(e.message);
     }
   };
 
   const handleDeleteTechnician = async (id: string) => {
-    const confirmDelete = confirm('Are you sure you want to remove this technician from the system?');
-    if (!confirmDelete) return;
-
+    if (!confirm('Remove this technician from the workshop?')) return;
     try {
-      const response = await fetch(`http://localhost:3000/api/technician/deleteTechnician/${id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/technician/deleteTechnician/${id}`,
+        { method: 'DELETE' }
+      );
       const responseData = await response.json();
       if (!response.ok) {
-        alert(responseData.message || 'Could not delete technician.');
+        alert(responseData.message || 'Delete failed.');
         return;
       }
-      alert(responseData.message);
-      setTechnicians((prevList) => prevList.filter((tech) => tech.id !== id));
+      setTechnicians((prev) => prev.filter((t) => t.id !== id));
+      if (editingId === id) setEditingId(null);
     } catch (err: unknown) {
-      const errorInstance = err instanceof Error ? err : new Error(String(err));
-      alert(`Network error: ${errorInstance.message}`);
+      const e = err instanceof Error ? err : new Error(String(err));
+      alert(e.message);
     }
   };
 
@@ -139,176 +142,165 @@ fetchAllTechnicians();
       experienceYears: tech.experienceYears,
       address: tech.address || '',
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleEditInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setEditFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleEditSaveSubmit = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/technician/updateTechnician/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editFormData),
-      });
-
+      const response = await fetch(
+        `http://localhost:3000/api/technician/updateTechnician/${id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editFormData),
+        }
+      );
       const responseData = await response.json();
       if (!response.ok) {
-        alert(responseData.message || 'Failed to update technician record.');
+        alert(responseData.message || 'Update failed.');
         return;
       }
-
-      setTechnicians((prevList) =>
-        prevList.map((tech) => (tech.id === id ? responseData.technician : tech))
-      );
-
       setEditingId(null);
-      alert('Technician changes saved successfully!');
+      setTriggerRefresh((prev) => prev + 1);
     } catch (err: unknown) {
-      const errorInstance = err instanceof Error ? err : new Error(String(err));
-      alert(`Network error: ${errorInstance.message}`);
+      const e = err instanceof Error ? err : new Error(String(err));
+      alert(e.message);
     }
   };
 
-  if (isLoading) return <div className="p-8 text-center text-lg text-gray-600 font-medium">Fetching active EV technicians...</div>;
-  if (errorMessage) return <div className="p-8 text-center text-red-500 font-semibold">Error: {errorMessage}</div>;
+  /* ── Loading ── */
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen bg-volt-background flex flex-col items-center justify-center gap-3">
+        <Loader2 className="h-7 w-7 text-volt-secondary animate-spin" />
+        <p className="text-sm font-medium text-sec-text">Loading technicians…</p>
+      </div>
+    );
+  }
+
+  /* ── Error ── */
+  if (errorMessage) {
+    return (
+      <div className="w-full min-h-screen bg-volt-background flex items-center justify-center p-6">
+        <div className="w-full max-w-sm bg-white border border-[rgba(186,26,26,0.15)] rounded-2xl p-8 text-center">
+          <div className="w-12 h-12 rounded-xl bg-[#FFDAD6] flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="h-5 w-5 text-volt-terracotta" />
+          </div>
+          <h3 className="font-black text-base text-volt-primary mb-1.5">Failed to load</h3>
+          <p className="text-sm text-sec-text leading-relaxed">{errorMessage}</p>
+          <button
+            onClick={() => setTriggerRefresh((p) => p + 1)}
+            className="mt-5 px-5 py-2.5 bg-volt-primary text-white text-sm font-bold rounded-xl hover:bg-[#1a2d47] transition"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Technician Ecosystem Management</h1>
-        <p className="text-sm text-gray-500">Monitor and expand your shop&apos;s engineering team resources.</p>
+    <div className="min-h-screen bg-volt-background">
+
+      {/* ── Page Header ── */}
+      <div className="bg-white border-b border-[rgba(9,20,38,0.08)] px-8 py-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-sec-text mb-2">
+              <Users className="w-3.5 h-3.5 text-volt-secondary" />
+              <span>Workshop</span>
+              <span className="text-[#C5C6CD]">/</span>
+              <span className="text-volt-primary">Technicians</span>
+            </div>
+            <h1 className="text-[26px] font-black text-volt-primary tracking-tight leading-tight">
+              Technician Management
+            </h1>
+            <p className="text-sm text-sec-text mt-1">
+              Manage your workshop engineers, specializations, and staff profiles.
+            </p>
+          </div>
+
+          {/* Summary pill */}
+          <div className="flex items-center gap-2 bg-volt-background border border-[rgba(9,20,38,0.08)] rounded-xl px-4 py-2.5">
+            <div className="w-7 h-7 rounded-lg bg-emerald-green flex items-center justify-center">
+              <Users className="w-3.5 h-3.5 text-volt-secondary" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-sec-text">Active staff</p>
+              <p className="text-base font-black text-volt-primary leading-none">{technicians.length}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Registration Form Panel */}
-      <div className="border border-gray-200 rounded-xl p-6 bg-gray-50 shadow-sm max-w-3xl">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Register New Team Member</h2>
-        {formSuccessMessage && <div className="mb-4 p-3 bg-green-100 text-green-700 font-medium rounded-lg text-sm">{formSuccessMessage}</div>}
-        {formErrorMessage && <div className="mb-4 p-3 bg-red-100 text-red-700 font-medium rounded-lg text-sm">{formErrorMessage}</div>}
+      {/* ── Body ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
-        <form onSubmit={handleFormSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Full Name</label>
-            <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="John Doe" />
+          {/* Left: Form panel */}
+          <div className="lg:col-span-1">
+            <TechnicianFormConsole
+              editingId={editingId}
+              formData={formData}
+              editFormData={editFormData}
+              formSuccessMessage={formSuccessMessage}
+              formErrorMessage={formErrorMessage}
+              onInputChange={handleInputChange}
+              onEditInputChange={handleEditInputChange}
+              onFormSubmit={handleFormSubmit}
+              onEditSave={handleEditSaveSubmit}
+              onCancelEdit={() => setEditingId(null)}
+            />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Specialization</label>
-            <select name="specialization" value={formData.specialization} onChange={handleInputChange} className="w-full border border-gray-300 rounded p-2 text-sm bg-white">
-              <option value="GENERAL_EV">General EV Maintenance</option>
-              <option value="BATTERY">Battery Specialist</option>
-              <option value="MOTOR">Motor Repair</option>
-              <option value="CONTROLLER">Controller Tuning</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
-            <input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="john@evshop.com" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
-            <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="9876543210" />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Years of Experience</label>
-            <input type="number" name="experienceYears" value={formData.experienceYears} onChange={handleInputChange} required className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="3" />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Home/Shop Address (Optional)</label>
-            <input type="text" name="address" value={formData.address} onChange={handleInputChange} className="w-full border border-gray-300 rounded p-2 text-sm bg-white" placeholder="123 Main Road, New Delhi" />
-          </div>
-          <div className="md:col-span-2 pt-2">
-            <button type="submit" className="w-full md:w-auto bg-blue-600 text-white font-semibold rounded px-6 py-2 hover:bg-blue-700 transition-colors text-sm">
-              Register Technician
-            </button>
-          </div>
-        </form>
-      </div>
 
-      {/* Directory Grid View */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Active Staff List</h2>
-        {technicians.length === 0 ? (
-          <div className="p-12 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-            <p className="text-gray-500">No technicians are registered in the workshop database yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {technicians.map((tech) => {
-              const isEditingThisCard = tech.id === editingId;
+          {/* Right: Cards */}
+          <div className="lg:col-span-2 space-y-5">
 
-              return (
-                <div key={tech.id} className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-                  {isEditingThisCard ? (
-                    <div className="space-y-3 text-xs">
-                      <h3 className="font-bold text-gray-700 border-b pb-1 mb-2">Edit Mode Form</h3>
-                      <div>
-                        <label className="block font-semibold text-gray-500 mb-0.5">Full Name</label>
-                        <input type="text" name="fullName" value={editFormData.fullName} onChange={handleEditInputChange} className="w-full border rounded p-1 text-xs" />
-                      </div>
-                      <div>
-                        <label className="block font-semibold text-gray-500 mb-0.5">Email Address</label>
-                        <input type="email" name="email" value={editFormData.email} onChange={handleEditInputChange} className="w-full border rounded p-1 text-xs" />
-                      </div>
-                      <div>
-                        <label className="block font-semibold text-gray-500 mb-0.5">Phone Number</label>
-                        <input type="text" name="phone" value={editFormData.phone} onChange={handleEditInputChange} className="w-full border rounded p-1 text-xs" />
-                      </div>
-                      <div>
-                        <label className="block font-semibold text-gray-500 mb-0.5">Specialization</label>
-                        <select name="specialization" value={editFormData.specialization} onChange={handleEditInputChange} className="w-full border border-gray-300 rounded p-1 text-xs bg-white">
-                          <option value="GENERAL_EV">GENERAL_EV</option>
-                          <option value="BATTERY">BATTERY</option>
-                          <option value="MOTOR">MOTOR</option>
-                          <option value="CONTROLLER">CONTROLLER</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block font-semibold text-gray-500 mb-0.5">Experience (Years)</label>
-                        <input type="number" name="experienceYears" value={editFormData.experienceYears} onChange={handleEditInputChange} className="w-full border rounded p-1 text-xs" />
-                      </div>
-                      <div>
-                        <label className="block font-semibold text-gray-500 mb-0.5">Address</label>
-                        <input type="text" name="address" value={editFormData.address} onChange={handleEditInputChange} className="w-full border rounded p-1 text-xs" />
-                      </div>
-                      <div className="pt-2 flex space-x-2">
-                        <button onClick={() => handleEditSaveSubmit(tech.id)} className="px-3 py-1 bg-green-600 text-white rounded font-medium text-xs hover:bg-green-700">Save</button>
-                        <button onClick={() => setEditingId(null)} className="px-3 py-1 bg-gray-300 text-gray-700 rounded font-medium text-xs hover:bg-gray-400">Cancel</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold uppercase text-lg">
-                          {tech.fullName.charAt(0)}
-                        </div>
-                        <div>
-                          <h2 className="text-md font-bold text-gray-800">{tech.fullName}</h2>
-                          {/* ✅ Automatically displays server-generated tracking identifiers */}
-                          <p className="text-xs font-bold text-blue-600 font-mono">ID: {tech.employeeId}</p>
-                        </div>
-                      </div>
+            {/* Section label */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-sec-text">
+                <svg className="w-3.5 h-3.5 text-volt-secondary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                Workshop engineers
+              </div>
+              <div className="flex-1 h-px bg-[rgba(9,20,38,0.07)]" />
+              <span className="text-[11px] font-bold text-volt-secondary bg-emerald-green px-2.5 py-0.5 rounded-full">
+                {technicians.length} active
+              </span>
+            </div>
 
-                      <div className="mt-4 pt-3 border-t border-gray-100 space-y-1.5 text-xs text-gray-600">
-                        <p><strong className="text-gray-700">Expertise:</strong> <span className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded font-semibold uppercase">{tech.specialization}</span></p>
-                        <p><strong className="text-gray-700">Experience:</strong> {tech.experienceYears} Years</p>
-                        <p><strong className="text-gray-700">Email:</strong> {tech.email}</p>
-                        <p><strong className="text-gray-700">Phone:</strong> {tech.phone}</p>
-                        {tech.address && <p><strong className="text-gray-700">Address:</strong> {tech.address}</p>}
-                      </div>
-
-                      <div className="mt-5 pt-3 border-t border-gray-100 flex justify-end space-x-2">
-                        <button onClick={() => startEditing(tech)} className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded text-xs transition-colors">Edit Details</button>
-                        <button onClick={() => handleDeleteTechnician(tech.id)} className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded text-xs transition-colors">Remove Staff</button>
-                      </div>
-                    </div>
-                  )}
+            {technicians.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-[rgba(9,20,38,0.08)] rounded-2xl bg-white">
+                <div className="w-12 h-12 rounded-xl bg-volt-container flex items-center justify-center mb-3">
+                  <Users className="w-5 h-5 text-sec-text" />
                 </div>
-              );
-            })}
+                <p className="font-bold text-volt-primary text-sm">No technicians yet</p>
+                <p className="text-xs text-sec-text mt-1">Register your first engineer using the form.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {technicians.map((tech) => (
+                  <TechnicianCard
+                    key={tech.id}
+                    tech={tech}
+                    isEditing={tech.id === editingId}
+                    onStartEdit={startEditing}
+                    onDelete={handleDeleteTechnician}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        )}
+
+        </div>
       </div>
     </div>
   );
