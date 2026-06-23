@@ -120,7 +120,7 @@ export function VehicleTimelinePanel({
                     {index !==
                       timeline.length -
                         1 && (
-                      <div className="absolute left-[19px] top-10 h-full w-px bg-slate-200" />
+                      <div className="absolute left-4.75 top-10 h-full w-px bg-slate-200" />
                     )}
 
                     <div

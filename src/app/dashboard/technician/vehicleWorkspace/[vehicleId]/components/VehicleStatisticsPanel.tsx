@@ -66,7 +66,7 @@ export function VehicleStatisticsPanel({
         return (
           <div
             key={card.title}
-            className={`group relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br ${card.gradient} bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
+            className={`group relative overflow-hidden rounded-2xl border border-slate-200 bg-linear-to-br ${card.gradient} bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
           >
             <div className="flex items-start justify-between">
               <div>

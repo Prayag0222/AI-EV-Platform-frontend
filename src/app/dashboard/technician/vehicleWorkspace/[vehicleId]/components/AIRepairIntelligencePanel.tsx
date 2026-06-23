@@ -52,10 +52,10 @@ export function AIRepairIntelligencePanel({
 
   return (
     <Card className="overflow-hidden border-0 shadow-lg">
-      <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 p-[1px]">
+      <div className="bg-linear-to-r from-indigo-600 via-indigo-500 to-cyan-500 p-px">
         <div className="bg-white">
           <CardContent className="p-0">
-            <div className="p-6 border-b bg-gradient-to-r from-indigo-50 to-cyan-50">
+            <div className="p-6 border-b bg-linear-to-r from-indigo-50 to-cyan-50">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <div className="flex items-center gap-2">

@@ -65,7 +65,7 @@ export function TelemetryDrawer({ ticket, onClose, onSave }: TelemetryDrawerProp
           <form id="telemetry-form" onSubmit={handleSubmit} className="mt-6 space-y-5">
             {/* Field: Mileage */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1.5">
+              <label className=" text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1.5">
                 <Gauge className="w-3.5 h-3.5 text-slate-400" /> Current Mileage (km)
               </label>
               <input
@@ -79,7 +79,7 @@ export function TelemetryDrawer({ ticket, onClose, onSave }: TelemetryDrawerProp
 
             {/* Field: Battery Health */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1.5">
+              <label className=" text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1.5">
                 <Battery className="w-3.5 h-3.5 text-slate-400" /> Battery State of Health (%)
               </label>
               <input
@@ -95,7 +95,7 @@ export function TelemetryDrawer({ ticket, onClose, onSave }: TelemetryDrawerProp
 
             {/* Field: Pack Temperature */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1.5">
+              <label className=" text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1.5">
                 <Thermometer className="w-3.5 h-3.5 text-slate-400" /> Pack Temperature (°C)
               </label>
               <input
@@ -109,7 +109,7 @@ export function TelemetryDrawer({ ticket, onClose, onSave }: TelemetryDrawerProp
 
             {/* Field: Hardware ID */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1.5">
+              <label className=" text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1.5">
                 Hardware ID / Battery Serial
               </label>
               <input

@@ -96,7 +96,7 @@ export function VehicleCard({ ticket, onSelect }: VehicleCardProps) {
       {/* Customer Meta Row Footer */}
       <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
         <div className="flex items-center gap-1.5 truncate max-w-[65%]">
-          <User className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+          <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <span className="truncate text-slate-700 font-medium">{customer?.name || "Walk-in"}</span>
         </div>
         <span className="font-mono text-[11px] text-slate-400">{customer?.phone || "N/A"}</span>

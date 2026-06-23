@@ -35,7 +35,7 @@ export function VehicleHeader({
 
   return (
     <Card className="overflow-hidden border-0 shadow-xl">
-      <div className="h-1 bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-500" />
+      <div className="h-1 bg-linear-to-r from-indigo-600 via-blue-500 to-cyan-500" />
 
       <CardContent className="p-0">
         <div className="p-6 lg:p-8">
@@ -109,7 +109,7 @@ export function VehicleHeader({
             </div>
 
             {/* Right Side KPI Area */}
-            <div className="grid grid-cols-3 gap-3 xl:w-[420px]">
+            <div className="grid grid-cols-3 gap-3 xl:w-105">
               <div className="rounded-2xl border bg-slate-50 p-4">
                 <Battery
                   className={`h-5 w-5 mb-2 ${sohColor}`}
