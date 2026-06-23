@@ -102,8 +102,8 @@ export default function OperationJobCard({ ticket, onOpenDetails, onDeleteSucces
               EV-{ticket.id.toString().padStart(4, '0')}
             </p>
           </div>
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-bold flex-shrink-0 ${spec.bg} ${spec.text}`}>
-            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${spec.dot}`} />
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-bold shrink-0 ${spec.bg} ${spec.text}`}>
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${spec.dot}`} />
             {ticket.status}
           </span>
         </div>
@@ -132,7 +132,7 @@ export default function OperationJobCard({ ticket, onOpenDetails, onDeleteSucces
       {/* Footer meta */}
       <div className="px-5 py-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
-          <div className="w-6 h-6 rounded-full bg-volt-primary flex items-center justify-center flex-shrink-0">
+          <div className="w-6 h-6 rounded-full bg-volt-primary flex items-center justify-center shrink-0">
             <User className="w-3 h-3 text-white" />
           </div>
           <div className="min-w-0">
@@ -143,9 +143,10 @@ export default function OperationJobCard({ ticket, onOpenDetails, onDeleteSucces
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-sec-text flex-shrink-0">
+        <div className="flex items-center gap-1 text-sec-text shrink-0">
           <Clock className="w-3 h-3" />
-          <span className="text-[11px] font-medium">{displayDate}</span>
+          <span className="text-[11px] font-medium">{displayDate} -</span><br />
+          <span className="text-[11px] font-medium"> {displayTime}</span>
         </div>
       </div>
 
@@ -174,7 +175,7 @@ export default function OperationJobCard({ ticket, onOpenDetails, onDeleteSucces
         </button>
         <button
           onClick={handleDelete}
-          className="w-8 h-8 flex items-center justify-center rounded-lg border border-[rgba(186,26,26,0.12)] bg-[#FFF5F5] text-volt-terracotta hover:bg-volt-terracotta hover:text-white transition flex-shrink-0"
+          className="w-8 h-8 flex items-center justify-center rounded-lg border border-[rgba(186,26,26,0.12)] bg-[#FFF5F5] text-volt-terracotta hover:bg-volt-terracotta hover:text-white transition shrink-0"
           title="Delete ticket"
         >
           <Trash2 className="w-3.5 h-3.5" />

@@ -4,6 +4,7 @@ import React from "react";
 import { useVehiclesEngine } from "./hooks/useVehiclesEngine";
 import { VehicleCard } from "./components/VehicleCard";
 import { Search, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
 
 export default function TechnicianVehiclesPage() {
   const {
@@ -16,6 +17,9 @@ export default function TechnicianVehiclesPage() {
     notice,
     setNotice,
   } = useVehiclesEngine();
+
+
+  
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 p-6">
@@ -98,17 +102,19 @@ export default function TechnicianVehiclesPage() {
       ) : (
         /* 🚗 Stage 3: Reactive Grid Mapping */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTickets.map((ticket) => (
-            <VehicleCard
-              key={ticket.id}
-              ticket={ticket}
-              onSelect={(t) => {
-                setSelectedTicket(t);
-                setNotice(`Opened telemetry channel for ${t.vehicle.vehicleModel} (Ticket #${t.id})`);
-              }}
-            />
-          ))}
-        </div>
+  {filteredTickets.map((ticket) => (
+    <Link href={`/dashboard/technician/vehicleWorkspace/${ticket.vehicle.id}`} key={ticket.vehicle.id} className="block">
+      <VehicleCard 
+        ticket={ticket} 
+        onSelect={(t) => { 
+          setSelectedTicket(t); 
+          setNotice(`Opened telemetry channel for ${t.vehicle.vehicleModel} (Ticket #${t.id})`); 
+        }} 
+      />
+    </Link>
+  ))}
+</div>
+
       )}
     </div>
   );

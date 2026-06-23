@@ -3,7 +3,7 @@
 import React from 'react';
 import { RepairTicket } from '../types';
 import { BrainCircuit, Database, Lock, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface AiCoPilotPanelProps {
   ticket: RepairTicket | null;

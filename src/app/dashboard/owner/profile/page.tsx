@@ -88,7 +88,7 @@ export default function ProfilePage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span>Settings</span>
-          <span className="text-[#C5C6CD]">/</span>
+          <span className="text-border">/</span>
           <span className="text-volt-primary">Workshop profile</span>
         </div>
 
@@ -104,7 +104,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Avatar */}
-          <div className="flex flex-col items-center gap-2 flex-shrink-0">
+          <div className="flex flex-col items-center gap-2 shrink-0">
             <div className="w-16 h-16 rounded-full bg-volt-primary flex items-center justify-center text-white text-xl font-black tracking-tight select-none">
               {getInitials()}
             </div>
@@ -114,8 +114,8 @@ export default function ProfilePage() {
 
         {/* Status Messages */}
         {error && (
-          <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-volt-terracotta/20 bg-[#FFDAD6] px-4 py-3 text-sm font-medium text-volt-terracotta">
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-volt-terracotta/20 bg-critical-soft px-4 py-3 text-sm font-medium text-volt-terracotta">
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
             {error}
@@ -124,7 +124,7 @@ export default function ProfilePage() {
 
         {message && (
           <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-volt-secondary/20 bg-emerald-green px-4 py-3 text-sm font-medium text-volt-secondary">
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {message}
@@ -144,7 +144,7 @@ export default function ProfilePage() {
                 value={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                 placeholder="Your full name"
-                className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-[#C5C6CD] focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition"
+                className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-border focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition"
               />
             </div>
 
@@ -179,7 +179,7 @@ export default function ProfilePage() {
               value={profile.shopName || ""}
               onChange={(e) => setProfile({ ...profile, shopName: e.target.value })}
               placeholder="e.g. VoltOps EV Care"
-              className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-[#C5C6CD] focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition"
+              className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-border focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition"
             />
           </div>
 
@@ -191,7 +191,7 @@ export default function ProfilePage() {
               onChange={(e) => setProfile({ ...profile, shopAddress: e.target.value })}
               rows={3}
               placeholder="Full address as it should appear on invoices"
-              className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-[#C5C6CD] focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition resize-none leading-relaxed"
+              className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-border focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition resize-none leading-relaxed"
             />
           </div>
         </div>
@@ -209,7 +209,7 @@ export default function ProfilePage() {
                 value={profile.gstNumber || ""}
                 onChange={(e) => setProfile({ ...profile, gstNumber: e.target.value.toUpperCase() })}
                 placeholder="e.g. 23AABCV1234M1ZX"
-                className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-[13px] font-mono font-semibold tracking-wider text-volt-primary placeholder:text-[#C5C6CD] placeholder:font-sans placeholder:tracking-normal placeholder:font-normal focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition"
+                className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-[13px] font-mono font-semibold tracking-wider text-volt-primary placeholder:text-border placeholder:font-sans placeholder:tracking-normal placeholder:font-normal focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition"
               />
               <p className="mt-1.5 text-[11px] text-sec-text flex items-center gap-1">
                 <svg className="w-3 h-3 text-volt-secondary" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -227,7 +227,7 @@ export default function ProfilePage() {
                 value={profile.shopPhone || ""}
                 onChange={(e) => setProfile({ ...profile, shopPhone: e.target.value })}
                 placeholder="+91 XXXXX XXXXX"
-                className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-[#C5C6CD] focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition"
+                className="mt-2 w-full rounded-lg border border-[rgba(9,20,38,0.12)] bg-volt-background px-3 py-2.5 text-sm font-medium text-volt-primary placeholder:text-border focus:border-volt-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-volt-secondary/10 transition"
               />
             </div>
           </div>
