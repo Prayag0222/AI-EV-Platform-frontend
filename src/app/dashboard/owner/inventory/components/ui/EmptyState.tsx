@@ -1,22 +1,44 @@
-import React from 'react';
-import { PackageOpen } from 'lucide-react';
+'use client';
 
-export default function EmptyState({ onAdd }: { onAdd: () => void }) {
+import { motion } from 'framer-motion';
+import { PackageOpen, Plus } from 'lucide-react';
+
+interface Props {
+  onAdd: () => void;
+}
+
+export default function EmptyState({
+  onAdd,
+}: Props) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="bg-gray-50 rounded-full p-6 mb-4">
-        <PackageOpen size={40} className="text-gray-400" />
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center justify-center px-6 py-20 text-center"
+    >
+      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-50">
+        <PackageOpen
+          size={36}
+          className="text-blue-600"
+        />
       </div>
-      <h3 className="text-lg font-semibold text-gray-700 mb-1">No inventory items yet</h3>
-      <p className="text-sm text-gray-400 mb-5 max-w-xs">
-        Add your first part to start tracking stock levels and values across your workshop.
+
+      <h2 className="text-xl font-bold text-gray-900">
+        No inventory yet
+      </h2>
+
+      <p className="mt-2 max-w-sm text-sm leading-6 text-gray-500">
+        Start building your workshop inventory by
+        adding your first spare part.
       </p>
+
       <button
         onClick={onAdd}
-        className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-95"
       >
-        Add your first inventory item
+        <Plus size={18} />
+        Add Inventory Item
       </button>
-    </div>
+    </motion.div>
   );
 }

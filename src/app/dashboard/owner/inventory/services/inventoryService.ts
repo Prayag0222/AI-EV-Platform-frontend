@@ -5,7 +5,7 @@ import type {
   AddStockPayload,
 } from '../types/inventory';
 
-const BASE_URL = 'http://127.0.0.1:3000/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 async function handleResponse<T>(res: Response): Promise<T> {
   const data = await res.json();
@@ -16,7 +16,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
 // ─── Existing endpoints (unchanged) ────────────────────────────────────────
 
 export async function fetchInventory(): Promise<InventoryItem[]> {
-  const res = await fetch(`${BASE_URL}/inventory`);
+  const res = await fetch(`${BASE_URL}/inventory`,{
+    credentials:"include"
+  });
   const data = await handleResponse<{ items: InventoryItem[] }>(res);
   return data.items ?? [];
 }
@@ -26,6 +28,7 @@ export async function addInventoryItem(payload: AddInventoryPayload): Promise<In
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    credentials:"include"
   });
   const data = await handleResponse<{ item: InventoryItem }>(res);
   return data.item;
@@ -41,13 +44,16 @@ export async function editInventoryItem(
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    credentials:"include"
   });
   const data = await handleResponse<{ item: InventoryItem }>(res);
   return data.item;
 }
 
 export async function deleteInventoryItem(id: number): Promise<void> {
-  const res = await fetch(`${BASE_URL}/inventory/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE_URL}/inventory/${id}`, { method: 'DELETE',
+    credentials:"include"
+   });
   await handleResponse<unknown>(res);
 }
 
@@ -56,6 +62,7 @@ export async function addStock(id: number, payload: AddStockPayload): Promise<In
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    credentials:"include"
   });
   const data = await handleResponse<{ item: InventoryItem }>(res);
   return data.item;

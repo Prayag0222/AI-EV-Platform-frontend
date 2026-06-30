@@ -6,10 +6,14 @@ import {
   Clock3,
   Phone,
   User,
+  Wrench,
+  History,
+  ArrowRight,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 import { formatTimeAgo } from "../utils/formatTimeAgo";
 
@@ -24,137 +28,180 @@ export function VehicleHeader({
   activeTicket,
   totalRepairs,
 }: VehicleHeaderProps) {
-  const soh = vehicle.batterySoh ?? 0;
+  const soh = Number(vehicle?.batterySoh ?? 0);
 
-  const sohColor =
+  const sohConfig =
     soh >= 85
-      ? "text-emerald-600"
+      ? {
+          text: "Excellent",
+          color: "text-emerald-600",
+          bg: "bg-emerald-50",
+        }
       : soh >= 70
-      ? "text-amber-600"
-      : "text-red-600";
+      ? {
+          text: "Moderate",
+          color: "text-amber-600",
+          bg: "bg-amber-50",
+        }
+      : {
+          text: "Critical",
+          color: "text-red-600",
+          bg: "bg-red-50",
+        };
 
   return (
-    <Card className="overflow-hidden border-0 shadow-xl">
-      <div className="h-1 bg-linear-to-r from-indigo-600 via-blue-500 to-cyan-500" />
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Card className="overflow-hidden border border-slate-200 shadow-sm">
+        <div className="h-1 bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-500" />
 
-      <CardContent className="p-0">
-        <div className="p-6 lg:p-8">
-          <div className="flex flex-col xl:flex-row gap-8">
-            {/* Left Side */}
+        <CardContent className="p-5 lg:p-7">
+          <div className="flex flex-col gap-8 xl:flex-row">
+
+            {/* Left */}
             <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100">
-                  <Bike className="h-7 w-7 text-indigo-600" />
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-100">
+                  <Bike className="h-8 w-8 text-indigo-600" />
                 </div>
 
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight">
-                    {vehicle.vehicleModel}
-                  </h1>
+                <div className="min-w-0 flex-1">
 
-                  <p className="text-sm text-slate-500 font-mono">
-                    {vehicle.vin}
+                  <div className="flex flex-wrap items-center gap-3">
+
+                    <h1 className="truncate text-2xl font-bold text-slate-900 lg:text-3xl">
+                      {vehicle?.vehicleModel || "Unknown Vehicle"}
+                    </h1>
+
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                      {activeTicket?.status || "INACTIVE"}
+                    </span>
+
+                  </div>
+
+                  <p className="mt-2 break-all font-mono text-xs text-slate-500">
+                    VIN • {vehicle?.vin || "--"}
                   </p>
-                </div>
 
-                <div className="ml-auto">
-                  <span className="rounded-full bg-blue-100 px-4 py-2 text-xs font-semibold text-blue-700">
-                    {activeTicket?.status || "INACTIVE"}
-                  </span>
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="flex items-center gap-3">
-                  <User className="h-4 w-4 text-slate-400" />
+              {/* Customer */}
+
+              <div className="mt-7 grid gap-5 md:grid-cols-2">
+
+                <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <User className="mt-1 h-4 w-4 text-slate-400" />
 
                   <div>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">
                       Customer
                     </p>
 
-                    <p className="font-semibold">
-                      {vehicle.customer?.name || "--"}
+                    <p className="font-semibold text-slate-900">
+                      {vehicle?.customer?.name || "--"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-slate-400" />
+                <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <Phone className="mt-1 h-4 w-4 text-slate-400" />
 
                   <div>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">
                       Contact
                     </p>
 
-                    <p className="font-semibold">
-                      {vehicle.customer?.phone || "--"}
+                    <p className="font-semibold text-slate-900">
+                      {vehicle?.customer?.phone || "--"}
                     </p>
                   </div>
                 </div>
+
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Button size="sm">
+              {/* Actions */}
+
+              {/* <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+
+                <Button className="sm:flex-1">
+                  <Wrench className="mr-2 h-4 w-4" />
                   Open Active Ticket
                 </Button>
 
                 <Button
-                  size="sm"
                   variant="outline"
+                  className="sm:flex-1"
                 >
+                  <History className="mr-2 h-4 w-4" />
                   Repair History
                 </Button>
-              </div>
+
+              </div> */}
+
             </div>
 
-            {/* Right Side KPI Area */}
-            <div className="grid grid-cols-3 gap-3 xl:w-105">
-              <div className="rounded-2xl border bg-slate-50 p-4">
+            {/* Right */}
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:w-[360px]">
+
+              <div className={`rounded-2xl border p-5 ${sohConfig.bg}`}>
                 <Battery
-                  className={`h-5 w-5 mb-2 ${sohColor}`}
+                  className={`mb-3 h-6 w-6 ${sohConfig.color}`}
                 />
 
-                <p className="text-xs text-slate-500">
+                <p className="text-xs uppercase tracking-wide text-slate-500">
                   Battery SOH
                 </p>
 
-                <p
-                  className={`text-2xl font-bold ${sohColor}`}
-                >
+                <p className={`mt-1 text-3xl font-bold ${sohConfig.color}`}>
                   {soh}%
+                </p>
+
+                <p className={`mt-1 text-xs font-semibold ${sohConfig.color}`}>
+                  {sohConfig.text}
                 </p>
               </div>
 
-              <div className="rounded-2xl border bg-slate-50 p-4">
-                <Clock3 className="h-5 w-5 mb-2 text-indigo-600" />
+              <div className="rounded-2xl border bg-slate-50 p-5">
+                <Clock3 className="mb-3 h-6 w-6 text-indigo-600" />
 
-                <p className="text-xs text-slate-500">
+                <p className="text-xs uppercase tracking-wide text-slate-500">
                   Last Service
                 </p>
 
-                <p className="text-sm font-semibold">
-                  {formatTimeAgo(
-                    vehicle.lastServiceDate
-                  )}
+                <p className="mt-2 font-semibold text-slate-900">
+                  {formatTimeAgo(vehicle?.lastServiceDate)}
                 </p>
               </div>
 
-              <div className="rounded-2xl border bg-slate-50 p-4">
-                <Bike className="h-5 w-5 mb-2 text-violet-600" />
+              <div className="rounded-2xl border bg-slate-50 p-5">
+                <Bike className="mb-3 h-6 w-6 text-violet-600" />
 
-                <p className="text-xs text-slate-500">
-                  Repairs
+                <p className="text-xs uppercase tracking-wide text-slate-500">
+                  Total Repairs
                 </p>
 
-                <p className="text-2xl font-bold">
+                <p className="mt-1 text-3xl font-bold text-slate-900">
                   {totalRepairs}
                 </p>
+
+                <div className="mt-2 flex items-center gap-1 text-xs font-medium text-violet-600">
+                  Service History
+                  <ArrowRight className="h-3 w-3" />
+                </div>
               </div>
+
             </div>
+
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

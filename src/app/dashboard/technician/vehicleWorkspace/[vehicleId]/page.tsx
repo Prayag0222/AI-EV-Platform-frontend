@@ -1,19 +1,26 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  AlertCircle,
+  Car,
+  Loader2,
+} from "lucide-react";
 
-import { BatteryInformationPanel  } from "./components/BatteryInformationPanel";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+import { AIRepairIntelligencePanel } from "./components/AIRepairIntelligencePanel";
+import { BatteryInformationPanel } from "./components/BatteryInformationPanel";
 import { CustomerInformationCard } from "./components/CustomerInformationCard";
 import { MotorControllerPanel } from "./components/MotorControllerPanel";
 import { ServiceHistoryPanel } from "./components/ServiceHistoryPanel";
+import { VehicleDetailsPanel } from "./components/VehicleDetailsPanel";
 import { VehicleHeader } from "./components/VehicleHeader";
 import { VehicleHealthSummary } from "./components/VehicleHealthSummary";
 import { VehicleStatisticsPanel } from "./components/VehicleStatisticsPanel";
 import { VehicleTimelinePanel } from "./components/VehicleTimelinePanel";
-import { VehicleDetailsPanel } from "./components/VehicleDetailsPanel";
-import { AIRepairIntelligencePanel } from "./components/AIRepairIntelligencePanel";
 import { useVehicleWorkspace } from "./hooks/useVehicleWorkspace";
-import { Accordion,AccordionItem,AccordionContent,AccordionTrigger } from "@/components/ui/accordion";
 
 export default function VehicleWorkspacePage() {
   const params = useParams();
@@ -29,9 +36,12 @@ export default function VehicleWorkspacePage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="text-sm text-slate-500">
-          Loading vehicle workspace...
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+          <p className="text-sm font-medium text-slate-500">
+            Loading vehicle workspace...
+          </p>
         </div>
       </div>
     );
@@ -39,161 +49,191 @@ export default function VehicleWorkspacePage() {
 
   if (!workspace) {
     return (
-      <div className="p-6">
-        <div className="text-sm text-red-500">
-          Failed to load vehicle workspace.
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+
+          <h2 className="mt-4 text-lg font-bold text-slate-900">
+            Vehicle Not Found
+          </h2>
+
+          <p className="mt-2 text-sm text-slate-500">
+            Unable to load this vehicle workspace.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 space-y-6">
-      {notice && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
-          {notice}
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
+
+        {/* Notice */}
+        {notice && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800"
+          >
+            {notice}
+          </motion.div>
+        )}
+
+        {/* Header */}
+        <VehicleHeader
+          vehicle={workspace.vehicle}
+          activeTicket={workspace.activeTicket}
+          totalRepairs={workspace.statistics.totalRepairs}
+        />
+
+        {/* AI */}
+        <AIRepairIntelligencePanel
+          vehicle={workspace.vehicle}
+          statistics={workspace.statistics}
+        />
+
+        {/* Stats */}
+        <VehicleStatisticsPanel
+          statistics={workspace.statistics}
+        />
+
+        {/* ================= DESKTOP ================= */}
+        <div className="hidden xl:flex xl:flex-col xl:gap-6">
+
+          <div className="grid gap-6 xl:grid-cols-3">
+
+            <VehicleDetailsPanel
+              vehicle={workspace.vehicle}
+              onSave={updateVehicleWorkspace}
+            />
+
+            <BatteryInformationPanel
+              vehicle={workspace.vehicle}
+              onSave={updateVehicleWorkspace}
+            />
+
+            <MotorControllerPanel
+              vehicle={workspace.vehicle}
+              onSave={updateVehicleWorkspace}
+            />
+
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+
+            <VehicleHealthSummary
+              healthSummary={workspace.healthSummary}
+            />
+
+            <CustomerInformationCard
+              customer={workspace.vehicle.customer}
+            />
+
+          </div>
+
         </div>
-      )}
 
-      <VehicleHeader
-        vehicle={workspace.vehicle}
-        activeTicket={workspace.activeTicket}
-        totalRepairs={workspace.statistics.totalRepairs}
-      />
+        {/* ================= MOBILE ================= */}
+        <div className="xl:hidden">
 
-      <AIRepairIntelligencePanel
-  vehicle={workspace.vehicle}
-  statistics={workspace.statistics}
-/>
+          <Accordion
+            type="multiple"
+            defaultValue={["vehicle", "battery"]}
+            className="space-y-3"
+          >
+            <AccordionItem
+              value="vehicle"
+              className="overflow-hidden rounded-2xl border bg-white"
+            >
+              <AccordionTrigger className="px-5">
+                Vehicle Details
+              </AccordionTrigger>
 
-      <VehicleStatisticsPanel
-        statistics={workspace.statistics}
-      />
+              <AccordionContent className="px-5 pb-5">
+                <VehicleDetailsPanel
+                  vehicle={workspace.vehicle}
+                  onSave={updateVehicleWorkspace}
+                />
+              </AccordionContent>
+            </AccordionItem>
 
-    {/* Desktop */}
-<div className="hidden xl:block space-y-6">
-  <div className="grid gap-6 xl:grid-cols-3">
-    <VehicleDetailsPanel
-      vehicle={workspace.vehicle}
-      onSave={updateVehicleWorkspace}
-    />
+            <AccordionItem
+              value="battery"
+              className="overflow-hidden rounded-2xl border bg-white"
+            >
+              <AccordionTrigger className="px-5">
+                Battery Information
+              </AccordionTrigger>
 
-    <BatteryInformationPanel
-      vehicle={workspace.vehicle}
-      onSave={updateVehicleWorkspace}
-    />
+              <AccordionContent className="px-5 pb-5">
+                <BatteryInformationPanel
+                  vehicle={workspace.vehicle}
+                  onSave={updateVehicleWorkspace}
+                />
+              </AccordionContent>
+            </AccordionItem>
 
-    <MotorControllerPanel
-      vehicle={workspace.vehicle}
-      onSave={updateVehicleWorkspace}
-    />
-  </div>
+            <AccordionItem
+              value="motor"
+              className="overflow-hidden rounded-2xl border bg-white"
+            >
+              <AccordionTrigger className="px-5">
+                Motor & Controller
+              </AccordionTrigger>
 
-  <div className="grid gap-6 xl:grid-cols-2">
-    <VehicleHealthSummary
-      healthSummary={workspace.healthSummary}
-    />
+              <AccordionContent className="px-5 pb-5">
+                <MotorControllerPanel
+                  vehicle={workspace.vehicle}
+                  onSave={updateVehicleWorkspace}
+                />
+              </AccordionContent>
+            </AccordionItem>
 
-    <CustomerInformationCard
-      customer={workspace.vehicle.customer}
-    />
-  </div>
-</div>
+            <AccordionItem
+              value="health"
+              className="overflow-hidden rounded-2xl border bg-white"
+            >
+              <AccordionTrigger className="px-5">
+                Vehicle Health
+              </AccordionTrigger>
 
+              <AccordionContent className="px-5 pb-5">
+                <VehicleHealthSummary
+                  healthSummary={workspace.healthSummary}
+                />
+              </AccordionContent>
+            </AccordionItem>
 
-      <div className="xl:hidden">
-  <Accordion
-    type="single"
-    collapsible
-    className="w-full space-y-3"
-  >
-    <AccordionItem
-      value="vehicle-details"
-      className="border rounded-xl bg-white px-4"
-    >
-      <AccordionTrigger>
-        Vehicle Details
-      </AccordionTrigger>
+            <AccordionItem
+              value="customer"
+              className="overflow-hidden rounded-2xl border bg-white"
+            >
+              <AccordionTrigger className="px-5">
+                Customer Information
+              </AccordionTrigger>
 
-      <AccordionContent className="pt-4">
-        <VehicleDetailsPanel
-          vehicle={workspace.vehicle}
-          onSave={updateVehicleWorkspace}
+              <AccordionContent className="px-5 pb-5">
+                <CustomerInformationCard
+                  customer={workspace.vehicle.customer}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+        </div>
+
+        {/* History */}
+        <ServiceHistoryPanel
+          tickets={workspace.vehicle.tickets}
         />
-      </AccordionContent>
-    </AccordionItem>
 
-    <AccordionItem
-      value="battery"
-      className="border rounded-xl bg-white px-4"
-    >
-      <AccordionTrigger>
-        Battery Information
-      </AccordionTrigger>
-
-      <AccordionContent className="pt-4">
-        <BatteryInformationPanel
-          vehicle={workspace.vehicle}
-          onSave={updateVehicleWorkspace}
+        {/* Timeline */}
+        <VehicleTimelinePanel
+          timeline={workspace.timeline}
         />
-      </AccordionContent>
-    </AccordionItem>
 
-    <AccordionItem
-      value="motor-controller"
-      className="border rounded-xl bg-white px-4"
-    >
-      <AccordionTrigger>
-        Motor & Controller
-      </AccordionTrigger>
-
-      <AccordionContent className="pt-4">
-        <MotorControllerPanel
-          vehicle={workspace.vehicle}
-          onSave={updateVehicleWorkspace}
-        />
-      </AccordionContent>
-    </AccordionItem>
-
-    <AccordionItem
-      value="health"
-      className="border rounded-xl bg-white px-4"
-    >
-      <AccordionTrigger>
-        Vehicle Health
-      </AccordionTrigger>
-
-      <AccordionContent className="pt-4">
-        <VehicleHealthSummary
-          healthSummary={workspace.healthSummary}
-        />
-      </AccordionContent>
-    </AccordionItem>
-
-    <AccordionItem
-      value="customer"
-      className="border rounded-xl bg-white px-4"
-    >
-      <AccordionTrigger>
-        Customer Information
-      </AccordionTrigger>
-
-      <AccordionContent className="pt-4">
-        <CustomerInformationCard
-          customer={workspace.vehicle.customer}
-        />
-      </AccordionContent>
-    </AccordionItem>
-  </Accordion>
-</div>
-
-      <ServiceHistoryPanel
-        tickets={workspace.vehicle.tickets}
-      />
-
-      <VehicleTimelinePanel
-        timeline={workspace.timeline}
-      />
+      </div>
     </div>
   );
 }

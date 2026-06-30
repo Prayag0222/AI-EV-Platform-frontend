@@ -62,7 +62,9 @@ export function useRepairWorkspace() {
 
         // 1. Fetch the unified ticket data layer
         setError("");
-        const ticketResponse = await fetch(`${API_BASE}/technician/workspace/${ticketId}`);
+        const ticketResponse = await fetch(`${API_BASE}/technician/workspace/${ticketId}`,{
+          credentials:"include"
+        });
         
         if (ticketResponse.ok) {
           const resData = await ticketResponse.json();
@@ -87,7 +89,9 @@ export function useRepairWorkspace() {
           }       
         }
 
-        const inventoryResponse = await fetch(`${API_BASE}/inventory`);
+        const inventoryResponse = await fetch(`${API_BASE}/inventory`,{
+          credentials:"include"
+        });
         if (inventoryResponse.ok) {
           const inventoryData = await inventoryResponse.json();
           setInventory(inventoryData.items || []);
@@ -116,6 +120,7 @@ export function useRepairWorkspace() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newStatus }),
+        credentials:"include"
       });
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.message || "Status update failed.");
@@ -155,6 +160,7 @@ export function useRepairWorkspace() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ structuredText: chipLabel, rawVoiceText: chipLabel, quickTags: [chipLabel], imageUrls: [] }),
+        credentials:"include"
       });
       const body = await response.json();
       if (response.ok && body.note) setNotes((prev) => prev.map((note) => note.id === freshMockNote.id ? body.note : note));
@@ -186,6 +192,7 @@ export function useRepairWorkspace() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
+        credentials:"include"
       });
 
       const body = await response.json();
@@ -213,6 +220,7 @@ export function useRepairWorkspace() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ structuredText: newStructuredText }),
+        credentials:"include"
       });
 
       if (!response.ok) throw new Error("Failed to update note");
@@ -230,6 +238,7 @@ export function useRepairWorkspace() {
     try {
       const response = await fetch(`${API_BASE}/technician/notes/${noteId}`, {
         method: 'DELETE',
+        credentials:"include"
       });
 
       if (!response.ok) throw new Error("Failed to delete note");
@@ -271,6 +280,7 @@ export function useRepairWorkspace() {
             {
               method: "POST",
               body: dataEnvelope, 
+              credentials:"include"
             }
           );
 
@@ -311,6 +321,7 @@ export function useRepairWorkspace() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inventoryId, quantity }),
+        credentials:"include"
       });
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.message || "Part allocation failed.");
@@ -330,7 +341,7 @@ export function useRepairWorkspace() {
     const allocated = ticket.parts.find((part) => part.id === partId);
     setIsSavingPart(true);
     try {
-      const response = await fetch(`${API_BASE}/technician/workspace/${ticketId}/parts/${partId}`, { method: "DELETE" });
+      const response = await fetch(`${API_BASE}/technician/workspace/${ticketId}/parts/${partId}`, { method: "DELETE",credentials:"include" });
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.message || "Part removal failed.");
       setTicket((current) => current ? { ...current, parts: current.parts.filter((part) => part.id !== partId) } : null);
@@ -351,6 +362,7 @@ export function useRepairWorkspace() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(costs),
+        credentials:"include"
       });
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.message || "Repair costs could not be saved.");

@@ -24,6 +24,9 @@ export default function ProfilePage() {
     loadProfile();
   }, []);
 
+
+  
+
   const handleSave = async () => {
     if (!profile) return;
     try {

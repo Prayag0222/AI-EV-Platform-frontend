@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  Sparkles,
-  ShieldCheck,
   AlertTriangle,
-  Wrench,
   BrainCircuit,
   ChevronRight,
+  ShieldCheck,
+  Sparkles,
+  Wrench,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -22,130 +23,172 @@ export function AIRepairIntelligencePanel({
   vehicle,
   statistics,
 }: AIRepairIntelligencePanelProps) {
-  const batterySoh = vehicle?.batterySoh ?? 0;
+  const batterySoh = Number(vehicle?.batterySoh ?? 0);
   const batteryTemp = Number(vehicle?.batteryTemp ?? 0);
+  const totalRepairs = statistics.totalRepairs ?? 0;
 
-  const riskLevel =
+  const risk =
     batterySoh >= 85
-      ? "Low"
+      ? {
+          label: "Low",
+          badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
+        }
       : batterySoh >= 70
-      ? "Medium"
-      : "High";
+      ? {
+          label: "Medium",
+          badge: "bg-amber-100 text-amber-700 border-amber-200",
+        }
+      : {
+          label: "High",
+          badge: "bg-red-100 text-red-700 border-red-200",
+        };
 
-  const signals = [];
+  const signals: string[] = [];
 
-  if (batterySoh >= 85) {
-    signals.push("Battery health remains within optimal operating range");
-  }
+  if (batterySoh >= 85)
+    signals.push("Battery health remains within optimal operating range.");
 
-  if (batterySoh < 85) {
-    signals.push("Battery degradation trend detected");
-  }
+  if (batterySoh < 85)
+    signals.push("Battery degradation trend detected.");
 
-  if (batteryTemp > 45) {
-    signals.push("Elevated battery temperature detected");
-  }
+  if (batteryTemp >= 45)
+    signals.push("Elevated battery temperature detected.");
 
-  if (statistics.totalRepairs > 3) {
-    signals.push("Recurring service history identified");
-  }
+  if (totalRepairs >= 3)
+    signals.push("Recurring repair history identified.");
+
+  if (signals.length === 0)
+    signals.push("No abnormal repair signals detected.");
+
+  const recommendations = [
+    "Inspect controller connectors.",
+    "Verify battery balancing cycle.",
+    "Inspect charging connector & harness.",
+  ];
+
+  if (batteryTemp >= 45)
+    recommendations.unshift("Check battery cooling and ventilation.");
+
+  if (batterySoh < 70)
+    recommendations.unshift("Perform complete battery health diagnosis.");
 
   return (
-    <Card className="overflow-hidden border-0 shadow-lg">
-      <div className="bg-linear-to-r from-indigo-600 via-indigo-500 to-cyan-500 p-px">
-        <div className="bg-white">
-          <CardContent className="p-0">
-            <div className="p-6 border-b bg-linear-to-r from-indigo-50 to-cyan-50">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-indigo-600" />
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Card className="overflow-hidden border border-slate-200 shadow-sm">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 p-[1px]">
+          <div className="bg-white">
+            <CardContent className="p-0">
 
-                    <h2 className="text-lg font-bold">
-                      AI Repair Intelligence
-                    </h2>
+              <div className="border-b bg-gradient-to-r from-indigo-50 to-cyan-50 p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
-                    <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-indigo-100 text-indigo-700">
-                      BETA
-                    </span>
-                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-indigo-600" />
 
-                  <p className="text-sm text-slate-500 mt-2">
-                    Future AI-powered diagnostics and repair recommendations.
-                  </p>
-                </div>
+                      <h2 className="text-lg font-bold text-slate-900">
+                        AI Repair Intelligence
+                      </h2>
 
-                <div
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold ${
-                    riskLevel === "Low"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : riskLevel === "Medium"
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  Risk Level: {riskLevel}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-6 p-6">
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                  <h3 className="font-semibold">
-                    Detected Signals
-                  </h3>
-                </div>
-
-                <div className="space-y-3">
-                  {signals.map((signal, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-2 text-sm"
-                    >
-                      <ChevronRight className="h-4 w-4 mt-0.5 text-indigo-500" />
-
-                      <span>{signal}</span>
+                      <span className="rounded-full bg-indigo-100 px-2 py-1 text-[10px] font-bold tracking-wide text-indigo-700">
+                        BETA
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <BrainCircuit className="h-4 w-4 text-indigo-600" />
-                  <h3 className="font-semibold">
-                    Suggested Checks
-                  </h3>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex gap-2 text-sm">
-                    <Wrench className="h-4 w-4 mt-0.5 text-slate-500" />
-                    Controller connector inspection
+                    <p className="mt-2 max-w-xl text-sm text-slate-500">
+                      Future AI-powered repair intelligence generated from
+                      historical repair records, technician notes and battery
+                      telemetry.
+                    </p>
                   </div>
 
-                  <div className="flex gap-2 text-sm">
-                    <Wrench className="h-4 w-4 mt-0.5 text-slate-500" />
-                    Battery balancing verification
-                  </div>
-
-                  <div className="flex gap-2 text-sm">
-                    <Wrench className="h-4 w-4 mt-0.5 text-slate-500" />
-                    Charging port inspection
-                  </div>
-
-                  <div className="flex gap-2 text-sm">
-                    <AlertTriangle className="h-4 w-4 mt-0.5 text-amber-500" />
-                    Future AI diagnosis will appear here
+                  <div
+                    className={`rounded-xl border px-4 py-2 text-sm font-semibold ${risk.badge}`}
+                  >
+                    Risk Level • {risk.label}
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
+
+              {/* Content */}
+              <div className="grid gap-8 p-5 lg:grid-cols-2">
+
+                {/* Signals */}
+                <section>
+                  <div className="mb-4 flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600" />
+
+                    <h3 className="font-semibold text-slate-900">
+                      Detected Signals
+                    </h3>
+                  </div>
+
+                  <div className="space-y-3">
+
+                    {signals.map((signal) => (
+                      <div
+                        key={signal}
+                        className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3"
+                      >
+                        <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
+
+                        <p className="text-sm text-slate-700">
+                          {signal}
+                        </p>
+                      </div>
+                    ))}
+
+                  </div>
+                </section>
+
+                {/* Recommendations */}
+                <section>
+                  <div className="mb-4 flex items-center gap-2">
+                    <BrainCircuit className="h-4 w-4 text-indigo-600" />
+
+                    <h3 className="font-semibold text-slate-900">
+                      Suggested Checks
+                    </h3>
+                  </div>
+
+                  <div className="space-y-3">
+
+                    {recommendations.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3"
+                      >
+                        <Wrench className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+
+                        <p className="text-sm text-slate-700">
+                          {item}
+                        </p>
+                      </div>
+                    ))}
+
+                    <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+
+                      <p className="text-sm text-amber-800">
+                        AI diagnosis, similar repair retrieval and predictive
+                        recommendations will be available in a future release.
+                      </p>
+                    </div>
+
+                  </div>
+                </section>
+
+              </div>
+
+            </CardContent>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }

@@ -1,9 +1,11 @@
-'use client';
+"use client";
 
-import React from 'react';
+import { motion } from "framer-motion";
+import React from "react";
 import { RefreshCw, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface RepairsToolbarProps {
   searchQuery: string;
@@ -14,6 +16,15 @@ interface RepairsToolbarProps {
   isRefreshing: boolean;
 }
 
+const FILTER_OPTIONS = [
+  "All",
+  "PENDING",
+  "DIAGNOSING",
+  "IN_SERVICE",
+  "RESOLVED",
+  "DELIVERED",
+] as const;
+
 export default function RepairsToolbar({
   searchQuery,
   onSearchChange,
@@ -22,61 +33,103 @@ export default function RepairsToolbar({
   onRefresh,
   isRefreshing,
 }: RepairsToolbarProps) {
-  
-  // Strict workflow filter options mapping directly to database values
-  const filterOptions = ["All", "PENDING", "DIAGNOSING", "IN_SERVICE", "RESOLVED", "DELIVERED"];
-
   return (
-    <div className="w-full bg-white rounded-2xl border border-border/70 p-4 shadow-sm flex flex-col gap-4 md:flex-row md:items-center md:justify-between transition-all duration-200">
-      
-      {/* 🔍 1. FUZZY STRING SEARCH BAR INPUT CONTAINER */}
-      <div className="relative flex-1 min-w-0 w-full md:max-w-xl">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-[#0C5C3C]" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
-          placeholder="Search ticket, customer, phone, vehicle or VIN..."
-          aria-label="Search repair queue"
-          className="h-10 w-full rounded-xl border border-border/50 bg-[#F9F6F1] pl-10 pr-4 text-sm font-medium text-primary-text placeholder:text-muted-foreground outline-none transition-all duration-200 focus:border-border/80 focus:bg-white focus:ring-2 focus:ring-[#0C5C3C]/10"
-        />
-      </div>
+    <motion.div
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+    >
+      <div className="flex flex-col gap-5 p-5">
 
-      {/* 🎛️ 2. HORIZONTAL STATUS FILTER CHANNELS */}
-      <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-        {filterOptions.map((option: string) => {
-          const isActive = statusFilter === option;
-          
-          return (
+        {/* Search */}
+
+        <div className="relative">
+
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) =>
+              onSearchChange(e.target.value)
+            }
+            placeholder="Search ticket ID, customer, phone, VIN or vehicle..."
+            aria-label="Search repair queue"
+            className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all duration-200 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+          />
+
+        </div>
+
+        {/* Filters */}
+
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+
+            {FILTER_OPTIONS.map((option) => {
+              const active =
+                statusFilter === option;
+
+              return (
+                <motion.div
+                  key={option}
+                  whileTap={{ scale: 0.96 }}
+                >
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      onFilterChange(option)
+                    }
+                    className={cn(
+                      "h-10 rounded-xl border px-4 text-xs font-semibold whitespace-nowrap transition-all",
+
+                      active
+                        ? "border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700"
+                        : "border-slate-200 bg-slate-50 text-slate-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
+                    )}
+                  >
+                    {option === "All"
+                      ? "All Repairs"
+                      : option.replace(
+                          "_",
+                          " "
+                        )}
+                  </Button>
+                </motion.div>
+              );
+            })}
+
+          </div>
+
+          <motion.div
+            whileTap={{ scale: 0.96 }}
+          >
             <Button
-              key={option}
-              variant="ghost"
-              size="sm"
-              onClick={() => onFilterChange(option)}
-              className={cn(
-                "h-9 rounded-xl px-4 text-xs font-bold tracking-tight transition-all duration-200 shadow-none border border-transparent",
-                isActive 
-                  ? "bg-[#0C5C3C] text-white hover:bg-[#0C5C3C]/90 focus:ring-2 focus:ring-[#0C5C3C]/20" 
-                  : "bg-[#F9F6F1] text-gray-700 hover:bg-border/40 hover:text-primary-text"
-              )}
+              type="button"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="h-10 rounded-xl bg-[#0C5C3C] px-5 text-sm font-semibold text-white hover:bg-[#094b32]"
             >
-              {option === "All" ? "All Repairs" : option.replace("_", " ")}
-            </Button>
-          );
-        })}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          className="h-9 rounded-xl border border-border/60 bg-white px-3 text-xs font-bold text-[#0C5C3C] hover:bg-emerald-50"
-          aria-label="Refresh repair queue"
-        >
-          <RefreshCw className={cn("mr-1.5 size-3.5", isRefreshing && "animate-spin")} />
-          Refresh
-        </Button>
-      </div>
+              <RefreshCw
+                className={cn(
+                  "mr-2 h-4 w-4",
+                  isRefreshing &&
+                    "animate-spin"
+                )}
+              />
 
-    </div>
+              {isRefreshing
+                ? "Refreshing..."
+                : "Refresh Queue"}
+            </Button>
+          </motion.div>
+
+        </div>
+
+      </div>
+    </motion.div>
   );
 }

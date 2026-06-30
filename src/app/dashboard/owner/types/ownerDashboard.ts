@@ -64,13 +64,11 @@ export interface AutomatedBriefingInsight {
 }
 
 // Master interface representing the unified data payload structure
+
+
 export interface OwnerDashboardPayload {
-  metrics: {
-    todayRevenue: number;
-    weekRevenue: number;
-    monthRevenue: number;
-    lifetimeRevenue: number;
-  };
+
+  metrics: RevenueMetrics;
   quickMetrics: QuickMetricsSummary;
   actionCards: OwnerActionCard[];
   operationsColumns: OwnerStatusColumn[];
@@ -84,4 +82,6 @@ export interface OwnerDashboardPayload {
   }>;
   recentActivity: ConsolidatedActivityLog[];
   aiBriefing: AutomatedBriefingInsight;
+
 }
+

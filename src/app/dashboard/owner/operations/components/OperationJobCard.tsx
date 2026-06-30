@@ -1,186 +1,176 @@
 'use client';
 
-import React from 'react';
-import { Trash2, ArrowRight, Clock, User } from 'lucide-react';
+import { ArrowRight, Clock, User } from 'lucide-react';
 
-interface CustomerInfo {
-  name: string;
-  phone: string;
-}
+import { RepairTicket } from '../types/types';
+import OperationStatusBadge from './OperationStatusBadge';
 
-interface Technician {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  employeeId: string;
-  specialization: string;
-  status: string;
-  experienceYears: string;
-  address: string | null;
-}
-
-interface RepairTicket {
-  id: number;
-  vehicleModel: string;
-  issueCategory: string;
-  description: string;
-  technicianNotes: string | null;
-  status: string;
-  customer: CustomerInfo;
-  technicianId?: string | null;
-  createdAt: string;
-  updatedAt?: string;
-  technician?: Technician | null;
-}
-
-interface JobCardProps {
+interface OperationJobCardProps {
   ticket: RepairTicket;
   onOpenDetails: (ticket: RepairTicket) => void;
-  onDeleteSuccess: (ticketId: number) => void;
   delivered?: boolean;
 }
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; dot: string }> = {
-  ready:           { bg: 'bg-emerald-green',  text: 'text-volt-secondary',  dot: 'bg-volt-secondary'  },
-  delivered:       { bg: 'bg-emerald-green',  text: 'text-volt-secondary',  dot: 'bg-volt-secondary'  },
-  'in service':    { bg: 'bg-[#D6EFDE]',      text: 'text-[#006F67]',       dot: 'bg-[#006F67]'       },
-  working:         { bg: 'bg-[#D6EFDE]',      text: 'text-[#006F67]',       dot: 'bg-[#006F67]'       },
-  'parts ordered': { bg: 'bg-[#FFDAD6]',      text: 'text-volt-terracotta', dot: 'bg-volt-terracotta' },
-  waiting:         { bg: 'bg-volt-sand',       text: 'text-[#564427]',       dot: 'bg-[#564427]'       },
-};
+export default function OperationJobCard({
+  ticket,
+  delivered = false,
+  onOpenDetails,
+}: OperationJobCardProps) {
+  const lastUpdated = ticket.updatedAt ?? ticket.createdAt;
 
-function getStatusConfig(status: string) {
-  return STATUS_CONFIG[status?.toLowerCase()] ?? STATUS_CONFIG['waiting'];
-}
-
-export default function OperationJobCard({ ticket, onOpenDetails, onDeleteSuccess, delivered = false }: JobCardProps) {
-  const spec = getStatusConfig(ticket.status);
-
-  const displayTime = ticket.updatedAt
-    ? new Date(ticket.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  const displayDate = new Date(ticket.updatedAt || ticket.createdAt).toLocaleDateString('en-IN', {
-    day: 'numeric', month: 'short',
+  const displayDate = new Date(lastUpdated).toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
   });
 
-  const handleDelete = async () => {
-    if (!confirm('Remove this ticket from the system?')) return;
-    try {
-      const response = await fetch(`http://localhost:3000/api/owner/deleteTicket/${ticket.id}`, {
-        method: 'DELETE',
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        alert(data.message || 'Could not delete ticket.');
-        return;
-      }
-      onDeleteSuccess(ticket.id);
-    } catch (err) {
-      console.error('Delete error:', err);
-    }
-  };
+  const displayTime = new Date(lastUpdated).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return (
-    <div className={`bg-white rounded-2xl border flex flex-col h-full transition-all ${
-      delivered
-        ? 'border-[rgba(9,20,38,0.06)] opacity-80 hover:opacity-100'
-        : 'border-[rgba(9,20,38,0.08)] hover:border-[rgba(9,20,38,0.16)] hover:shadow-sm'
-    }`}>
+    <article
+      className={`flex h-full flex-col rounded-2xl border bg-white transition-all
+      ${
+        delivered
+          ? 'border-[rgba(9,20,38,0.06)] opacity-80 hover:opacity-100'
+          : 'border-[rgba(9,20,38,0.08)] hover:border-[rgba(9,20,38,0.16)] hover:shadow-lg'
+      }`}
+    >
+      {/* Header */}
 
-      {/* Card top */}
-      <div className="p-5 flex flex-col flex-1">
+      <div className="flex-1 p-5">
 
-        {/* Header row: ticket ID + status badge */}
-        <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="mb-4 flex items-start justify-between gap-3">
+
           <div>
-            <p className="text-[11px] font-bold tracking-widest uppercase text-sec-text mb-0.5">
+
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-sec-text">
               {delivered ? 'Delivered' : 'Job'}
             </p>
-            <p className="text-xl font-black text-volt-primary leading-none">
+
+            <h3 className="text-xl font-black text-volt-primary">
               EV-{ticket.id.toString().padStart(4, '0')}
-            </p>
+            </h3>
+
           </div>
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-bold shrink-0 ${spec.bg} ${spec.text}`}>
-            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${spec.dot}`} />
-            {ticket.status}
-          </span>
+
+          <OperationStatusBadge status={ticket.status} />
+
         </div>
 
-        {/* Vehicle + issue */}
-        <div className="mb-1">
-          <p className="text-[11px] font-bold tracking-widest uppercase text-sec-text mb-1">
+        {/* Vehicle */}
+
+        <div className="space-y-1">
+
+          <p className="text-[11px] font-bold uppercase tracking-widest text-sec-text">
             {ticket.vehicleModel}
           </p>
-          <p className="text-sm font-semibold text-volt-primary leading-snug">
+
+          <h4 className="text-sm font-semibold text-volt-primary leading-snug">
             {ticket.issueCategory}
-          </p>
+          </h4>
+
         </div>
 
-        {/* Description preview */}
-        {ticket.description && (
-          <p className="text-[12px] text-sec-text leading-relaxed mt-1.5 line-clamp-2 flex-1">
+        {/* Description */}
+
+        {!!ticket.description && (
+          <p className="mt-3 line-clamp-2 text-[13px] leading-relaxed text-sec-text">
             {ticket.description}
           </p>
         )}
+
       </div>
 
       {/* Divider */}
-      <div className="h-px mx-5 bg-[rgba(9,20,38,0.06)]" />
 
-      {/* Footer meta */}
-      <div className="px-5 py-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <div className="w-6 h-6 rounded-full bg-volt-primary flex items-center justify-center shrink-0">
-            <User className="w-3 h-3 text-white" />
+      <div className="mx-5 h-px bg-[rgba(9,20,38,.06)]" />
+
+      {/* Customer */}
+
+      <div className="flex items-center justify-between gap-4 px-5 py-3">
+
+        <div className="flex min-w-0 items-center gap-2">
+
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-volt-primary">
+
+            <User className="h-3.5 w-3.5 text-white" />
+
           </div>
+
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-sec-text">Customer</p>
-            <p className="text-[11.5px] font-semibold text-volt-primary truncate">
+
+            <p className="text-[10px] font-bold uppercase tracking-widest text-sec-text">
+              Customer
+            </p>
+
+            <p className="truncate text-[12px] font-semibold text-volt-primary">
               {ticket.customer?.name || 'Walk-in'}
             </p>
+
           </div>
+
         </div>
 
-        <div className="flex items-center gap-1 text-sec-text shrink-0">
-          <Clock className="w-3 h-3" />
-          <span className="text-[11px] font-medium">{displayDate} -</span><br />
-          <span className="text-[11px] font-medium"> {displayTime}</span>
+        <div className="flex flex-col items-end text-sec-text">
+
+          <div className="flex items-center gap-1">
+
+            <Clock className="h-3 w-3" />
+
+            <span className="text-[11px] font-medium">
+              {displayDate}
+            </span>
+
+          </div>
+
+          <span className="text-[11px]">
+            {displayTime}
+          </span>
+
         </div>
+
       </div>
 
       {/* Divider */}
-      <div className="h-px mx-5 bg-[rgba(9,20,38,0.06)]" />
 
-      {/* Technician row */}
+      <div className="mx-5 h-px bg-[rgba(9,20,38,.06)]" />
+
+      {/* Technician */}
+
       <div className="px-5 py-3">
-        <p className="text-[10px] font-bold uppercase tracking-wide text-sec-text mb-0.5">Technician</p>
-        <p className="text-[11.5px] font-semibold text-volt-primary">
-          {ticket.technician ? ticket.technician.fullName : 'Unassigned'}
+
+        <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-sec-text">
+          Technician
         </p>
+
+        <p className="text-[12px] font-semibold text-volt-primary">
+
+          {ticket.technician
+            ? ticket.technician.fullName
+            : 'Unassigned'}
+
+        </p>
+
       </div>
 
-      {/* Divider */}
-      <div className="h-px mx-5 bg-[rgba(9,20,38,0.06)]" />
+      {/* Footer */}
 
-      {/* Action row */}
-      <div className="flex items-center gap-2 px-4 py-3 bg-[#FAFAF8] rounded-b-2xl">
+      <div className="rounded-b-2xl bg-[#FAFAF8] p-4">
+
         <button
           onClick={() => onOpenDetails(ticket)}
-          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-[rgba(9,20,38,0.10)] bg-white text-volt-primary text-[11px] font-bold uppercase tracking-wide py-2 hover:bg-volt-container transition active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-[rgba(9,20,38,.08)] bg-white py-2.5 text-[12px] font-bold uppercase tracking-wide text-volt-primary transition hover:bg-volt-container active:scale-[0.98]"
         >
-          View details
-          <ArrowRight className="w-3 h-3" />
+          View Details
+
+          <ArrowRight className="h-3.5 w-3.5" />
+
         </button>
-        <button
-          onClick={handleDelete}
-          className="w-8 h-8 flex items-center justify-center rounded-lg border border-[rgba(186,26,26,0.12)] bg-[#FFF5F5] text-volt-terracotta hover:bg-volt-terracotta hover:text-white transition shrink-0"
-          title="Delete ticket"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+
       </div>
-    </div>
+
+    </article>
   );
 }

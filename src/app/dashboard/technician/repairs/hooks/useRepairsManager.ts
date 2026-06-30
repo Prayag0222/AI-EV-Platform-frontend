@@ -39,7 +39,9 @@ export const useRepairsManager = () => {
       setActiveUser(userAccount);
 
       const ticketsResponse = await fetch(
-        `${API_BASE}/technician/dashboard?technicianId=${encodeURIComponent(userAccount.id)}`,
+        `${API_BASE}/technician/dashboard?technicianId=${encodeURIComponent(userAccount.id)}`,{
+          credentials:"include"
+        }
       );
       const ticketsData = await ticketsResponse.json();
 
@@ -73,6 +75,7 @@ export const useRepairsManager = () => {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
+        credentials:"include"
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.message || "Status update was rejected.");
@@ -90,6 +93,7 @@ export const useRepairsManager = () => {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ technicianNotes: notes }),
+        credentials:"include"
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.message || "Notes could not be saved.");

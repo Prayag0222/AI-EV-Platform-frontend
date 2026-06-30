@@ -1,4 +1,4 @@
-export type TicketStatus = "PENDING" | "DIAGNOSING" | "IN_SERVICE" | "RESOLVED" | "DELIVERED";
+export type TicketStatus = "PENDING" | "DIAGNOSING" | "IN_SERVICE" | "RESOLVED" ;
 export type TicketPriority = "LOW" | "STANDARD" | "HIGH" | "URGENT";
 
 export interface CustomerProfile {

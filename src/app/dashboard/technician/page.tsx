@@ -64,9 +64,15 @@ export default function TechnicianWorkspacePage() {
         }
 
         const loggedInUser = profileData.user;
+        if(loggedInUser.role !== 'TECHNICIAN'){
+  router.push('/dashboard/owner')
+  return
+}
         setActiveUser(loggedInUser);
 
-        const ticketsResponse = await fetch(`http://localhost:3000/api/technician/dashboard?technicianId=${loggedInUser.id}`);
+        const ticketsResponse = await fetch(`http://localhost:3000/api/technician/dashboard?technicianId=${loggedInUser.id}`,{
+          credentials:"include"
+        });
         const ticketsData = await ticketsResponse.json();
       
         if (ticketsData.success) {
@@ -89,7 +95,8 @@ export default function TechnicianWorkspacePage() {
       const response = await fetch(`http://localhost:3000/api/technician/tickets/${ticketId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
+        credentials:"include"
       });
 
       const data = await response.json();

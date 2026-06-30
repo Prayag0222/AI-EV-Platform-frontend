@@ -28,6 +28,8 @@ import type {
   InvoiceRecord,
 } from "./types/billing";
 import { getProfile, type Profile } from "../services/profileApi";
+import { toast } from 'react-toastify';
+
 
 
 
@@ -73,6 +75,7 @@ export default function BillingPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [profile, setProfile] = useState<Profile | null>(null);
+  
   useEffect(() => {
     let cancelled = false;
 
@@ -142,9 +145,9 @@ discount: calculateInvoice(value).discount,
       setPreview(invoice);
       setNotice(`${invoice.invoiceNo} generated successfully.`);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Invoice could not be saved.",
-      );
+      const message = err instanceof Error ? err.message : "Invoice could not be saved.";
+  setError(message);
+  toast.error(message);  // ← add this line only
     } finally {
       setSaving(false);
     }
@@ -177,9 +180,12 @@ discount: calculateInvoice(value).discount,
       setError(err instanceof Error ? err.message : "Delete failed.");
     }
   };
-  const print = (invoice?: InvoiceRecord) => {
-    if (invoice) setPreview(invoice);
-    window.setTimeout(() => printInvoice(), 80);
+const print = (invoice?: InvoiceRecord) => {
+    const targetInvoice = invoice || preview;
+    if (targetInvoice) setPreview(targetInvoice);
+    if (!targetInvoice) return;
+    
+    window.setTimeout(() => printInvoice(targetInvoice), 80); // ✅ Fixed
   };
 
   const download = (invoice: InvoiceRecord) => {
@@ -245,6 +251,7 @@ discount: calculateInvoice(value).discount,
           tickets={pending}
           selectedId={draft?.ticketId}
           onSelect={(ticket) => {
+            console.log("PROFILE BEFORE DRAFT:", profile);
             setDraft(ticketToDraft(ticket,profile));
             window.setTimeout(
               () =>
@@ -279,8 +286,10 @@ discount: calculateInvoice(value).discount,
         />
       </div>
       <CounterSaleModal
+     key={`${counterOpen}-${profile?.id}-${profile?.shopName ?? ""}`}
         open={counterOpen}
         saving={saving}
+        profile={profile}
         onClose={() => setCounterOpen(false)}
         onSave={(value) => void saveDraft(value)}
       />
@@ -289,14 +298,14 @@ discount: calculateInvoice(value).discount,
           <div className="mx-auto my-4 max-w-3xl print:m-0 print:max-w-none">
             <div className="mb-3 flex flex-wrap justify-end gap-2 print:hidden">
               <button
-                onClick={() => print()}
+                onClick={() => void print()}
                 className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold"
               >
                 <Printer size={15} />
                 Print PDF
               </button>
               <button
-                onClick={() => download(preview)}
+                onClick={() =>void download(preview)}
                 className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold"
               >
                 <Download size={15} />
@@ -324,7 +333,7 @@ discount: calculateInvoice(value).discount,
                 <X size={16} />
               </button>
             </div>
-            <InvoicePreview invoice={preview} />
+            <InvoicePreview invoice={preview} profile={profile}/>
           </div>
         </div>
       )}

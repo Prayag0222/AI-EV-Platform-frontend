@@ -1,26 +1,50 @@
-import React from 'react';
+import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 import type { StockStatus } from '../../types/inventory';
 
-const CONFIG: Record<StockStatus, { label: string; className: string }> = {
+const CONFIG = {
   in_stock: {
     label: 'In Stock',
-    className: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    icon: CheckCircle2,
+    className:
+      'bg-emerald-50 text-emerald-700 border border-emerald-200',
   },
   low_stock: {
     label: 'Low Stock',
-    className: 'bg-amber-50 text-amber-700 border border-amber-200',
+    icon: AlertTriangle,
+    className:
+      'bg-amber-50 text-amber-700 border border-amber-200',
   },
   out_of_stock: {
     label: 'Out of Stock',
-    className: 'bg-red-50 text-red-700 border border-red-200',
+    icon: XCircle,
+    className:
+      'bg-red-50 text-red-700 border border-red-200',
   },
-};
+} satisfies Record<
+  StockStatus,
+  {
+    label: string;
+    icon: React.ElementType;
+    className: string;
+  }
+>;
 
-export default function StatusBadge({ status }: { status: StockStatus }) {
-  const { label, className } = CONFIG[status];
+interface Props {
+  status: StockStatus;
+}
+
+export default function StatusBadge({
+  status,
+}: Props) {
+  const item = CONFIG[status];
+  const Icon = item.icon;
+
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${className}`}>
-      {label}
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${item.className}`}
+    >
+      <Icon size={12} />
+      {item.label}
     </span>
   );
 }

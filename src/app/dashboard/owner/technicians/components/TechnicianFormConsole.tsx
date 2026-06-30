@@ -5,6 +5,8 @@ import {
   User, Mail, Phone, MapPin, Briefcase,
   X, Save, UserPlus, PencilLine,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+
 
 export interface TechnicianFormData {
   fullName: string;
@@ -71,7 +73,10 @@ export default function TechnicianFormConsole({
   onCancelEdit,
 }: TechnicianFormConsoleProps) {
   return (
-    <div className="bg-white rounded-2xl border border-[rgba(9,20,38,0.08)] overflow-hidden sticky top-6">
+    <motion.div  
+    initial={{ opacity: 0, x: -20 }}
+animate={{ opacity: 1, x: 0 }}
+    className="bg-white rounded-2xl border border-[rgba(9,20,38,0.08)] overflow-hidden sticky top-6">
 
       {/* ── Panel header ── */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(9,20,38,0.06)] bg-[#FAFAF8]">
@@ -330,7 +335,7 @@ export default function TechnicianFormConsole({
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

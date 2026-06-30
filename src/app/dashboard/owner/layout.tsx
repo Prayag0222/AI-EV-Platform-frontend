@@ -1,34 +1,44 @@
-"use client"
-import React,{useState} from 'react';
-import Sidebar from '@/components/Sidebar';
-import AddCustomerModal from '@/components/AddCustomerModal';
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Sidebar from "@/components/Sidebar";
+import AddCustomerModal from "@/components/AddCustomerModal";
+
+const API = process.env.NEXT_PUBLIC_API_URL;
 
 interface OwnerLayoutProps {
   children: React.ReactNode;
 }
 
 export default function OwnerLayout({ children }: OwnerLayoutProps) {
+  const [isCustomerOpen, setIsCustomerOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; role: string } | null>(null);
 
-const [isCustomerOpen, setIsCustomerOpen] = useState<boolean>(false);
+  useEffect(() => {
+    fetch(`${API}/auth/me`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => setUser(data.user))
+      .catch(() => null);
+  }, []);
 
   return (
     <div className="flex h-screen w-full bg-volt-background text-volt-primary overflow-hidden">
-      
-      {/* 🧭 PERMANENT LEFT SIDEBAR CONTROL PANEL */}
-      <aside className="w-64 h-full bg-volt-surface border-r border-volt-container hidden md:block shrink-0">
-        <Sidebar onAddCustomerClick={() => setIsCustomerOpen(true)} />
-      </aside>
 
-      {/* 🚀 DYNAMIC CONTENT VIEWPORT LAYER */}
-      <main className="flex-1 h-full overflow-x-hidden overflow-y-auto flex flex-col">
-        {children} {/* <-- This is exactly where page.tsx gets injected automatically! */}
-      </main>
-
-      <AddCustomerModal 
-        isOpen={isCustomerOpen} 
-        onClose={() => setIsCustomerOpen(false)} 
+      {/* Sidebar — handles both desktop and mobile drawer internally */}
+      <Sidebar
+        user={user}
+        onAddCustomerClick={() => setIsCustomerOpen(true)}
       />
 
+      {/* Main content — pt-14 on mobile to clear the fixed top bar */}
+      <main className="flex-1 h-full overflow-x-hidden overflow-y-auto flex flex-col pt-14 md:pt-0">
+        {children}
+      </main>
+
+      <AddCustomerModal
+        isOpen={isCustomerOpen}
+        onClose={() => setIsCustomerOpen(false)}
+      />
     </div>
   );
 }
