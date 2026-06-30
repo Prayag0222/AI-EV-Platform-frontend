@@ -4,8 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from "framer-motion";
 import { ShieldAlert, AlertTriangle, CalendarDays, Check, FileText, PackageOpen, Sparkles, Wrench, X } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 // Component Imports
 import MetricCard from './components/MetricCard';
@@ -136,7 +135,7 @@ export default function TechnicianWorkspacePage() {
   // Loading animation while authenticating
   if (isLoading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-[#F9F6F1] flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] bg-volt-background flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -160,7 +159,7 @@ export default function TechnicianWorkspacePage() {
   return (
     // ⚡ CLEAN WRAPPER: No more redundant sidebars or ghost grid columns! 
     // The background color is now fully inherited from layout.tsx
-    <div className="mx-auto max-w-[1480px] px-5 pb-14 pt-8 md:px-8 md:pt-11 lg:px-10 animate-fade-in">
+    <div className="mx-auto max-w-370 px-5 pb-14 pt-8 md:px-8 md:pt-11 lg:px-10 animate-fade-in">
       
       <section className="mb-10 grid gap-6 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
         <div>

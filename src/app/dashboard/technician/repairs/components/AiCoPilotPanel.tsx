@@ -3,7 +3,7 @@
 import React from 'react';
 import { RepairTicket } from '../types';
 import { BrainCircuit, Database, Lock, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface AiCoPilotPanelProps {
   ticket: RepairTicket | null;
@@ -38,14 +38,14 @@ export default function AiCoPilotPanel({ ticket }: AiCoPilotPanelProps) {
       </div>
 
       {/* 🧠 3. MOCK DIAGNOSTIC INTERFACE */}
-      <div className="flex flex-col gap-3 opacity-60 grayscale-[30%]">
+      <div className="flex flex-col gap-3 opacity-60 grayscale-30">
         
         <p className="text-xs text-sec-text font-medium leading-relaxed">
           The intelligence engine is currently warming up. In Stage 2, this terminal will analyze your mechanical logs against historical vector databases to predict failure points instantly.
         </p>
 
         {/* Mock Data Extraction Target */}
-        <div className="bg-[#F9F6F1] border border-border/50 rounded-xl p-3 flex items-center justify-between">
+        <div className="bg-volt-background border border-border/50 rounded-xl p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Database className="size-4 text-muted-foreground" />
             <span className="text-xs font-semibold text-primary-text">

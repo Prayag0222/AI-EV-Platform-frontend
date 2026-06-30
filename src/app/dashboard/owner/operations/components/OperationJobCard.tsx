@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Trash2, ArrowRight, Clock, User } from 'lucide-react';
 
 interface CustomerInfo {
   name: string;
@@ -10,11 +11,11 @@ interface CustomerInfo {
 interface Technician {
   id: string;
   fullName: string;
-  email: string;          
+  email: string;
   phone: string;
-  employeeId: string;          
+  employeeId: string;
   specialization: string;
-  status: string;      
+  status: string;
   experienceYears: string;
   address: string | null;
 }
@@ -25,7 +26,7 @@ interface RepairTicket {
   issueCategory: string;
   description: string;
   technicianNotes: string | null;
-  status: string; 
+  status: string;
   customer: CustomerInfo;
   technicianId?: string | null;
   createdAt: string;
@@ -35,122 +36,151 @@ interface RepairTicket {
 
 interface JobCardProps {
   ticket: RepairTicket;
-  onOpenDetails: (ticket: RepairTicket) => void; 
-  // ⚡ SYSTEM ADDTION: Callback prop to notify the parent state loop
-  onDeleteSuccess: (ticketId: number) => void; 
+  onOpenDetails: (ticket: RepairTicket) => void;
+  onDeleteSuccess: (ticketId: number) => void;
+  delivered?: boolean;
 }
 
-export default function OperationJobCard({ ticket, onOpenDetails, onDeleteSuccess }: JobCardProps) {
+const STATUS_CONFIG: Record<string, { bg: string; text: string; dot: string }> = {
+  ready:           { bg: 'bg-emerald-green',  text: 'text-volt-secondary',  dot: 'bg-volt-secondary'  },
+  delivered:       { bg: 'bg-emerald-green',  text: 'text-volt-secondary',  dot: 'bg-volt-secondary'  },
+  'in service':    { bg: 'bg-[#D6EFDE]',      text: 'text-[#006F67]',       dot: 'bg-[#006F67]'       },
+  working:         { bg: 'bg-[#D6EFDE]',      text: 'text-[#006F67]',       dot: 'bg-[#006F67]'       },
+  'parts ordered': { bg: 'bg-[#FFDAD6]',      text: 'text-volt-terracotta', dot: 'bg-volt-terracotta' },
+  waiting:         { bg: 'bg-volt-sand',       text: 'text-[#564427]',       dot: 'bg-[#564427]'       },
+};
 
-  const getStatusBadgeStyles = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'ready':
-        return 'bg-[#9cf2e8] text-[#00504a]'; 
-      case 'in service':
-      case 'working':
-        return 'bg-[#99efe5] text-[#006f67]'; 
-      case 'parts ordered':
-        return 'bg-[#ffdad6] text-[#93000a]'; 
-      case 'waiting':
-      default:
-        return 'bg-[#fadfb8] text-[#564427]'; 
-    }
-  };
+function getStatusConfig(status: string) {
+  return STATUS_CONFIG[status?.toLowerCase()] ?? STATUS_CONFIG['waiting'];
+}
 
-  const displayTime = ticket.updatedAt 
+export default function OperationJobCard({ ticket, onOpenDetails, onDeleteSuccess, delivered = false }: JobCardProps) {
+  const spec = getStatusConfig(ticket.status);
+
+  const displayTime = ticket.updatedAt
     ? new Date(ticket.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : '10 mins ago';
+    : new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  const deleteTicketHandler = async (ticketId: number) => {
-    const confirmDelete = confirm('Are you sure you want to remove this ticket from the system?');
-    if (!confirmDelete) return;
-    
-    const id = ticketId;
+  const displayDate = new Date(ticket.updatedAt || ticket.createdAt).toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'short',
+  });
 
+  const handleDelete = async () => {
+    if (!confirm('Remove this ticket from the system?')) return;
     try {
-      const response = await fetch(`http://Localhost:3000/api/owner/deleteTicket/${id}`, {
-        method: "DELETE",
+      const response = await fetch(`http://localhost:3000/api/owner/deleteTicket/${ticket.id}`, {
+        method: 'DELETE',
       });
-
-      const responseData = await response.json();
-
+      const data = await response.json();
       if (!response.ok) {
-        alert(responseData.message || 'Could not delete ticket.');
+        alert(data.message || 'Could not delete ticket.');
         return;
       }
-      
-      
-      // ⚡ CRITICAL FIX: Trigger the callback function to update the parent state instantly!
-      onDeleteSuccess(id);
-
-    } catch (error) {
-      console.log("error in deleting ticket", error);
+      onDeleteSuccess(ticket.id);
+    } catch (err) {
+      console.error('Delete error:', err);
     }
   };
 
   return (
-    <div className="bg-white border border-[#c5c6cd] rounded-xl p-6 ambient-shadow hover-lift flex flex-col h-full transition-all duration-200">
-      
-      {/* TIER 1 LINE HEADER: Token ID Code vs Customer Name */}
-      <div className="flex justify-between items-center mb-2">
-        <span className="font-sans text-2xl font-bold text-[#091426]">
-          EV-{ticket.id.toString().padStart(4, '0')}
-        </span>
-        <span className="font-sans text-base font-semibold text-[#45474c]">
-          {ticket.customer?.name || 'Walk-In Profile'}
-        </span>
+    <div className={`bg-white rounded-2xl border flex flex-col h-full transition-all ${
+      delivered
+        ? 'border-[rgba(9,20,38,0.06)] opacity-80 hover:opacity-100'
+        : 'border-[rgba(9,20,38,0.08)] hover:border-[rgba(9,20,38,0.16)] hover:shadow-sm'
+    }`}>
+
+      {/* Card top */}
+      <div className="p-5 flex flex-col flex-1">
+
+        {/* Header row: ticket ID + status badge */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <p className="text-[11px] font-bold tracking-widest uppercase text-sec-text mb-0.5">
+              {delivered ? 'Delivered' : 'Job'}
+            </p>
+            <p className="text-xl font-black text-volt-primary leading-none">
+              EV-{ticket.id.toString().padStart(4, '0')}
+            </p>
+          </div>
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-bold shrink-0 ${spec.bg} ${spec.text}`}>
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${spec.dot}`} />
+            {ticket.status}
+          </span>
+        </div>
+
+        {/* Vehicle + issue */}
+        <div className="mb-1">
+          <p className="text-[11px] font-bold tracking-widest uppercase text-sec-text mb-1">
+            {ticket.vehicleModel}
+          </p>
+          <p className="text-sm font-semibold text-volt-primary leading-snug">
+            {ticket.issueCategory}
+          </p>
+        </div>
+
+        {/* Description preview */}
+        {ticket.description && (
+          <p className="text-[12px] text-sec-text leading-relaxed mt-1.5 line-clamp-2 flex-1">
+            {ticket.description}
+          </p>
+        )}
       </div>
 
-      {/* Vehicle Model Title */}
-      <div className="font-sans text-xs text-[#75777d] tracking-wider mb-4 uppercase font-bold">
-        {ticket.vehicleModel}
+      {/* Divider */}
+      <div className="h-px mx-5 bg-[rgba(9,20,38,0.06)]" />
+
+      {/* Footer meta */}
+      <div className="px-5 py-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="w-6 h-6 rounded-full bg-volt-primary flex items-center justify-center shrink-0">
+            <User className="w-3 h-3 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-sec-text">Customer</p>
+            <p className="text-[11.5px] font-semibold text-volt-primary truncate">
+              {ticket.customer?.name || 'Walk-in'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 text-sec-text shrink-0">
+          <Clock className="w-3 h-3" />
+          <span className="text-[11px] font-medium">{displayDate} -</span><br />
+          <span className="text-[11px] font-medium"> {displayTime}</span>
+        </div>
       </div>
 
-      {/* Primary fault preview content */}
-      <div className="font-sans text-sm text-[#1b1b1d] mb-4 flex-1 font-bold">
-        {ticket.issueCategory}
+      {/* Divider */}
+      <div className="h-px mx-5 bg-[rgba(9,20,38,0.06)]" />
+
+      {/* Technician row */}
+      <div className="px-5 py-3">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-sec-text mb-0.5">Technician</p>
+        <p className="text-[11.5px] font-semibold text-volt-primary">
+          {ticket.technician ? ticket.technician.fullName : 'Unassigned'}
+        </p>
       </div>
 
-      {/* Status Badge Tag */}
-      <div className="mb-4">
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-sans font-semibold tracking-wide ${getStatusBadgeStyles(ticket.status)}`}>
-          {ticket.status || 'Waiting'}
-        </span>
-      </div>
+      {/* Divider */}
+      <div className="h-px mx-5 bg-[rgba(9,20,38,0.06)]" />
 
-      {/* INTERACTIVE ACTIONS FLOOR */}
-      <div className="pt-1 flex justify-between">
+      {/* Action row */}
+      <div className="flex items-center gap-2 px-4 py-3 bg-[#FAFAF8] rounded-b-2xl">
         <button
-          onClick={() => onOpenDetails(ticket)} 
-          className="bg-gray-200 rounded-xl px-4 py-1 text-xs font-bold tracking-wide hover:bg-[#091426] hover:text-white transition-all cursor-pointer"
+          onClick={() => onOpenDetails(ticket)}
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-[rgba(9,20,38,0.10)] bg-white text-volt-primary text-[11px] font-bold uppercase tracking-wide py-2 hover:bg-volt-container transition active:scale-[0.98]"
         >
-          Full Info View ➔
+          View details
+          <ArrowRight className="w-3 h-3" />
         </button>
-        <button 
-          onClick={() => deleteTicketHandler(ticket.id)}
-          className='bg-red-600 text-xs p-1 px-3 text-white font-semibold rounded-md mx-auto active:scale-100 cursor-pointer hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg'
+        <button
+          onClick={handleDelete}
+          className="w-8 h-8 flex items-center justify-center rounded-lg border border-[rgba(186,26,26,0.12)] bg-[#FFF5F5] text-volt-terracotta hover:bg-volt-terracotta hover:text-white transition shrink-0"
+          title="Delete ticket"
         >
-          Delete 
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
-
-      {/* TIER 2 FOOTER METRICS */}
-      <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#e4e2e3]">
-        <div className="flex flex-col">
-          <span className="font-sans text-[10px] uppercase font-bold text-[#75777d] mb-0.5">Technician</span>
-          <span className="font-sans text-xs font-bold text-[#091426]">
-            {ticket.technician ? ticket.technician.fullName : 'Unassigned Pool'}
-          </span>
-        </div>
-
-        <div className="flex flex-col text-right">
-          <span className="font-sans text-[10px] uppercase font-bold text-[#75777d]">Activity</span>
-          <span className="font-sans text-xs font-bold text-[#091426] mt-0.5">
-            {displayTime}
-          </span>
-        </div>
-      </div>
-
     </div>
   );
 }
