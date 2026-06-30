@@ -4,6 +4,7 @@ import React, { useState } from 'react'; // ⚡ Removed useEffect entirely
 import { RepairTicket } from '../types';
 import { Button } from "@/components/ui/button";
 import { ClipboardCheck, FileText, Info, Save, User } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface DiagnosticConsoleProps {
   ticket: RepairTicket | null;
@@ -20,16 +21,7 @@ export default function DiagnosticConsole({
   // 🧠 LOCAL LAYOUT LOG BUFFER STATE
   const [localNotes, setLocalNotes] = useState<string>(ticket?.technicianNotes || "");
   
-  // 🔄 1. PROP DESCRIPTOR SYNCHRONIZATION (RENDER-PHASE SYNC)
-  // Replaces the useEffect loop! We track the ID of the ticket we are currently viewing.
-  const [prevTicketId, setPrevTicketId] = useState<number | undefined>(ticket?.id);
-
-  // If the mechanic clicks a new ticket, the ID changes. We update the text buffer 
-  // immediately *during* the render cycle, completely preventing the cascading redraw error!
-  if (ticket?.id !== prevTicketId) {
-    setPrevTicketId(ticket?.id);
-    setLocalNotes(ticket?.technicianNotes || "");
-  }
+  
 
   // 🛡️ 2. NO ACTIVE SELECTION PLACEHOLDER UNMUTE GATE
   if (!ticket) {
@@ -53,7 +45,11 @@ export default function DiagnosticConsole({
   };
 
   return (
-    <div className="w-full flex flex-col gap-5 animate-fade-in">
+    <motion.div
+      initial={{ opacity: 0, x: 16 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.25 }}
+    className="w-full flex flex-col gap-5 animate-fade-in">
       
       {/* SECTION HEADER BLOCK */}
       <div className="flex items-center justify-between border-b border-border/40 pb-3 shrink-0">
@@ -110,10 +106,17 @@ export default function DiagnosticConsole({
             placeholder="Document live data log parameters: degradation profiles, cell voltage drop indices, safety pack balancing sequences..."
             className="w-full bg-white border border-border/50 rounded-xl p-3 text-xs font-mono text-black outline-none shadow-inner transition-all duration-200 placeholder:text-muted-foreground/70 focus:border-border/80 focus:ring-2 focus:ring-[#0C5C3C]/10 resize-none"
           />
+          <div className="flex justify-between text-[10px] text-slate-400">
+    <span>Technician Notes</span>
+    <span>{localNotes.length}/5000</span>
+</div>
         </div>
 
         {/* FEEDBACK & COMMIT TRIGGERS */}
-        <div className="flex flex-col gap-2">
+        <motion.div
+        initial={{ opacity: 0, y: 8 }}
+    animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col gap-2">
           {saveSuccess && (
             <div className="bg-emerald-50 border border-emerald-200/50 text-[#0C5C3C] text-[11px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all duration-200">
               <span className="size-1.5 rounded-full bg-[#0C5C3C] animate-ping" />
@@ -126,11 +129,11 @@ export default function DiagnosticConsole({
             className="w-full h-10 text-xs font-bold rounded-xl bg-[#0C5C3C] text-white shadow-sm hover:bg-[#0C5C3C]/90 flex items-center justify-center gap-2 tracking-tight"
           >
             <Save className="size-3.5 shrink-0" />
-            Commit Operational Logs
+            Saving......
           </Button>
-        </div>
+        </motion.div>
       </form>
 
-    </div>
+    </motion.div>
   );
 }

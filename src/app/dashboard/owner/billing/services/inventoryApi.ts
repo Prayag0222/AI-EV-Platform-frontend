@@ -13,14 +13,20 @@ export interface InventoryItem {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, init);
+  const response = await fetch(`${API_BASE}${path}`,{
+    credentials:"include",
+    ...init
+    
+  },);
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.error || 'Inventory request failed.');
   return body as T;
 }
 
 export async function searchInventory(query: string) {
-  const data = await request<{ items: InventoryItem[] }>(`/inventory/search?q=${encodeURIComponent(query)}&limit=10`);
+  const data = await request<{ items: InventoryItem[] }>(`/inventory/search?q=${encodeURIComponent(query)}&limit=10`,{
+    credentials:"include"
+  });
   return data.items || [];
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
   IndianRupee,
   Package,
@@ -22,74 +23,93 @@ export function VehicleStatisticsPanel({
   const cards = [
     {
       title: "Total Repairs",
-      value: statistics.totalRepairs,
+      value: statistics.totalRepairs.toLocaleString(),
+      subtitle: "Completed repair jobs",
       icon: Wrench,
-      gradient:
-        "from-blue-500/10 to-indigo-500/10",
-      iconBg:
-        "bg-blue-100 text-blue-600",
+      iconColor: "text-blue-600",
+      iconBg: "bg-blue-100",
+      accent: "bg-blue-500",
     },
     {
       title: "Revenue Generated",
       value: `₹${statistics.totalRevenue.toLocaleString()}`,
+      subtitle: "Lifetime repair revenue",
       icon: IndianRupee,
-      gradient:
-        "from-emerald-500/10 to-green-500/10",
-      iconBg:
-        "bg-emerald-100 text-emerald-600",
+      iconColor: "text-emerald-600",
+      iconBg: "bg-emerald-100",
+      accent: "bg-emerald-500",
     },
     {
       title: "Parts Consumed",
-      value: statistics.totalPartsConsumed,
+      value: statistics.totalPartsConsumed.toLocaleString(),
+      subtitle: "Inventory utilized",
       icon: Package,
-      gradient:
-        "from-amber-500/10 to-orange-500/10",
-      iconBg:
-        "bg-amber-100 text-amber-600",
+      iconColor: "text-amber-600",
+      iconBg: "bg-amber-100",
+      accent: "bg-amber-500",
     },
     {
-      title: "Avg Repair Cost",
+      title: "Average Repair",
       value: `₹${statistics.averageRepairCost.toLocaleString()}`,
+      subtitle: "Average repair cost",
       icon: TrendingUp,
-      gradient:
-        "from-violet-500/10 to-purple-500/10",
-      iconBg:
-        "bg-violet-100 text-violet-600",
+      iconColor: "text-violet-600",
+      iconBg: "bg-violet-100",
+      accent: "bg-violet-500",
     },
   ];
 
   return (
-    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-      {cards.map((card) => {
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {cards.map((card, index) => {
         const Icon = card.icon;
 
         return (
-          <div
+          <motion.div
             key={card.title}
-            className={`group relative overflow-hidden rounded-2xl border border-slate-200 bg-linear-to-br ${card.gradient} bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: index * 0.05,
+              duration: 0.25,
+            }}
+            className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
           >
+            {/* Accent */}
+            <div
+              className={`absolute inset-x-0 top-0 h-1 ${card.accent}`}
+            />
+
             <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-slate-500">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-500">
                   {card.title}
                 </p>
 
-                <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
+                <h3 className="mt-3 truncate text-3xl font-bold tracking-tight text-slate-900">
                   {card.value}
                 </h3>
+
+                <p className="mt-2 text-xs text-slate-500">
+                  {card.subtitle}
+                </p>
               </div>
 
               <div
-                className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.iconBg}`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${card.iconBg}`}
               >
-                <Icon className="h-6 w-6" />
+                <Icon
+                  className={`h-6 w-6 ${card.iconColor}`}
+                />
               </div>
             </div>
 
-            <div className="mt-5 h-1 w-full rounded-full bg-slate-100">
-              <div className="h-1 w-2/3 rounded-full bg-slate-300" />
+            <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className={`h-full w-2/3 rounded-full transition-all duration-500 group-hover:w-full ${card.accent}`}
+              />
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>

@@ -1,7 +1,15 @@
 "use client";
 
-import { Battery, Save, Thermometer } from "lucide-react";
 import { useState } from "react";
+import {
+  Battery,
+  Activity,
+  RotateCw,
+  Thermometer,
+  Save,
+  Cpu,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,101 +25,164 @@ export function BatteryInformationPanel({
 }: BatteryInformationPanelProps) {
   const [isSaving, setIsSaving] = useState(false);
 
+  // No useEffect intentionally.
   const [batteryPackSerial, setBatteryPackSerial] = useState(
-    vehicle.batteryPackSerial || ""
+    vehicle?.batteryPackSerial ?? ""
   );
 
   const [batteryCapacity, setBatteryCapacity] = useState(
-    vehicle.batteryCapacity || ""
+    vehicle?.batteryCapacity ?? ""
   );
 
   const [batterySoh, setBatterySoh] = useState(
-    vehicle.batterySoh?.toString() || ""
+    vehicle?.batterySoh?.toString() ?? ""
   );
 
   const [batteryCycles, setBatteryCycles] = useState(
-    vehicle.batteryCycles?.toString() || ""
+    vehicle?.batteryCycles?.toString() ?? ""
   );
 
   const [batteryTemp, setBatteryTemp] = useState(
-    vehicle.batteryTemp || ""
+    vehicle?.batteryTemp?.toString() ?? ""
   );
 
   const [healthScore, setHealthScore] = useState(
-    vehicle.healthScore?.toString() || ""
+    vehicle?.healthScore?.toString() ?? ""
   );
 
   const handleSave = async () => {
     setIsSaving(true);
 
-    await onSave({
-      batteryPackSerial,
-      batteryCapacity,
-      batterySoh: batterySoh ? Number(batterySoh) : null,
-      batteryCycles: batteryCycles ? Number(batteryCycles) : null,
-      batteryTemp,
-      healthScore: healthScore ? Number(healthScore) : null,
-    });
-
-    setIsSaving(false);
+    try {
+      await onSave({
+        batteryPackSerial: batteryPackSerial || null,
+        batteryCapacity: batteryCapacity || null,
+        batterySoh: batterySoh ? Number(batterySoh) : null,
+        batteryCycles: batteryCycles ? Number(batteryCycles) : null,
+        batteryTemp: batteryTemp || null,
+        healthScore: healthScore ? Number(healthScore) : null,
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Battery className="h-5 w-5" />
+    <Card className="border-slate-200 shadow-sm">
+      <CardHeader className="border-b bg-slate-50/70">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Battery className="h-5 w-5 text-indigo-600" />
           Battery Information
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <Input
-          placeholder="Battery Pack Serial"
-          value={batteryPackSerial}
-          onChange={(e) => setBatteryPackSerial(e.target.value)}
-        />
+      <CardContent className="space-y-5 p-5">
+        <div className="grid gap-5">
 
-        <Input
-          placeholder="Battery Capacity"
-          value={batteryCapacity}
-          onChange={(e) => setBatteryCapacity(e.target.value)}
-        />
+          <div>
+            <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <Cpu className="h-3.5 w-3.5" />
+              Battery Pack Serial
+            </label>
 
-        <Input
-          type="number"
-          placeholder="Battery SOH (%)"
-          value={batterySoh}
-          onChange={(e) => setBatterySoh(e.target.value)}
-        />
+            <Input
+              value={batteryPackSerial}
+              placeholder="BAT-72V-000123"
+              onChange={(e) => setBatteryPackSerial(e.target.value)}
+            />
+          </div>
 
-        <Input
-          type="number"
-          placeholder="Battery Cycles"
-          value={batteryCycles}
-          onChange={(e) => setBatteryCycles(e.target.value)}
-        />
+          <div>
+            <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <Battery className="h-3.5 w-3.5" />
+              Battery Capacity
+            </label>
 
-        <Input
-          placeholder="Battery Temperature"
-          value={batteryTemp}
-          onChange={(e) => setBatteryTemp(e.target.value)}
-        />
+            <Input
+              value={batteryCapacity}
+              placeholder="72V 40Ah"
+              onChange={(e) => setBatteryCapacity(e.target.value)}
+            />
+          </div>
 
-        <Input
-          type="number"
-          placeholder="Health Score"
-          value={healthScore}
-          onChange={(e) => setHealthScore(e.target.value)}
-        />
+          <div className="grid grid-cols-2 gap-4">
+
+            <div>
+              <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Activity className="h-3.5 w-3.5" />
+                SOH (%)
+              </label>
+
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={batterySoh}
+                placeholder="95"
+                onChange={(e) => setBatterySoh(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <RotateCw className="h-3.5 w-3.5" />
+                Cycles
+              </label>
+
+              <Input
+                type="number"
+                value={batteryCycles}
+                placeholder="320"
+                onChange={(e) => setBatteryCycles(e.target.value)}
+              />
+            </div>
+
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+
+            <div>
+              <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Thermometer className="h-3.5 w-3.5" />
+                Temperature
+              </label>
+
+              <Input
+                value={batteryTemp}
+                placeholder="34°C"
+                onChange={(e) => setBatteryTemp(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Activity className="h-3.5 w-3.5" />
+                Health Score
+              </label>
+
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={healthScore}
+                placeholder="91"
+                onChange={(e) => setHealthScore(e.target.value)}
+              />
+            </div>
+
+          </div>
+        </div>
 
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full"
+          className="h-11 w-full"
         >
-          <Save className="h-4 w-4 mr-2" />
-          {isSaving ? "Saving..." : "Save Battery Information"}
+          <Save className="mr-2 h-4 w-4" />
+
+          {isSaving
+            ? "Saving Battery Information..."
+            : "Save Battery Information"}
         </Button>
       </CardContent>
     </Card>

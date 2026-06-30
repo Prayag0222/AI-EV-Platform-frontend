@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { Mail, Phone, MapPin, UserRoundPen, Trash2 } from 'lucide-react';
+import { getInitials } from '../utils/technician';
+import { motion } from 'framer-motion';
+
 
 interface Technician {
   id: string;
@@ -58,11 +61,6 @@ const SPEC_CONFIG: Record<
   },
 };
 
-function getInitials(name: string) {
-  const parts = name.trim().split(' ').filter(Boolean);
-  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  return parts[0].substring(0, 2).toUpperCase();
-}
 
 export default function TechnicianCard({
   tech,
@@ -81,7 +79,14 @@ export default function TechnicianCard({
       }`}
     >
       {/* ── Card top ── */}
-      <div className="p-5">
+      <motion.div
+       layout
+  initial={{ opacity: 0, y: 12 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -12 }}
+  whileHover={{ y: -2 }}
+  transition={{ duration: 0.2 }}
+      className="p-5">
 
         {/* Identity row */}
         <div className="flex items-start justify-between gap-3 mb-4">
@@ -123,7 +128,7 @@ export default function TechnicianCard({
             <ContactLine icon={<MapPin className="w-3.5 h-3.5" />} value={tech.address} truncate />
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Card footer ── */}
       <div className="flex items-center gap-2 px-5 py-3.5 border-t border-[rgba(9,20,38,0.06)] bg-[#FAFAF8] rounded-b-2xl">

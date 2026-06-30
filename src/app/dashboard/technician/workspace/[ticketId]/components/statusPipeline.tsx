@@ -16,7 +16,6 @@ const STATUSES: TicketStatus[] = [
   "DIAGNOSING",
   "IN_SERVICE",
   "RESOLVED",
-  "DELIVERED",
 ];
 
 export function StatusPipeline({ currentStatus, onStatusChange, isSaving = false }: StatusPipelineProps) {

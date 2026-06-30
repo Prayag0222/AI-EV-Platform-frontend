@@ -1,30 +1,73 @@
-import type { InvoiceRecord } from '../types/billing';
+import type { InvoiceRecord } from "../types/billing";
 
-export const downloadInvoicePDF = async (invoice: InvoiceRecord) => {
-  if (typeof window === 'undefined') return;
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
-  const { default: html2pdf } = await import('html2pdf.js');
+async function fetchPDF(
+  invoiceId: number,
+  download = false
+): Promise<Blob> {
+  const response = await fetch(
+    `${API_BASE}/invoice/${invoiceId}/pdf${
+      download ? "?download=true" : ""
+    }`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
 
-  const element = document.getElementById('invoice-print-area');
+  if (!response.ok) {
+    throw new Error("Failed to generate invoice PDF.");
+  }
 
-  if (!element) return;
+  return await response.blob();
+}
 
-  const options = {
-    margin: 10,
-    filename: `${invoice.invoiceNo}.pdf`,
-    image: { type: 'jpeg' as const , quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: {
-      orientation: 'portrait' as const,
-      unit: 'mm',
-      format: 'a4',
-    },
-  };
+export const printInvoice = (invoice: InvoiceRecord) => {
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
-  html2pdf().set(options).from(element).save();
+  window.open(
+    `${API_BASE}/invoice/${invoice.id}/print`,
+    "_blank",
+    "noopener,noreferrer"
+  );
 };
 
-export const printInvoice = () => {
-  if (typeof window === 'undefined') return;
-  window.print();
+export const downloadInvoicePDF = async (
+  invoice: InvoiceRecord
+) => {
+  const blob = await fetchPDF(invoice.id, true);
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `${invoice.invoiceNo}-${invoice.customerName.replace(
+    /\s+/g,
+    "-"
+  )}.pdf`;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+};
+
+export const shareOnWhatsApp = (invoice: InvoiceRecord) => {
+  const message =
+    `Hello ${invoice.customerName}, your invoice ${invoice.invoiceNo} ` +
+    `for ₹${invoice.grandTotal.toFixed(2)} is ready.`;
+
+  const phone = invoice.customerPhone.replace(/\D/g, "");
+
+  window.open(
+    `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
 };

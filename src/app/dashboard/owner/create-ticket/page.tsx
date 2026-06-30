@@ -77,7 +77,7 @@ export default function CreateTicketPage() {
   useEffect(() => {
     const getStaff = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/technician/getAllTechnicians');
+        const res = await fetch('http://localhost:3000/api/technician/getAllTechnicians',{credentials:"include"});
         if (!res.ok) throw new Error('Failed to download employee list.');
         const data = await res.json();
         setTechnicians(Array.isArray(data) ? data : []);
@@ -167,6 +167,7 @@ export default function CreateTicketPage() {
       const response = await fetch('http://localhost:3000/api/owner/createTicket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials:"include",
         body: JSON.stringify(finalPayload)
       });
 

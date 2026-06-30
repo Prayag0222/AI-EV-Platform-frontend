@@ -1,3 +1,5 @@
+import { Profile } from "../../services/profileApi";
+
 export type PaymentMethod = 'CASH' | 'UPI' | 'CARD' | 'BANK_TRANSFER' | 'NONE';
 export type PaymentStatus = 'PAID' | 'UNPAID';
 
@@ -24,7 +26,7 @@ export interface BillingTicket {
   notes?: Array<{ structuredText: string }>;
   parts?: Array<{
     id: number;
-    quantity: number;
+    quantity: number ;
     lockedCost: number;
     inventoryItem: {id:number, partName: string; sku: string; retailPrice: number };
   }>;
@@ -73,7 +75,7 @@ taxPercent: number;
 discountPercent: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
-  notes: string;
+  notes: string
 }
 
 export interface InvoiceTotals {

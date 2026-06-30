@@ -18,7 +18,9 @@ export function useVehicleWorkspace(vehicleId: number | null) {
         // setIsLoading(true);
 
         const response = await fetch(
-          `http://localhost:3000/api/vehicles/vehicle/workspace/${vehicleId}`
+          `http://localhost:3000/api/vehicles/vehicle/workspace/${vehicleId}`,{
+            credentials:"include"
+          }
         );
 
         const data = await response.json();
@@ -55,7 +57,8 @@ export function useVehicleWorkspace(vehicleId: number | null) {
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(updates)
+          body: JSON.stringify(updates),
+          credentials:"include"
         }
       );
 
@@ -63,7 +66,9 @@ export function useVehicleWorkspace(vehicleId: number | null) {
 
       if (data.success) {
   const refreshedResponse = await fetch(
-    `http://localhost:3000/api/vehicles/vehicle/workspace/${vehicleId}`
+    `http://localhost:3000/api/vehicles/vehicle/workspace/${vehicleId}`,{
+      credentials:"include"
+    }
   );
 
   const refreshedData = await refreshedResponse.json();

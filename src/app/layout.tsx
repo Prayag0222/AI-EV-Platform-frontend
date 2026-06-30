@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono,Sora, Hanken_Grotesk, JetBrains_Mono,Roboto_Mono } from "next/font/google";
 import "./globals.css";
 
+import "react-toastify/dist/ReactToastify.css"; // Required for styling
+
+import { ToastContainer } from "react-toastify";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -46,13 +50,16 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
+  
 }>) {
   return (
     <html
       lang="en" suppressHydrationWarning
       className={`${sora.variable} ${hanken.variable} ${jet.variable} ${geistSans.variable} ${geistMono.variable} ${roboto.variable} bg-[#121416] text-[#e2e2e5] h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">{children}
+      <ToastContainer  position="top-right"  />
+      </body>
     </html>
   );
 }

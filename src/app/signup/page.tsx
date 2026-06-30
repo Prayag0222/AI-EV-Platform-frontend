@@ -1,172 +1,184 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
+import AuthLayout from "@/components/auth/AuthLayout";
+const Api = process.env.NEXT_PUBLIC_API_URL
 
-// 1. Structural Blueprint for TypeScript Learning
+console.log(String(Api));
+
+
 interface SignUpData {
   name: string;
   email: string;
-  password?: string;
-  role: string;
+  password: string;
 }
 
-export default function SignUp() {
+export default function SignupPage() {
   const router = useRouter();
-  
-  // 2. State definition strictly locked to our blueprint
-  const [formData, setFormData] = useState<SignUpData>({ 
-    name: '', 
-    email: '', 
-    password: '',
-    role: 'technician' // setting a default role selection
-  });
-  
-  const [notification, setNotification] = useState('');
-  const [error, setError] = useState('');
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
 
-  // 3. Dynamic input handler that accommodates inputs and dropdowns
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const [formData, setFormData] = useState<SignUpData>({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
-  // 4. Asynchronous connection to your brother's backend API
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
-    setNotification('');
-    setError('');
-    setLoading(true);
 
     try {
-      // NOTE: Swap '/api/auth/signup' out if your brother used a different path!
-      const response = await fetch('http://localhost:3000/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      setLoading(true);
+
+      const response = await fetch(
+      `${Api}/auth/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            role: "OWNER",
+          }),
+        }
+      );
+
+      console.log(response);
+      
 
       const data = await response.json();
-    
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed.');
+        throw new Error(
+          data.message || "Signup failed"
+        );
       }
 
-      console.log('Sign Up Success:', data);
+      toast.success(
+        "Account created successfully."
+      );
 
-      setNotification('🎉 Sign Up Completed Successfully!');
-      
-      setTimeout(() => {
-        router.push('/login'); // Redirect to login page after success
-      }, 2000);
-
-    } catch (err: unknown) {
-  // We check if 'err' is an object that contains a 'message' string property
-  if (err instanceof Error) {
-    setError(err.message);
-  } else {
-    setError('Something went wrong. Please try again.');
-  }
+      router.push("/login");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-indigo-900 via-slate-900 to-blue-900 px-4 relative overflow-hidden">
-      
-      {/* Toast Alert Notifications */}
-      {notification && (
-        <div className="absolute top-5 right-5 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-2xl font-medium animate-bounce z-50">
-          {notification}
+    <AuthLayout
+      title="Create Account"
+      subtitle="Create your VoltOps owner account and start managing your workshop."
+      footerText="Already have an account?"
+      footerLinkText="Sign In"
+      footerLinkHref="/login"
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Full Name
+          </label>
+
+          <input
+            required
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="John Doe"
+            className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
+          />
         </div>
-      )}
 
-      {error && (
-        <div className="absolute top-5 right-5 bg-red-500 text-white px-6 py-3 rounded-xl shadow-2xl font-medium z-50">
-          {error}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Email Address
+          </label>
+
+          <input
+            required
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
+          />
         </div>
-      )}
 
-      <div className="w-full max-w-md p-8 space-y-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl transform transition-all duration-300 hover:scale-[1.01]">
-        <h2 className="text-3xl font-extrabold text-center text-white tracking-wide">Create Account</h2>
-        <p className="text-center text-slate-300 text-sm">Join us for a smarter EV experience</p>
-        
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">Full Name</label>
-            <input 
-              required 
-              type="text" 
-              name="name" 
-              value={formData.name}
-              onChange={handleChange} 
-              className="w-full px-4 py-2.5 mt-1 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition-all duration-200" 
-              placeholder="John Doe" 
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Password
+          </label>
 
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">Email Address</label>
-            <input 
-              required 
-              type="email" 
-              name="email" 
-              value={formData.email}
-              onChange={handleChange} 
-              className="w-full px-4 py-2.5 mt-1 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition-all duration-200" 
-              placeholder="you@example.com" 
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">Password</label>
-            <input 
-              required 
-              type="password" 
-              name="password" 
+          <div className="relative">
+            <input
+              required
+              name="password"
               value={formData.password}
-              onChange={handleChange} 
-              className="w-full px-4 py-2.5 mt-1 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition-all duration-200" 
-              placeholder="••••••••" 
-            />
-          </div>
-
-          {/* New Dynamic Dropdown for User Roles */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">Your Role</label>
-            <select 
-              name="role"
-              value={formData.role}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 mt-1 bg-slate-800 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none transition-all duration-200 cursor-pointer"
-            >
-              <option value="TECHNICIAN">Technician</option>
-              <option value="OWNER">Owner</option>
-            */removed user role for now to simplify roles, can be added back if needed/*
-            </select>
-          </div>
-          
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full px-4 py-3 font-bold text-lg text-white bg-linear-to-r from-indigo-500 to-blue-600 rounded-xl shadow-lg hover:from-indigo-600 hover:to-blue-700 hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"
-          >
-            {loading ? "Registering..." : "Sign Up"}
-          </button> 
-        </form>
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
+              placeholder="••••••••"
+              className="w-full h-12 px-4 pr-12 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            />
 
-        <p className="text-sm text-center text-slate-300">
-          Already have an account?{' '}
-          <Link href="/login" className="text-indigo-400 font-semibold hover:text-indigo-300 hover:underline transition-all">
-            Log in
-          </Link>
-        </p>
-      </div>
-    </div>
+            <button
+              type="button"
+              onClick={() =>
+                setShowPassword(
+                  !showPassword
+                )
+              }
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
+            >
+              {showPassword ? (
+                <EyeOff size={18} />
+              ) : (
+                <Eye size={18} />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full h-12 rounded-xl bg-slate-900 text-white font-medium hover:bg-black transition-colors disabled:opacity-50"
+        >
+          {loading
+            ? "Creating Account..."
+            : "Create Account"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }

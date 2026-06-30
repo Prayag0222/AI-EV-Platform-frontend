@@ -1,21 +1,48 @@
-import React from 'react';
-import { AlertOctagon, RefreshCw } from 'lucide-react';
+'use client';
 
-export default function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+import { motion } from 'framer-motion';
+import {
+  AlertTriangle,
+  RefreshCw,
+} from 'lucide-react';
+
+interface Props {
+  message: string;
+  onRetry: () => void;
+}
+
+export default function ErrorState({
+  message,
+  onRetry,
+}: Props) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="bg-red-50 rounded-full p-5 mb-4">
-        <AlertOctagon size={36} className="text-red-500" />
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center justify-center px-6 py-20 text-center"
+    >
+      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-red-50">
+        <AlertTriangle
+          size={36}
+          className="text-red-600"
+        />
       </div>
-      <h3 className="text-lg font-semibold text-gray-800 mb-1">Failed to load inventory</h3>
-      <p className="text-sm text-gray-400 mb-5 max-w-xs">{message}</p>
+
+      <h2 className="text-xl font-bold text-gray-900">
+        Something went wrong
+      </h2>
+
+      <p className="mt-2 max-w-sm text-sm leading-6 text-gray-500">
+        {message}
+      </p>
+
       <button
         onClick={onRetry}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors"
+        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 active:scale-95"
       >
-        <RefreshCw size={14} />
-        Retry
+        <RefreshCw size={17} />
+        Try Again
       </button>
-    </div>
+    </motion.div>
   );
 }

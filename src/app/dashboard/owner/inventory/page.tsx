@@ -11,10 +11,10 @@ import InventoryTable from './components/InventoryTable';
 import { StatsCardsSkeleton, TableSkeleton } from './components/ui/Skeletons';
 import ErrorState from './components/ui/ErrorState';
 
-import AddInventoryModal from './components/modals/AddInventoryModal';
-import EditInventoryModal from './components/modals/EditInventoryModal';
-import DeleteModal from './components/modals/DeleteModal';
-import AddStockModal from './components/modals/AddStockModal';
+import AddInventoryForm from './components/forms/AddInventoryForm';
+import EditInventoryForm from './components/forms/EditInventoryForm';
+import DeleteInventoryDialog from './components/forms/DeleteInventoryDialog';
+import AddStockForm from './components/forms/AddStockForm';
 
 export default function InventoryPage() {
   const inv = useInventory();
@@ -27,22 +27,22 @@ export default function InventoryPage() {
 
   return (
     <main className="min-h-screen bg-gray-50/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
         {/* ── Page Header ─────────────────────────────────────────────── */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2.5 rounded-xl shadow-sm">
+            <div className="bg-blue-600 p-2.5 rounded-2xl shadow-sm">
               <Boxes size={20} className="text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 leading-tight">Inventory</h1>
+              <h1 className="text-2xl font-bold text-gray-900 leading-tight">Inventory</h1>
               <p className="text-sm text-gray-400">Track parts, stock levels, and workshop supply</p>
             </div>
           </div>
           <button
             onClick={() => setShowAdd(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-blue-700 active:scale-95 transition-all"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 text-white text-sm font-semibold rounded-2xl shadow-sm hover:bg-blue-700 active:scale-95 transition-all"
           >
             <Plus size={16} />
             Add New Part
@@ -87,22 +87,22 @@ export default function InventoryPage() {
       </div>
 
       {/* ── Modals ──────────────────────────────────────────────────── */}
-      <AddInventoryModal
-        open={showAdd}
-        onClose={() => setShowAdd(false)}
-        onSubmit={inv.handleAdd}
-      />
-      <EditInventoryModal
-        item={editTarget}
-        onClose={() => setEditTarget(null)}
-        onSubmit={inv.handleEdit}
-      />
-      <DeleteModal
-        item={deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={inv.handleDelete}
-      />
-      <AddStockModal
+  <AddInventoryForm
+  open={showAdd}
+  onClose={() => setShowAdd(false)}
+  onSubmit={inv.handleAdd}
+/>
+<EditInventoryForm
+    item={editTarget}
+    onClose={() => setEditTarget(null)}
+    onSubmit={inv.handleEdit}
+/>
+     <DeleteInventoryDialog
+  item={deleteTarget}
+  onClose={() => setDeleteTarget(null)}
+  onConfirm={inv.handleDelete}
+/>
+      <AddStockForm
         item={stockTarget}
         onClose={() => setStockTarget(null)}
         onSubmit={inv.handleAddStock}

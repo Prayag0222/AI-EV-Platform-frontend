@@ -39,6 +39,7 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
       const response = await fetch('http://localhost:3000/api/owner/createCustomer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials:"include",
         body: JSON.stringify({ 
           name, 
           phone, 
