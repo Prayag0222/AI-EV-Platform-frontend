@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'; // ⚡ Removed useEffect entirely
 import { RepairTicket } from '../types';
-import { Button } from "@/components/ui/button_temp";
+import { Button } from "@/components/ui/button";
 import { ClipboardCheck, FileText, Info, Save, User } from "lucide-react";
 import { motion } from "framer-motion";
 

@@ -12,7 +12,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button_temp";
+import { Button } from "@/components/ui/button";
 
 import { RepairTicket } from "../types";
 

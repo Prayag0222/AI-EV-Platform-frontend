@@ -9,7 +9,7 @@ import {
   Search,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button_temp";
+import { Button } from "@/components/ui/button";
 import { logout } from "@/services/auth";
 import { TechnicianSidebar } from "./components/TechnicianSidebar";
 

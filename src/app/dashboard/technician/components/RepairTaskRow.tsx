@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button_temp";
+import { Button } from "@/components/ui/button";
 
 interface RepairTicket {
   id: number;
