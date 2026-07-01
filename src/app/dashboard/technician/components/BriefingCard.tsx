@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronRight, LucideIcon } from "lucide-react";
 import React, { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button_temp";
 
 interface BriefingCardProps {
   icon: LucideIcon;
