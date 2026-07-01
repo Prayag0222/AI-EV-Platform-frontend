@@ -266,7 +266,7 @@ export function WorkspacePanel({
                       {note.structuredText}
                     </p>
                     {note.rawVoiceText && note.rawVoiceText !== note.structuredText && (
-                      <p className="text-[11px] font-medium text-slate-400 italic break-words">
+                      <p className="text-[11px] font-medium text-slate-400 italic wrap-break-words">
                         Raw Input: &ldquo;{note.rawVoiceText}&rdquo;
                       </p>
                     )}
