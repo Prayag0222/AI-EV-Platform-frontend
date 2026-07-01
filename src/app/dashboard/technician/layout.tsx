@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { logout } from "@/services/auth";
 import { TechnicianSidebar } from "./components/TechnicianSidebar";
 
 export default function TechnicianLayout({
@@ -22,6 +23,12 @@ export default function TechnicianLayout({
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    setMobileOpen(false);
+    router.push("/login");
+  };
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -46,6 +53,7 @@ export default function TechnicianLayout({
           onToggleCollapse={() =>
             setCollapsed((prev) => !prev)
           }
+          onLogout={handleLogout}
         />
       </motion.div>
 
@@ -84,6 +92,7 @@ export default function TechnicianLayout({
                 }}
                 onClose={() => setMobileOpen(false)}
                 onToggleCollapse={() => {}}
+                onLogout={handleLogout}
               />
             </motion.div>
           </>

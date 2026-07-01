@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import AuthLayout from "@/components/auth/AuthLayout";
 const Api = process.env.NEXT_PUBLIC_API_URL
 
-console.log(String(Api));
 
 
 interface SignUpData {
@@ -60,7 +59,6 @@ export default function SignupPage() {
         }
       );
 
-      console.log(response);
       
 
       const data = await response.json();

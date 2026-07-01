@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Search ,SquarePlus} from 'lucide-react';
+import { API_BASE } from '@/config/api';
 
 // 📋 SECTION 1: THE TYPESCRIPT INTERFACE CONTRACTS
 export interface CustomerRecord {
@@ -40,7 +41,7 @@ export default function CustomerSearchDropdown({
   useEffect(() => {
     const loadCustomers = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/owner/getCustomer',{
+        const response = await fetch(`${API_BASE}/owner/getCustomer`, {
           credentials:"include"
         });
         if (!response.ok) throw new Error('API failed to return ledger rows.');
@@ -92,7 +93,7 @@ export default function CustomerSearchDropdown({
   <div ref={dropdownRef} className="relative w-full">
 
     {/* Header */}
-    <div className="mb-3 flex items-start justify-between">
+    <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <label className="flex items-center gap-2 text-sm font-semibold text-volt-primary">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-volt-secondary/10">
@@ -224,13 +225,13 @@ export default function CustomerSearchDropdown({
 
                 <div className="min-w-0 flex-1">
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex min-w-0 items-center justify-between gap-2">
 
                     <h4 className="truncate text-sm font-semibold text-volt-text">
                       {customer.name}
                     </h4>
 
-                    <span className="rounded-full bg-volt-background px-2 py-1 text-[10px] font-medium text-volt-muted">
+                    <span className="shrink-0 rounded-full bg-volt-background px-2 py-1 text-[10px] font-medium text-volt-muted">
                       Existing
                     </span>
 
@@ -247,7 +248,7 @@ export default function CustomerSearchDropdown({
                     </span>
 
                     {customer.vin && (
-                      <span className="rounded-full bg-volt-background px-2 py-1 text-[11px] text-volt-muted">
+                      <span className="max-w-full truncate rounded-full bg-volt-background px-2 py-1 text-[11px] text-volt-muted">
                         VIN • {customer.vin}
                       </span>
                     )}

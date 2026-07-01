@@ -74,7 +74,7 @@ export default function WorkspacePage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-slate-900 pb-32 lg:pb-12 font-sans selection:bg-teal-100">
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10 pt-4 space-y-6">
+      <div className="mx-auto max-w-360 px-4 sm:px-6 lg:px-10 pt-4 space-y-6">
         
         {/* 🟢 SERVER RUNTIME FEEDBACK STRIP */}
         <div className="flex items-center gap-2 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl w-max shadow-[0_1px_2px_rgba(0,0,0,0.01)]">

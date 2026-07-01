@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { VehicleWorkspaceData } from "../types/workspaceTypes";
+import { API_BASE } from "@/config/api";
 
 export function useVehicleWorkspace(vehicleId: number | null) {
   const [workspace, setWorkspace] = useState<VehicleWorkspaceData | null>(null);
@@ -18,7 +19,7 @@ export function useVehicleWorkspace(vehicleId: number | null) {
         // setIsLoading(true);
 
         const response = await fetch(
-          `http://localhost:3000/api/vehicles/vehicle/workspace/${vehicleId}`,{
+          `${API_BASE}/vehicles/vehicle/workspace/${vehicleId}`,{
             credentials:"include"
           }
         );
@@ -51,7 +52,7 @@ export function useVehicleWorkspace(vehicleId: number | null) {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/vehicles/vehicle/workspace/${vehicleId}`,
+        `${API_BASE}/vehicles/vehicle/workspace/${vehicleId}`,
         {
           method: "PATCH",
           headers: {
@@ -66,7 +67,7 @@ export function useVehicleWorkspace(vehicleId: number | null) {
 
       if (data.success) {
   const refreshedResponse = await fetch(
-    `http://localhost:3000/api/vehicles/vehicle/workspace/${vehicleId}`,{
+    `${API_BASE}/vehicles/vehicle/workspace/${vehicleId}`,{
       credentials:"include"
     }
   );

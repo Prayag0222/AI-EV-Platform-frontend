@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   Command,
   History,
+  LogOut,
   PackageOpen,
   Grid2X2,
   Wrench,
@@ -40,6 +41,7 @@ interface TechnicianSidebarProps {
   onNavigate: (path: string) => void;
   onClose: () => void;
   onToggleCollapse: () => void;
+  onLogout: () => void;
 }
 
 export function TechnicianSidebar({
@@ -49,6 +51,7 @@ export function TechnicianSidebar({
   onNavigate,
   onClose,
   onToggleCollapse,
+  onLogout,
 }: TechnicianSidebarProps) {
   const isActive = (path: string) => {
     if (path === "#") return false;
@@ -162,32 +165,45 @@ export function TechnicianSidebar({
         })}
       </nav>
 
-      {/* Collapse */}
+      <div className="border-t border-slate-100 p-4 space-y-3">
+        <button
+          onClick={onLogout}
+          className={cn(
+            "flex w-full items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors",
+            collapsed && !mobile ? "justify-center" : "justify-between",
+            "border-red-100 bg-red-50 text-red-600 hover:bg-red-100"
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            {(!collapsed || mobile) && <span>Logout</span>}
+          </div>
+          {(!collapsed || mobile) && <ChevronLeft className="h-4 w-4 rotate-180 text-red-600" />}
+        </button>
 
-      {!mobile && (
-        <div className="border-t border-slate-100 p-4">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={onToggleCollapse}
-          >
-            <motion.div
-              animate={{
-                rotate: collapsed ? 180 : 0,
-              }}
-              transition={{ duration: 0.2 }}
+        {!mobile && (
+          <div>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={onToggleCollapse}
             >
-              <ChevronLeft className="h-4 w-4" />
-            </motion.div>
+              <motion.div
+                animate={{
+                  rotate: collapsed ? 180 : 0,
+                }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </motion.div>
 
-            {!collapsed && (
-              <span className="ml-2">
-                Collapse
-              </span>
-            )}
-          </Button>
-        </div>
-      )}
+              {!collapsed && (
+                <span className="ml-2">Collapse</span>
+              )}
+            </Button>
+          </div>
+        )}
+      </div>
     </aside>
   );
 }

@@ -116,7 +116,7 @@ export function VehicleCard({
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-3 gap-3 p-5">
+      <div className="grid grid-cols-1 gap-3 p-5 min-[380px]:grid-cols-3">
         <div className="rounded-xl bg-slate-50 p-3">
           <div className="mb-2 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
             <Battery className="h-3 w-3" />

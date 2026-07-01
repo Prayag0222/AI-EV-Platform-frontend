@@ -111,6 +111,7 @@ function SidebarContent({
         <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
           Workspace
         </p>
+        
 
         <nav className="space-y-1">
           {primaryNavigation.map((item) => {
@@ -135,13 +136,14 @@ function SidebarContent({
                   <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-volt-secondary" />
                 )}
                 <div className="flex items-center gap-3">
-                  <Icon className={`h-[17px] w-[17px] shrink-0 ${active ? "text-volt-secondary" : "text-slate-400 group-hover:text-volt-primary"}`} />
+                  <Icon className={`h-4.25  w-4.25 shrink-0 ${active ? "text-volt-secondary" : "text-slate-400 group-hover:text-volt-primary"}`} />
                   <span className={`text-sm ${active ? "font-semibold" : "font-medium"}`}>
                     {item.label}
                   </span>
                 </div>
                 <ChevronRight className={`h-3.5 w-3.5 transition-opacity ${active ? "opacity-100 text-volt-secondary" : "opacity-0 group-hover:opacity-60 text-slate-400"}`} />
               </Link>
+              
             );
           })}
         </nav>
@@ -162,7 +164,7 @@ function SidebarContent({
                     className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-slate-500 transition-colors hover:bg-volt-background hover:text-volt-primary"
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className="h-[17px] w-[17px] text-slate-400 group-hover:text-volt-primary shrink-0" />
+                      <Icon className="h-4.25 w-4.25 text-slate-400 group-hover:text-volt-primary shrink-0" />
                       <span className="text-sm font-medium">{action.label}</span>
                     </div>
                     <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-60 text-slate-400 transition-opacity" />
@@ -177,7 +179,7 @@ function SidebarContent({
                   className="group flex items-center justify-between rounded-xl px-3 py-2.5 text-slate-500 transition-colors hover:bg-volt-background hover:text-volt-primary"
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="h-[17px] w-[17px] text-slate-400 group-hover:text-volt-primary shrink-0" />
+                    <Icon className="h-4.25 w-4.25 text-slate-400 group-hover:text-volt-primary shrink-0" />
                     <span className="text-sm font-medium">{action.label}</span>
                   </div>
                   <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-60 text-slate-400 transition-opacity" />

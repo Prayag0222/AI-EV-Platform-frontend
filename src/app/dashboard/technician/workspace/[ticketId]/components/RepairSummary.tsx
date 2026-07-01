@@ -49,7 +49,7 @@ export function RepairSummary({ ticket }: RepairSummaryProps) {
   return (
     <section className="bg-surface rounded-2xl border border-soft shadow-[0_1px_3px_rgba(0,0,0,0.01)] overflow-hidden font-sans">
       {/* Header section with micro-action text */}
-      <div className="px-6 pt-5 pb-4 flex items-center justify-between">
+      <div className="flex flex-col gap-3 px-5 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="space-y-0.5">
           <h2 className="text-base font-bold tracking-tight text-primary-text font-display">
             Repair Summary
@@ -64,7 +64,7 @@ export function RepairSummary({ ticket }: RepairSummaryProps) {
       </div>
 
       {/* Industrial Grid layout with explicit clean hair-line borders */}
-      <div className="grid grid-cols-2 md:grid-cols-3 divide-x divide-y divide-soft border-t border-soft bg-white/40">
+      <div className="grid grid-cols-1 divide-y divide-soft border-t border-soft bg-white/40 sm:grid-cols-2 md:grid-cols-3 md:divide-x">
         {items.map((item, idx) => (
           <div key={idx} className="p-5 space-y-2 hover:bg-white/80 transition-colors">
             <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">

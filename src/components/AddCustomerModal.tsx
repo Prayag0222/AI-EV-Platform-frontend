@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from "react";
 import { X, Loader2, CheckCircle2, AlertTriangle, User, Bike } from 'lucide-react';
+import { API_BASE } from '@/config/api';
 
 interface AddCustomerModalProps {
   isOpen: boolean;
@@ -35,8 +36,7 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
     setToast(null);        
 
     try {
-      // FIXED: Pointing directly to your Port 5000 Express backend engine layer
-      const response = await fetch('http://localhost:3000/api/owner/createCustomer', {
+      const response = await fetch(`${API_BASE}/owner/createCustomer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials:"include",
@@ -108,7 +108,7 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 backdrop-blur-sm animate-fade-in sm:items-center">
       
       {/* 🔔 FLOATING TIMELINE FEED NOTIFICATION TOAST */}
       {toast && (
@@ -129,10 +129,10 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
       )}
 
       {/* THE INNER POPUP COMPONENT CARD FRAME */}
-      <div className="w-full max-w-2xl bg-volt-surface border border-volt-container rounded-container shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative flex max-h-[92vh] w-full max-w-2xl flex-col rounded-t-2xl border border-volt-container bg-volt-surface shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-150 sm:rounded-container sm:zoom-in-95">
         
         {/* HEADER LAYER BLOCK */}
-        <div className="flex items-center justify-between border-b border-volt-container p-6">
+        <div className="flex items-start justify-between gap-4 border-b border-volt-container p-4 sm:p-6">
           <div>
             <h3 className="font-display text-lg font-bold text-volt-primary tracking-tight">
               Register New Customer & Garage Profile
@@ -152,7 +152,7 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
         </div>
 
         {/* SCROLLABLE GRID ZONE */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="overflow-y-auto p-4 space-y-6 sm:p-6">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             
@@ -295,12 +295,12 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
           </div>
 
           {/* LOWER ACTIONS STRIP AREA */}
-          <div className="pt-4 border-t border-volt-container flex items-center justify-end gap-3 sticky bottom-0 bg-volt-surface z-10">
+          <div className="sticky bottom-0 z-10 flex flex-col-reverse gap-3 border-t border-volt-container bg-volt-surface pt-4 sm:flex-row sm:items-center sm:justify-end">
             <button 
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-volt font-display text-sm font-medium text-slate-400 hover:bg-volt-background transition-colors cursor-pointer disabled:opacity-30"
+              className="min-h-10 px-4 py-2 rounded-volt font-display text-sm font-medium text-slate-400 hover:bg-volt-background transition-colors cursor-pointer disabled:opacity-30"
             >
               Cancel
             </button>
@@ -308,7 +308,7 @@ export default function AddCustomerModal({ isOpen, onClose }: AddCustomerModalPr
             <button 
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-volt bg-volt-primary font-display text-sm font-semibold text-white hover:bg-volt-primary/90 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 min-w-[140px] disabled:bg-volt-primary/60"
+              className="min-h-10 px-5 py-2.5 rounded-volt bg-volt-primary font-display text-sm font-semibold text-white hover:bg-volt-primary/90 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 min-w-[140px] disabled:bg-volt-primary/60"
             >
               {isSubmitting ? (
                 <>

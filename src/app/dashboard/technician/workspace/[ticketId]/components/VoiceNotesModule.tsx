@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, StopCircle, Save, Loader2, AlertCircle } from 'lucide-react';
+import { API_BASE } from '@/config/api';
 
 interface VoiceNotesProps {
   ticketId: string | string[] | undefined;
@@ -77,8 +78,9 @@ export default function VoiceNotesModule({ ticketId, onNoteAdded }: VoiceNotesPr
       const formData = new FormData();
       formData.append('audio', audioBlob, 'diagnostic_audio.webm');
 
-      const response = await fetch(`http://localhost:3000/api/technician/workspace/${targetId}/notes/audio`, {
+      const response = await fetch(`${API_BASE}/technician/workspace/${targetId}/notes/audio`, {
         method: 'POST',
+        credentials: 'include',
         body: formData, // Browser automatically sets 'multipart/form-data' header
       });
 

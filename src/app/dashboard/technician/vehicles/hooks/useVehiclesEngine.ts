@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { RepairingVehicleTicket, VehicleTelemetryData } from "../types";
+import { API_BASE } from "@/config/api";
 
 export function useVehiclesEngine() {
   const [tickets, setTickets] = useState<RepairingVehicleTicket[]>([]);
@@ -14,7 +15,7 @@ export function useVehiclesEngine() {
       try {
         setIsLoading(true);
         
-        const profileRes = await fetch("http://localhost:3000/api/auth/me", {
+        const profileRes = await fetch(`${API_BASE}/auth/me`, {
           method: "GET",
           credentials: "include"
         });
@@ -28,7 +29,8 @@ export function useVehiclesEngine() {
         const id = profileData.user.id;
 
         const ticketsRes = await fetch(
-          `http://localhost:3000/api/vehicles/dashboard/${id}`
+          `${API_BASE}/vehicles/dashboard/${id}`,
+          { credentials: "include" }
         );
         const ticketsData = await ticketsRes.json();
 
@@ -55,9 +57,10 @@ export function useVehiclesEngine() {
     telemetryUpdates: Partial<VehicleTelemetryData> // ✨ Goodbye 'any', hello precise object tracking!
   ) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/technician/tickets/${ticketId}`, {
+      const response = await fetch(`${API_BASE}/technician/tickets/${ticketId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ telemetry: telemetryUpdates }),
       });
 

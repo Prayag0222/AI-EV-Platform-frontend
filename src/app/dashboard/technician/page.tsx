@@ -11,6 +11,7 @@ import MetricCard from './components/MetricCard';
 import RepairTaskRow from './components/RepairTaskRow';
 import IntelligenceBrief from './components/IntelligenceBrief';
 import BriefingCard from './components/BriefingCard';
+import { API_BASE } from '@/config/api';
 
 interface CustomerInfo { name: string; phone: string; }
 interface RepairTicket {
@@ -50,7 +51,7 @@ export default function TechnicianWorkspacePage() {
   useEffect(() => {
     const initializeWorkspace = async () => {
       try {
-        const profileResponse = await fetch("http://localhost:3000/api/auth/me", {
+        const profileResponse = await fetch(`${API_BASE}/auth/me`, {
           method: "GET",
           credentials: "include"
         });
@@ -70,7 +71,7 @@ export default function TechnicianWorkspacePage() {
 }
         setActiveUser(loggedInUser);
 
-        const ticketsResponse = await fetch(`http://localhost:3000/api/technician/dashboard?technicianId=${loggedInUser.id}`,{
+        const ticketsResponse = await fetch(`${API_BASE}/technician/dashboard?technicianId=${loggedInUser.id}`,{
           credentials:"include"
         });
         const ticketsData = await ticketsResponse.json();
@@ -87,12 +88,12 @@ export default function TechnicianWorkspacePage() {
       }
     };
     initializeWorkspace();
-  }, []);
+  }, [router]);
 
   // UPDATE REPAIR TICKET WORKBENCH STATUS (MANUAL OVERRIDE ROUTER)
   const advanceRepair = async (ticketId: number, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/technician/tickets/${ticketId}`, {
+      const response = await fetch(`${API_BASE}/technician/tickets/${ticketId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -118,9 +119,10 @@ export default function TechnicianWorkspacePage() {
   // SAVE WORKBENCH PROGRESS LOGS TO THE DATABASE
   const saveTechnicianNotes = async (ticketId: number, notes: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/technician/tickets/${ticketId}`, {
+      const response = await fetch(`${API_BASE}/technician/tickets/${ticketId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials:"include",
         body: JSON.stringify({ technicianNotes: notes })
       });
 

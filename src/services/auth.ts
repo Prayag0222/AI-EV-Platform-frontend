@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function login(email: string, password: string) {
   const response = await fetch(`${API_URL}/auth/login`, {
@@ -43,6 +43,12 @@ export async function getCurrentUser() {
   return data;
 }
 
+export async function logout() {
+  await fetch(`${API_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+}
 
 export async function createShop(shopName:string,shopPhone:string,gstNumber:string,shopAddress:string) {
 
