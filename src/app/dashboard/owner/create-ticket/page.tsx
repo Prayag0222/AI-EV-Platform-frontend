@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import CustomerSearchDropdown, { CustomerRecord } from './components/CustomerSearchDropdown';
+import { API_BASE } from '@/config/api';
+import { toast } from 'react-toastify';
 import { 
   BikeIcon, 
   BookCheck, 
@@ -77,7 +79,7 @@ export default function CreateTicketPage() {
   useEffect(() => {
     const getStaff = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/technician/getAllTechnicians',{credentials:"include"});
+        const res = await fetch(`${API_BASE}/technician/getAllTechnicians`, { credentials: "include" });
         if (!res.ok) throw new Error('Failed to download employee list.');
         const data = await res.json();
         setTechnicians(Array.isArray(data) ? data : []);
@@ -164,7 +166,7 @@ export default function CreateTicketPage() {
         technicianId: formData.technicianId === '' ? null : formData.technicianId
       };
 
-      const response = await fetch('http://localhost:3000/api/owner/createTicket', {
+      const response = await fetch(`${API_BASE}/owner/createTicket`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials:"include",
@@ -174,7 +176,7 @@ export default function CreateTicketPage() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Server rejected intake packet.');
 
-      alert(`🎉 Success! Ticket verified and opened. Ticket ID: #TK-${result.ticket?.id}`);
+      toast.success(`Ticket verified and opened. Ticket ID: #TK-${result.ticket?.id}`);
       
       setFormData({
         customerId: '', name: '', phone: '', vehicleModel: '', vin: '',
@@ -189,14 +191,14 @@ export default function CreateTicketPage() {
 
     } catch (error: unknown) {
       const errorInstance = error instanceof Error ? error : new Error(String(error));
-      alert(`Intake Process Halted: ${errorInstance.message}`);
+      toast.error(`Intake Process Halted: ${errorInstance.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <main className="p-8 max-w-7xl mx-auto min-h-screen bg-volt-background font-sans text-volt-primary antialiased space-y-8">
+    <main className="px-4 py-5 md:px-8 md:py-10 max-w-7xl mx-auto min-h-screen bg-volt-background font-sans text-volt-primary antialiased space-y-8">
       
       {/* 🏙️ MASTER TOP TITLE SEGMENT */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-volt-container gap-4">
@@ -211,7 +213,7 @@ export default function CreateTicketPage() {
       </div>
 
       {/* 🔍 FLOATING SEARCH HUB CARD */}
-      <section className="bg-volt-surface border border-volt-container rounded-container p-6 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.01)] transition-all">
+      <section className="bg-volt-surface border border-volt-container rounded-container p-4 sm:p-6 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.01)] transition-all">
         <div className="max-w-2xl">
           <label className="block font-display text-[11px] font-bold tracking-widest text-slate-400 uppercase mb-2">
             Account Lookup Pipeline
@@ -224,9 +226,9 @@ export default function CreateTicketPage() {
         </div>
 
         {selectedProfileText && !isNewCustomer && (
-          <div className="mt-4 flex items-center gap-2.5 bg-volt-background border border-volt-container/60 p-3 rounded-volt font-display text-xs text-slate-600 animate-fade-in w-fit">
+          <div className="mt-4 flex w-full items-start gap-2.5 bg-volt-background border border-volt-container/60 p-3 rounded-volt font-display text-xs text-slate-600 animate-fade-in sm:w-fit">
             <CheckCircle className="h-4 w-4 text-volt-secondary stroke-[1.5]" />
-            <span>Active Account Context: <strong className="text-volt-primary font-bold select-all">{selectedProfileText}</strong></span>
+            <span className="min-w-0 break-words">Active Account Context: <strong className="text-volt-primary font-bold select-all">{selectedProfileText}</strong></span>
           </div>
         )}
       </section>
@@ -239,7 +241,7 @@ export default function CreateTicketPage() {
           
           {/* ZONE A: NEW WALK-IN CUSTOMER PROFILE CARD */}
           {isNewCustomer && (
-            <div className="bg-volt-surface border border-volt-container rounded-container p-6 shadow-sm space-y-5 animate-in fade-in slide-in-from-top-4 duration-200">
+            <div className="bg-volt-surface border border-volt-container rounded-container p-4 sm:p-6 shadow-sm space-y-5 animate-in fade-in slide-in-from-top-4 duration-200">
               <div className="flex items-center gap-2 border-b border-volt-container/60 pb-3">
                 <User className="h-4 w-4 text-volt-secondary stroke-[1.5]" />
                 <span className="font-display text-xs font-bold uppercase tracking-wider text-slate-400">Account Configuration</span>
@@ -283,7 +285,7 @@ export default function CreateTicketPage() {
 
           {/* ZONE B: EXISTING ACCOUNT VEHICLE ASSET ASSIGNMENT ROUTER */}
           {!isNewCustomer && formData.customerId && (
-            <div className="bg-volt-surface border border-volt-container rounded-container p-6 shadow-sm space-y-5 animate-fade-in">
+            <div className="bg-volt-surface border border-volt-container rounded-container p-4 sm:p-6 shadow-sm space-y-5 animate-fade-in">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-volt-container/60 pb-3 gap-3">
                 <div className="flex items-center gap-2">
                   <BikeIcon className="h-4 w-4 text-volt-secondary stroke-[1.5]" />
@@ -291,7 +293,7 @@ export default function CreateTicketPage() {
                 </div>
                 
                 {/* Visual Tab Pill Switches */}
-                <div className="flex gap-1.5 bg-volt-background p-1 rounded border border-volt-container w-fit text-[11px] font-display font-semibold text-slate-500">
+                <div className="flex w-full gap-1.5 bg-volt-background p-1 rounded border border-volt-container text-[11px] font-display font-semibold text-slate-500 sm:w-fit">
                   <button
                     type="button"
                     onClick={() => {
@@ -301,7 +303,7 @@ export default function CreateTicketPage() {
                       }
                     }}
                     disabled={existingCustomerVehicles.length === 0}
-                    className={`px-3 py-1.5 rounded transition-all cursor-pointer ${
+                    className={`min-h-10 flex-1 px-3 py-1.5 rounded transition-all cursor-pointer sm:flex-none ${
                       !isNewVehicleForCustomer ? 'bg-volt-surface border border-volt-container text-volt-primary font-bold shadow-sm' : 'hover:text-volt-primary disabled:opacity-30'
                     }`}
                   >
@@ -313,7 +315,7 @@ export default function CreateTicketPage() {
                       setIsNewVehicleForCustomer(true);
                       setFormData((prev) => ({ ...prev, vehicleModel: '', vin: '' }));
                     }}
-                    className={`px-3 py-1.5 rounded transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`min-h-10 flex flex-1 items-center justify-center gap-1 px-3 py-1.5 rounded transition-all cursor-pointer sm:flex-none ${
                       isNewVehicleForCustomer ? 'bg-volt-surface border border-volt-container text-volt-primary font-bold shadow-sm' : 'hover:text-volt-primary'
                     }`}
                   >
@@ -360,7 +362,7 @@ export default function CreateTicketPage() {
 
           {/* ZONE C: BRAND NEW CUSTOMER VEHICLE METRIC BLOCK */}
           {isNewCustomer && (
-            <div className="bg-volt-surface border border-volt-container rounded-container p-6 shadow-sm space-y-4 animate-fade-in">
+            <div className="bg-volt-surface border border-volt-container rounded-container p-4 sm:p-6 shadow-sm space-y-4 animate-fade-in">
               <div className="flex items-center gap-2 border-b border-volt-container/60 pb-3">
                 <BikeIcon className="h-4 w-4 text-volt-secondary stroke-[1.5]" />
                 <span className="font-display text-xs font-bold uppercase tracking-wider text-slate-400">Vehicle Definition</span>
@@ -385,7 +387,7 @@ export default function CreateTicketPage() {
           )}
 
           {/* ZONE D: PROBLEM STATEMENT LOG TEXT FIELDS */}
-          <div className="bg-volt-surface border border-volt-container rounded-container p-6 shadow-sm space-y-5">
+          <div className="bg-volt-surface border border-volt-container rounded-container p-4 sm:p-6 shadow-sm space-y-5">
             <div className="flex items-center gap-2 border-b border-volt-container/60 pb-3">
               <FileText className="h-4 w-4 text-volt-secondary stroke-[1.5]" />
               <span className="font-display text-xs font-bold uppercase tracking-wider text-slate-400">Diagnostic Core Details</span>
@@ -407,7 +409,7 @@ export default function CreateTicketPage() {
         {/* RIGHT COLUMN WING: WORKFLOW CONTROLS, PRIORITIES & STAFFING ASSIGNMENT */}
         <div className="space-y-8">
           
-          <div className="bg-volt-surface border border-volt-container rounded-container p-6 shadow-sm space-y-6">
+          <div className="bg-volt-surface border border-volt-container rounded-container p-4 sm:p-6 shadow-sm space-y-6">
             <div className="flex items-center gap-2 border-b border-volt-container/60 pb-3">
               <Wrench className="h-4 w-4 text-volt-secondary stroke-[1.5]" />
               <span className="font-display text-xs font-bold uppercase tracking-wider text-slate-400">Pipeline Controls</span>

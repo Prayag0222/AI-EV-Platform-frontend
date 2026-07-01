@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, User, Smartphone, Bike,MapPinHouse,Mail } from 'lucide-react';
 import { Customer } from '@/app/dashboard/owner/types/customer';
+import { API_BASE } from '@/config/api';
 
 // 📋 1. Simple definition of what a customer object looks like
 
@@ -49,10 +50,10 @@ const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     setErrorMessage(null);
 
     try {
-      // 🌐 Fire the payload directly to your custom backend proxy on port 3000
-      const response = await fetch(`http://localhost:3000/api/owner/updateCustomer/${customer.id}`, {
+      const response = await fetch(`${API_BASE}/owner/updateCustomer/${customer.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
@@ -75,20 +76,18 @@ const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     } finally {
       setIsSubmitting(false);
     }
-    console.log(errorMessage);
-    
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-volt-surface border border-volt-container rounded-container p-6 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 backdrop-blur-sm sm:items-center">
+      <div className="relative max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-volt-container bg-volt-surface p-4 shadow-2xl sm:rounded-container sm:p-6">
         
         {/* Header Title Row */}
         <div className="flex items-center justify-between border-b border-volt-container pb-4 mb-4">
           <h2 className="font-display text-base font-bold text-volt-primary tracking-wide">
             Modify Customer Profile
           </h2>
-          <button onClick={onClose} className="p-1 text-slate-500 hover:text-volt-primary transition-colors cursor-pointer">
+          <button onClick={onClose} className="min-h-10 min-w-10 p-1 text-slate-500 hover:text-volt-primary transition-colors cursor-pointer">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -133,12 +132,18 @@ const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-volt-container pt-4 mt-6">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-volt font-display text-xs font-semibold text-slate-400 hover:bg-volt-background transition-colors cursor-pointer">Cancel</button>
+          {errorMessage && (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">
+              {errorMessage}
+            </p>
+          )}
+
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t border-volt-container pt-4 sm:flex-row sm:items-center sm:justify-end">
+            <button type="button" onClick={onClose} className="min-h-10 px-4 py-2 rounded-volt font-display text-xs font-semibold text-slate-400 hover:bg-volt-background transition-colors cursor-pointer">Cancel</button>
             <button 
             type="submit" 
             disabled={isSubmitting} 
-            className="px-4 py-2 rounded-volt bg-volt-secondary font-display text-xs font-semibold text-volt-background hover:opacity-90 transition-all shadow-md cursor-pointer disabled:opacity-40"
+            className="min-h-10 px-4 py-2 rounded-volt bg-volt-secondary font-display text-xs font-semibold text-volt-background hover:opacity-90 transition-all shadow-md cursor-pointer disabled:opacity-40"
           >
             {isSubmitting ? 'Saving to Database...' : 'Commit Modifications'}
           </button>

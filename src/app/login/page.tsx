@@ -57,7 +57,6 @@ const [gstNumber, setGstNumber] = useState("");
         credentials.password
       );
 
-      console.log(data);
       
       
      if(data.setShowShopModal === true){
@@ -101,7 +100,6 @@ const [gstNumber, setGstNumber] = useState("");
     gstNumber,
     shopAddress)
 
-        console.log(data);
         if(data?.shop) {
   toast.success("Shop created!")
   router.push("/dashboard/owner")  // ← missing!

@@ -272,7 +272,6 @@ export function useRepairWorkspace() {
         const dataEnvelope = new FormData();
         dataEnvelope.append("audio", completeAudioBlob, "briefing.webm");
 
-        console.log("🎙️ Sending WebM audio blob straight to Groq pipeline...");
 
         try {
           const apiResponse = await fetch(
@@ -288,7 +287,6 @@ export function useRepairWorkspace() {
             const parsedJson = await apiResponse.json();
             if (parsedJson.success && parsedJson.note) {
               setNotes((prev) => [...prev, parsedJson.note]);
-              console.log("✨ Notes array updated successfully with database index.");
             }
           }
         } catch (uploadErr) {

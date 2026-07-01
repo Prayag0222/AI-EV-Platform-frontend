@@ -21,6 +21,12 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
       .catch(() => null);
   }, []);
 
+  useEffect(() => {
+    const openCustomerModal = () => setIsCustomerOpen(true);
+    window.addEventListener("voltops:add-customer", openCustomerModal);
+    return () => window.removeEventListener("voltops:add-customer", openCustomerModal);
+  }, []);
+
   return (
     <div className="flex h-screen w-full bg-volt-background text-volt-primary overflow-hidden">
 
@@ -39,6 +45,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
         isOpen={isCustomerOpen}
         onClose={() => setIsCustomerOpen(false)}
       />
+      
     </div>
   );
 }

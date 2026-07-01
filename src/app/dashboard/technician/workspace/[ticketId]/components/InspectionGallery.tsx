@@ -35,7 +35,6 @@ export function InspectionGallery() {
   ];
 
   const handleCameraCapture = () => {
-    console.log("📸 Initializing native hardware system camera capture layer...");
     // Wire up future device media streams safely here
   };
 

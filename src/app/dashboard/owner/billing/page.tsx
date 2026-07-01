@@ -251,7 +251,6 @@ const print = (invoice?: InvoiceRecord) => {
           tickets={pending}
           selectedId={draft?.ticketId}
           onSelect={(ticket) => {
-            console.log("PROFILE BEFORE DRAFT:", profile);
             setDraft(ticketToDraft(ticket,profile));
             window.setTimeout(
               () =>

@@ -1,7 +1,5 @@
 import type { InvoiceRecord } from "../types/billing";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+import { API_BASE } from "@/config/api";
 
 async function fetchPDF(
   invoiceId: number,
@@ -25,9 +23,6 @@ async function fetchPDF(
 }
 
 export const printInvoice = (invoice: InvoiceRecord) => {
-  const API_BASE =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
-
   window.open(
     `${API_BASE}/invoice/${invoice.id}/print`,
     "_blank",

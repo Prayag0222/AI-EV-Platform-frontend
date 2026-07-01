@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Loader2,
   AlertTriangle,
-  DollarSign,
   Bike,
   CheckCircle2,
   ShieldAlert,
@@ -13,6 +12,8 @@ import {
   Bell,
   Settings,
   TrendingUp,
+  UserPlus,
+  FilePlus2,
 } from 'lucide-react';
 import PriorityActionCenter from '@/features/dashboard/components/PriorityActionCenter';
 import AiBriefing from '@/features/dashboard/components/AiBriefing';
@@ -23,6 +24,8 @@ import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { OwnerDashboardPayload } from './types/ownerDashboard';
 import { fetchOwnerDashboardMetrics } from './services/dashboard';
+
+
 
 const Api = process.env.NEXT_PUBLIC_API_URL;
 
@@ -41,12 +44,15 @@ export default function OwnerDashboardPage() {
   const [activeUser, setActiveUser] = useState<{ id: string; name: string } | null>(null);
   const [isAuthError, setIsAuthError] = useState(false);
   const [revenueView, setRevenueView] = useState<'today' | 'week' | 'month' | 'lifetime'>('month');
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
 
     async function load() {
       try {
+        setIsLoading(true);
+        setError(null);
         const profileRes = await fetch(`${Api}/auth/me`, {
           method: 'GET',
           credentials: 'include',
@@ -78,7 +84,7 @@ export default function OwnerDashboardPage() {
 
     load();
     return () => { isMounted = false; };
-  }, []);
+  }, [reloadKey, router]);
 
   // ── Loading ──
   if (isLoading) {
@@ -135,7 +141,7 @@ export default function OwnerDashboardPage() {
           <h3 className="font-bold text-slate-900 mb-1">Failed to load</h3>
           <p className="text-sm text-slate-500">{error || 'Could not load dashboard data.'}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => setReloadKey((key) => key + 1)}
             className="mt-5 w-full rounded-xl bg-slate-900 py-2.5 text-sm font-semibold text-white"
           >
             Retry
@@ -172,11 +178,12 @@ export default function OwnerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-volt-background font-sans text-volt-primary antialiased">
-
+    
       {/* ── Desktop Header (hidden on mobile — sidebar handles mobile top bar) ── */}
       <header className="hidden md:flex sticky top-0 z-40 h-16 w-full items-center justify-between border-b border-volt-container bg-volt-surface px-8 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)]">
         <div>
           <h1 className="font-display text-base font-bold text-volt-primary">Dashboard</h1>
+          
           <p className="text-xs text-slate-400">
             {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
@@ -203,8 +210,8 @@ export default function OwnerDashboardPage() {
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-10 lg:py-10 space-y-6">
 
         {/* ── Hero greeting ── */}
-        <section className="flex items-start justify-between">
-          <div>
+        <section className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
               {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })}
             </p>
@@ -215,12 +222,24 @@ export default function OwnerDashboardPage() {
               <span className="font-semibold text-volt-primary">{quickMetrics.activeTickets} active tickets</span> on the floor today.
             </p>
           </div>
-          {/* Profile icon — visible on mobile only (desktop has header) */}
-          <Link href="/dashboard/owner/profile" className="md:hidden shrink-0 ml-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-volt-primary text-sm font-bold text-white shadow-sm">
-              {activeUser?.name?.slice(0, 2).toUpperCase() ?? 'VO'}
-            </div>
-          </Link>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('voltops:add-customer'))}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-volt-container bg-white px-3 text-xs font-bold text-volt-primary shadow-sm transition hover:bg-volt-background sm:px-4"
+            >
+              <UserPlus className="h-4 w-4" />
+              Add Customer
+            </button>
+            <Link
+              href="/dashboard/owner/create-ticket"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-volt-primary px-3 text-xs font-bold text-white shadow-sm transition hover:bg-volt-primary/95 sm:px-4"
+            >
+              <FilePlus2 className="h-4 w-4" />
+              Create Ticket
+            </Link>
+             
+          </div>
         </section>
 
         {/* ── Revenue card (full width on mobile) + 3 metric cards ── */}
