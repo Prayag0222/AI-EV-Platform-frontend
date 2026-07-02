@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { API_BASE } from "@/config/api";
 import {
   LayoutDashboard,
   Wrench,
@@ -18,8 +19,6 @@ import {
   X,
   Menu,
 } from "lucide-react";
-
-const API = process.env.NEXT_PUBLIC_API_URL;
 
 interface NavItem {
   label: string;
@@ -58,7 +57,7 @@ function SidebarContent({
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      await fetch(`${API}/auth/logout`, {
+      await fetch(`${API_BASE}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

@@ -1,5 +1,4 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL
+import { API_BASE } from '@/config/api';
 
 export interface Profile {
   id: string;
@@ -14,7 +13,7 @@ export interface Profile {
 
 export async function getProfile() {
   const response = await fetch(
-    `${API_URL}/profile/me`,
+    `${API_BASE}/profile/me`,
     {
       credentials: "include",
     }
@@ -37,7 +36,7 @@ export async function updateProfile(payload: {
   shopPhone?: string;
 }) {
   const response = await fetch(
-    `${API_URL}/profile/me`,
+    `${API_BASE}/profile/me`,
     {
       method: "PUT",
       headers: {

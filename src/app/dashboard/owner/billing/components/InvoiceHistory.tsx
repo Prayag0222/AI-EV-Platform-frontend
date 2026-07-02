@@ -1,19 +1,290 @@
 'use client';
-import { ChevronLeft, ChevronRight, Eye, MoreHorizontal, Printer, Search, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import {
+  ChevronLeft, ChevronRight, Search, Eye,
+  Printer, Trash2, CheckCircle2, X,
+} from 'lucide-react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import type { InvoiceRecord } from '../types/billing';
 import { formatCurrency } from '../utils/calculateInvoice';
 
-const PAGE_SIZE = 6;
-export default function InvoiceHistory({ invoices, onView, onPrint, onMarkPaid, onDelete }: { invoices: InvoiceRecord[]; onView: (invoice: InvoiceRecord) => void; onPrint: (invoice: InvoiceRecord) => void; onMarkPaid: (invoice: InvoiceRecord) => void; onDelete: (invoice: InvoiceRecord) => void }) {
-  const [query, setQuery] = useState(''); const [status, setStatus] = useState('ALL'); const [date, setDate] = useState(''); const [page, setPage] = useState(1); const [menu, setMenu] = useState<number | null>(null);
-  const filtered = useMemo(() => invoices.filter((invoice) => {
-    const needle = query.toLowerCase(); const matchesSearch = [invoice.invoiceNo, invoice.customerName, invoice.ticket?.vehicle?.vehicleModel].some((value) => value?.toLowerCase().includes(needle));
-    return matchesSearch && (status === 'ALL' || invoice.paymentStatus === status) && (!date || invoice.createdAt.slice(0, 10) === date);
-  }), [invoices, query, status, date]);
-  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)); const rows = filtered.slice((Math.min(page, pages) - 1) * PAGE_SIZE, Math.min(page, pages) * PAGE_SIZE);
-  return <section className="rounded-2xl border border-[#dedbd8] bg-white" aria-labelledby="history-heading"><div className="border-b border-[#e7e3df] p-5"><div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#006a63]">Ledger</p><h2 id="history-heading" className="mt-1 text-xl font-bold text-[#091426]">Invoice history</h2></div><div className="flex flex-col gap-2 sm:flex-row"><label className="relative"><Search className="absolute left-3 top-2.5 text-[#8a8b90]" size={17}/><input value={query} onChange={(e) => { setQuery(e.target.value); setPage(1); }} className="w-full rounded-xl border border-[#d9d6d2] py-2 pl-9 pr-3 text-sm outline-none focus:border-[#006a63] sm:w-56" placeholder="Search invoices"/></label><select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="rounded-xl border border-[#d9d6d2] px-3 py-2 text-sm"><option value="ALL">All statuses</option><option value="PAID">Paid</option><option value="UNPAID">Unpaid</option></select><input type="date" value={date} onChange={(e) => { setDate(e.target.value); setPage(1); }} className="rounded-xl border border-[#d9d6d2] px-3 py-2 text-sm"/></div></div></div>
-    <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left text-sm"><thead className="bg-[#f7f5f3] text-[10px] uppercase tracking-wider text-[#75777d]"><tr>{['Invoice no.', 'Customer', 'Vehicle', 'Date', 'Total', 'Status', 'Method', 'Actions'].map((h) => <th key={h} className="px-5 py-3 font-bold">{h}</th>)}</tr></thead><tbody>{rows.map((invoice) => <tr key={invoice.id} className="border-t border-[#eeeae7] text-[#45474c] hover:bg-[#fcfbfa]"><td className="px-5 py-4 font-mono text-xs font-bold text-[#006a63]">{invoice.invoiceNo}</td><td className="px-5 py-4"><b className="text-[#091426]">{invoice.customerName}</b><small className="block text-[#8a8b90]">{invoice.customerPhone}</small></td><td className="px-5 py-4">{invoice.ticket?.vehicle?.vehicleModel || (invoice.saleType === 'COUNTER' ? 'Counter sale' : '—')}</td><td className="px-5 py-4">{new Date(invoice.createdAt).toLocaleDateString('en-IN')}</td><td className="px-5 py-4 font-bold text-[#091426]">{formatCurrency(invoice.grandTotal)}</td><td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${invoice.paymentStatus === 'PAID' ? 'bg-[#d7f4ef] text-[#006a63]' : 'bg-[#fff0d9] text-[#7a4f00]'}`}>{invoice.paymentStatus}</span></td><td className="px-5 py-4 text-xs font-semibold">{invoice.paymentMethod.replace('_', ' ')}</td><td className="relative px-5 py-4"><button onClick={() => setMenu(menu === invoice.id ? null : invoice.id)} className="rounded-lg border p-2 hover:bg-[#f2f0ef]"><MoreHorizontal size={16}/></button>{menu === invoice.id && <div className="absolute right-5 top-12 z-20 w-40 rounded-xl border bg-white p-1.5 shadow-xl"><button onClick={() => { onView(invoice); setMenu(null); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold hover:bg-[#f4f2f0]"><Eye size={14}/>View details</button><button onClick={() => { onPrint(invoice); setMenu(null); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold hover:bg-[#f4f2f0]"><Printer size={14}/>Print again</button>{invoice.paymentStatus !== 'PAID' && <button onClick={() => { onMarkPaid(invoice); setMenu(null); }} className="flex w-full rounded-lg px-3 py-2 text-xs font-semibold text-[#006a63] hover:bg-[#e8f7f4]">Mark paid</button>}<button onClick={() => { onDelete(invoice); setMenu(null); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-[#ba1a1a] hover:bg-[#fff1ef]"><Trash2 size={14}/>Delete</button></div>}</td></tr>)}{!rows.length && <tr><td colSpan={8} className="p-10 text-center text-sm text-[#75777d]">No invoices match these filters.</td></tr>}</tbody></table></div>
-    <div className="flex items-center justify-between border-t px-5 py-4 text-xs text-[#75777d]"><span>Showing {rows.length} of {filtered.length}</span><div className="flex items-center gap-2"><button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-lg border p-2 disabled:opacity-30"><ChevronLeft size={15}/></button><span className="font-semibold text-[#45474c]">Page {Math.min(page, pages)} of {pages}</span><button disabled={page >= pages} onClick={() => setPage((p) => p + 1)} className="rounded-lg border p-2 disabled:opacity-30"><ChevronRight size={15}/></button></div></div>
-  </section>;
+const PAGE_SIZE = 8;
+
+interface Props {
+  invoices: InvoiceRecord[];
+  onView: (i: InvoiceRecord) => void;
+  onPrint: (i: InvoiceRecord) => void;
+  onMarkPaid: (i: InvoiceRecord) => void;
+  onDelete: (i: InvoiceRecord) => void;
+}
+
+export default function InvoiceHistory({ invoices, onView, onPrint, onMarkPaid, onDelete }: Props) {
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState('ALL');
+  const [page, setPage] = useState(1);
+  const [menuId, setMenuId] = useState<number | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return invoices.filter((inv) => {
+      const matchSearch = !q ||
+        inv.invoiceNo.toLowerCase().includes(q) ||
+        inv.customerName.toLowerCase().includes(q) ||
+        inv.customerPhone.includes(q);
+      const matchStatus = status === 'ALL' || inv.paymentStatus === status;
+      return matchSearch && matchStatus;
+    });
+  }, [invoices, query, status]);
+
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pages);
+  const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const resetPage = () => setPage(1);
+
+  return (
+    <section className="rounded-2xl border border-volt-container bg-white overflow-hidden">
+
+      {/* ── Header ── */}
+      <div className="border-b border-volt-container px-4 sm:px-6 py-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-volt-secondary">Ledger</p>
+            <h2 className="mt-0.5 text-lg font-black text-volt-primary">Invoice History</h2>
+          </div>
+          <span className="text-xs font-semibold text-slate-400">{filtered.length} records</span>
+        </div>
+
+        {/* Filters */}
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+            <input
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); resetPage(); }}
+              className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+              placeholder="Search invoice, customer..."
+            />
+            {query && (
+              <button onClick={() => { setQuery(''); resetPage(); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Status filter chips */}
+          <div className="flex gap-1.5 shrink-0">
+            {(['ALL', 'PAID', 'UNPAID'] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => { setStatus(s); resetPage(); }}
+                className={`rounded-xl px-3 py-2.5 text-xs font-bold transition-colors ${
+                  status === s
+                    ? 'bg-slate-900 text-white'
+                    : 'border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400'
+                }`}
+              >
+                {s === 'ALL' ? 'All' : s === 'PAID' ? 'Paid' : 'Unpaid'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Mobile Cards ── */}
+      <div className="block sm:hidden divide-y divide-slate-100">
+        {rows.length === 0 ? (
+          <p className="py-12 text-center text-sm text-slate-400">No invoices match these filters.</p>
+        ) : (
+          rows.map((inv) => (
+            <div key={inv.id} className="p-4 space-y-3">
+              {/* Top row */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-mono text-xs font-bold text-volt-secondary truncate">{inv.invoiceNo}</p>
+                  <p className="text-sm font-bold text-slate-900 mt-0.5">{inv.customerName}</p>
+                  <p className="text-xs text-slate-400">{inv.customerPhone}</p>
+                </div>
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                    inv.paymentStatus === 'PAID'
+                      ? 'bg-emerald-50 text-emerald-700'
+                      : 'bg-amber-50 text-amber-700'
+                  }`}>
+                    {inv.paymentStatus}
+                  </span>
+                  <p className="text-base font-black text-slate-900">{formatCurrency(inv.grandTotal)}</p>
+                </div>
+              </div>
+
+              {/* Meta row */}
+              <div className="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+                <span className="bg-slate-100 rounded-lg px-2 py-1 font-medium">
+                  {inv.ticket?.vehicle?.vehicleModel || (inv.saleType === 'COUNTER' ? 'Counter sale' : '—')}
+                </span>
+                <span>{inv.paymentMethod.replace('_', ' ')}</span>
+                <span>{new Date(inv.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onView(inv)}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <Eye size={13} /> View
+                </button>
+                <button
+                  onClick={() => onPrint(inv)}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <Printer size={13} /> Print
+                </button>
+                {inv.paymentStatus !== 'PAID' && (
+                  <button
+                    onClick={() => onMarkPaid(inv)}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors"
+                  >
+                    <CheckCircle2 size={13} /> Paid
+                  </button>
+                )}
+                <button
+                  onClick={() => onDelete(inv)}
+                  className="flex items-center justify-center rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ── Desktop Table ── */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-200">
+            <tr>
+              {['Invoice No.', 'Customer', 'Vehicle', 'Date', 'Total', 'Status', 'Method', 'Actions'].map((h) => (
+                <th key={h} className="px-5 py-3 font-bold">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-12 text-center text-sm text-slate-400">
+                  No invoices match these filters.
+                </td>
+              </tr>
+            ) : (
+              rows.map((inv) => (
+                <tr key={inv.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                  <td className="px-5 py-4 font-mono text-xs font-bold text-volt-secondary">{inv.invoiceNo}</td>
+                  <td className="px-5 py-4">
+                    <p className="font-semibold text-slate-900">{inv.customerName}</p>
+                    <p className="text-xs text-slate-400">{inv.customerPhone}</p>
+                  </td>
+                  <td className="px-5 py-4 text-slate-600">
+                    {inv.ticket?.vehicle?.vehicleModel || (inv.saleType === 'COUNTER' ? 'Counter sale' : '—')}
+                  </td>
+                  <td className="px-5 py-4 text-slate-500 text-xs">
+                    {new Date(inv.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </td>
+                  <td className="px-5 py-4 font-bold text-slate-900">{formatCurrency(inv.grandTotal)}</td>
+                  <td className="px-5 py-4">
+                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                      inv.paymentStatus === 'PAID'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'bg-amber-50 text-amber-700'
+                    }`}>
+                      {inv.paymentStatus}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-xs font-medium text-slate-500">
+                    {inv.paymentMethod.replace('_', ' ')}
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="relative" ref={menuId === inv.id ? menuRef : undefined}>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => onView(inv)}
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                          title="View"
+                        >
+                          <Eye size={15} />
+                        </button>
+                        <button
+                          onClick={() => onPrint(inv)}
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                          title="Print"
+                        >
+                          <Printer size={15} />
+                        </button>
+                        {inv.paymentStatus !== 'PAID' && (
+                          <button
+                            onClick={() => onMarkPaid(inv)}
+                            className="rounded-lg p-1.5 text-emerald-500 hover:bg-emerald-50 transition-colors"
+                            title="Mark Paid"
+                          >
+                            <CheckCircle2 size={15} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => onDelete(inv)}
+                          className="rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── Pagination ── */}
+      {filtered.length > PAGE_SIZE && (
+        <div className="flex items-center justify-between border-t border-slate-100 px-4 sm:px-6 py-4">
+          <span className="text-xs text-slate-400">
+            {rows.length} of {filtered.length} invoices
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => p - 1)}
+              className="rounded-xl border border-slate-200 p-2 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+            >
+              <ChevronLeft size={15} />
+            </button>
+            <span className="text-xs font-semibold text-slate-600 min-w-20 text-center">
+              Page {safePage} of {pages}
+            </span>
+            <button
+              disabled={safePage >= pages}
+              onClick={() => setPage((p) => p + 1)}
+              className="rounded-xl border border-slate-200 p-2 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+            >
+              <ChevronRight size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }

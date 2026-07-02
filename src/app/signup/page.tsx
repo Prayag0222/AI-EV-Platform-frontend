@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import AuthLayout from "@/components/auth/AuthLayout";
-const Api = process.env.NEXT_PUBLIC_API_URL
+import { API_BASE } from '@/config/api';
 
 
 
@@ -45,13 +45,11 @@ export default function SignupPage() {
     try {
       setLoading(true);
 
-      const response = await fetch(
-      `${Api}/auth/signup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(`${API_BASE}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
           body: JSON.stringify({
             ...formData,
             role: "OWNER",

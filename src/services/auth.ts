@@ -1,9 +1,8 @@
 import { toast } from "react-toastify";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { API_BASE } from "@/config/api";
 
 export async function login(email: string, password: string) {
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -30,7 +29,7 @@ const user = data.user
 }
 
 export async function getCurrentUser() {
-  const response = await fetch(`${API_URL}/auth/me`, {
+  const response = await fetch(`${API_BASE}/auth/me`, {
     credentials: "include",
   });
 
@@ -44,7 +43,7 @@ export async function getCurrentUser() {
 }
 
 export async function logout() {
-  await fetch(`${API_URL}/auth/logout`, {
+  await fetch(`${API_BASE}/auth/logout`, {
     method: "POST",
     credentials: "include",
   });
@@ -52,7 +51,7 @@ export async function logout() {
 
 export async function createShop(shopName:string,shopPhone:string,gstNumber:string,shopAddress:string) {
 
-  const response = await fetch(`${API_URL}/shop/create`, {
+  const response = await fetch(`${API_BASE}/shop/create`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
