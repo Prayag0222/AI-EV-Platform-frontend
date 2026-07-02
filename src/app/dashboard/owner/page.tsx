@@ -24,10 +24,8 @@ import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { OwnerDashboardPayload } from './types/ownerDashboard';
 import { fetchOwnerDashboardMetrics } from './services/dashboard';
+import { API_BASE } from '@/config/api';
 
-
-
-const Api = process.env.NEXT_PUBLIC_API_URL;
 
 const formatINR = (amount: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -53,7 +51,7 @@ export default function OwnerDashboardPage() {
       try {
         setIsLoading(true);
         setError(null);
-        const profileRes = await fetch(`${Api}/auth/me`, {
+        const profileRes = await fetch(`${API_BASE}/auth/me`, {
           method: 'GET',
           credentials: 'include',
         });

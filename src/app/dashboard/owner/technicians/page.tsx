@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Loader2, AlertTriangle, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { API_BASE } from '@/config/api';
 
 import TechnicianHeader from './components/TechnicianHeader';
 import TechnicianStats from './components/TechnicianStats';
@@ -14,8 +15,6 @@ import TechnicianFormModal, {
   TechnicianEditFormData,
 } from './components/TechnicianFormModal';
 import DeleteTechnicianModal from './components/DeleteTechnicianModal';
-
-const API = process.env.NEXT_PUBLIC_API_URL;
 
 interface Technician {
   id: string;
@@ -65,7 +64,7 @@ export default function OwnerTechniciansPage() {
   // ── Fetch ──
   useEffect(() => {
     let mounted = true;
-    fetch(`${API}/technician/getAllTechnicians`, { credentials: 'include' })
+    fetch(`${API_BASE}/technician/getAllTechnicians`, { credentials: 'include' })
       .then((r) => { if (!r.ok) throw new Error('Failed to load technicians.'); return r.json(); })
       .then((data) => { if (mounted) { setTechnicians(data); setError(null); } })
       .catch((e) => { if (mounted) setError(e.message); })
@@ -102,7 +101,7 @@ export default function OwnerTechniciansPage() {
     setFormError(null);
     setFormSuccess(null);
     try {
-      const res = await fetch(`${API}/technician/createTechnician`, {
+      const res = await fetch(`${API_BASE}/technician/createTechnician`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -123,7 +122,7 @@ export default function OwnerTechniciansPage() {
 
   const handleEditSave = async (id: string) => {
     try {
-      const res = await fetch(`${API}/technician/updateTechnician/${id}`, {
+      const res = await fetch(`${API_BASE}/technician/updateTechnician/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -143,7 +142,7 @@ export default function OwnerTechniciansPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      const res = await fetch(`${API}/technician/deleteTechnician/${deleteTarget.id}`, {
+      const res = await fetch(`${API_BASE}/technician/deleteTechnician/${deleteTarget.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

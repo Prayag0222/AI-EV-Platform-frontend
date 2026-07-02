@@ -1,8 +1,8 @@
 import { OwnerDashboardPayload } from "../types/ownerDashboard";
+import { API_BASE } from '@/config/api';
 
 
 // Points directly to your Express engine dashboard routing group
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL 
 
 /**
  * Syncs the dashboard data mapping vectors directly from your backend database pool.
@@ -13,7 +13,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 type DashboardResponse = OwnerDashboardPayload ;
 
 export async function fetchOwnerDashboardMetrics(): Promise<DashboardResponse> {
-  const response = await fetch(`${API_BASE_URL}/owner/dashboard`, {
+  const response = await fetch(`${API_BASE}/owner/dashboard`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',  // ← ADD THIS

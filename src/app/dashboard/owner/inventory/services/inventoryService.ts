@@ -4,8 +4,7 @@ import type {
   EditInventoryPayload,
   AddStockPayload,
 } from '../types/inventory';
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL
+import { API_BASE } from '@/config/api';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   const data = await res.json();
@@ -16,7 +15,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 // ─── Existing endpoints (unchanged) ────────────────────────────────────────
 
 export async function fetchInventory(): Promise<InventoryItem[]> {
-  const res = await fetch(`${BASE_URL}/inventory`,{
+  const res = await fetch(`${API_BASE}/inventory`,{
     credentials:"include"
   });
   const data = await handleResponse<{ items: InventoryItem[] }>(res);
@@ -24,7 +23,7 @@ export async function fetchInventory(): Promise<InventoryItem[]> {
 }
 
 export async function addInventoryItem(payload: AddInventoryPayload): Promise<InventoryItem> {
-  const res = await fetch(`${BASE_URL}/inventory`, {
+  const res = await fetch(`${API_BASE}/inventory`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -40,7 +39,7 @@ export async function editInventoryItem(
   id: number,
   payload: EditInventoryPayload
 ): Promise<InventoryItem> {
-  const res = await fetch(`${BASE_URL}/inventory/${id}`, {
+  const res = await fetch(`${API_BASE}/inventory/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -51,14 +50,14 @@ export async function editInventoryItem(
 }
 
 export async function deleteInventoryItem(id: number): Promise<void> {
-  const res = await fetch(`${BASE_URL}/inventory/${id}`, { method: 'DELETE',
+  const res = await fetch(`${API_BASE}/inventory/${id}`, { method: 'DELETE',
     credentials:"include"
    });
   await handleResponse<unknown>(res);
 }
 
 export async function addStock(id: number, payload: AddStockPayload): Promise<InventoryItem> {
-  const res = await fetch(`${BASE_URL}/inventory/${id}/stock`, {
+  const res = await fetch(`${API_BASE}/inventory/${id}/stock`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

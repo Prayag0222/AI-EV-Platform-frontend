@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import AddCustomerModal from "@/components/AddCustomerModal";
-
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { API_BASE } from "@/config/api";
 
 interface OwnerLayoutProps {
   children: React.ReactNode;
@@ -15,7 +14,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
 
   useEffect(() => {
-    fetch(`${API}/auth/me`, { credentials: "include" })
+    fetch(`${API_BASE}/auth/me`, { credentials: "include" })
       .then((r) => r.json())
       .then((data) => setUser(data.user))
       .catch(() => null);

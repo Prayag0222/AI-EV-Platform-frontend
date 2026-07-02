@@ -6,4 +6,7 @@ if (!apiUrl) {
   );
 }
 
-export const API_BASE = apiUrl;
+const normalizedUrl = apiUrl.replace(/\/+$/, '');
+export const API_BASE = normalizedUrl.endsWith('/api')
+  ? normalizedUrl
+  : `${normalizedUrl}/api`;
