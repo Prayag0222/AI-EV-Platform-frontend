@@ -2,7 +2,7 @@
   "name": "VoltOps",
   "short_name": "VoltOps",
   "description": "AI-powered EV Repair Intelligence Platform for workshops, battery repair centers and EV service businesses.",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
