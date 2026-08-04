@@ -1,7 +1,6 @@
 const CACHE_NAME = "voltops-v1";
 
 const APP_SHELL = [
-  "/",
   "/offline.html",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
