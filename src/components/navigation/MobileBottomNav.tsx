@@ -44,7 +44,7 @@ export default function MobileBottomNav() {
         bottom-4
         left-1/2
         -translate-x-1/2
-        z-50
+        z-30
         w-[95%]
         max-w-md
         rounded-2xl
