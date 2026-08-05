@@ -7,7 +7,6 @@ import {
   Users,
   Wrench,
   Package,
-  Menu,
 } from "lucide-react";
 
 const navItems = [
