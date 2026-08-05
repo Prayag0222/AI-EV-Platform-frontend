@@ -3,13 +3,18 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/services/auth";
+import { useState } from "react";
+import AppLoadingScreen from "@/components/loading/AppLoadingScreen";
+
 
 export default function AppEntryPage() {
   const router = useRouter();
+  const [loading,setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+       
         const { user } = await getCurrentUser();
 
         if (user.role === "OWNER") {
@@ -26,10 +31,17 @@ export default function AppEntryPage() {
       } catch {
         router.replace("/login");
       }
+      finally{
+        setLoading(false)
+      }
     };
 
     checkAuth();
   }, [router]);
 
-  return null;
+ if (loading) {
+  return <AppLoadingScreen />;
+}
+
+return null;;
 }
