@@ -38,9 +38,9 @@ export default function AuthLayout({
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl border border-black/[0.06] p-6 md:p-8 shadow-sm">
+        <div className="bg-white rounded-3xl border border-black/6 p-6 md:p-8 shadow-sm">
           <div className="mb-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] px-3 py-1.5 mb-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-black/8 px-3 py-1.5 mb-4">
               <span className="h-2 w-2 rounded-full bg-violet-500" />
               <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-600">
                 VoltOps Access
