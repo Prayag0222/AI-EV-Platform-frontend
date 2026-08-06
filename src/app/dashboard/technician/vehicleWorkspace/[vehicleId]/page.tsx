@@ -87,16 +87,10 @@ export default function VehicleWorkspacePage() {
           totalRepairs={workspace.statistics.totalRepairs}
         />
 
-        {/* AI */}
-        <AIRepairIntelligencePanel
-          vehicle={workspace.vehicle}
-          statistics={workspace.statistics}
-        />
+       
 
         {/* Stats */}
-        <VehicleStatisticsPanel
-          statistics={workspace.statistics}
-        />
+       
 
         {/* ================= DESKTOP ================= */}
         <div className="hidden xl:flex xl:flex-col xl:gap-6">

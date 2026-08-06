@@ -234,7 +234,7 @@ export default function Sidebar({ onAddCustomerClick, user }: SidebarProps) {
   return (
     <>
       {/* ── Mobile Top Bar ── */}
-      <div className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-volt-container bg-volt-surface px-4 md:hidden">
+      <div className="fixed top-0 left-0 right-0 z-100 flex h-14 items-center justify-between border-b border-volt-container bg-volt-surface px-4 md:hidden">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-volt-primary text-white">
             <Zap className="h-4 w-4 fill-current" />

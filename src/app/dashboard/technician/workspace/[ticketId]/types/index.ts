@@ -6,6 +6,7 @@ export interface CustomerProfile {
   phone: string;
   memberSince?: string;
   pastRepairsCount?: number;
+  email?: string;
 }
 
 export interface Technician { fullName: string; }

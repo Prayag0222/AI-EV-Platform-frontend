@@ -12,6 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { logout } from "@/services/auth";
 import { TechnicianSidebar } from "./components/TechnicianSidebar";
+import TechnicianTopNav from "./components/navigation/TechnicianTopNav";
+
 
 export default function TechnicianLayout({
   children,
@@ -161,6 +163,8 @@ export default function TechnicianLayout({
           </div>
         </motion.header>
 
+        <TechnicianTopNav/>
+
         {/* Route Transition */}
 
         <motion.main
@@ -176,10 +180,13 @@ export default function TechnicianLayout({
           transition={{
             duration: 0.22,
           }}
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-y-auto pb-24"
         >
           {children}
         </motion.main>
+
+
+
 
       </div>
     </div>
