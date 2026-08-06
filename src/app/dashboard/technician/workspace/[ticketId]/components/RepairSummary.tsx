@@ -3,7 +3,7 @@
 
 import React from "react";
 import { 
-  AlertTriangle, ShieldCheck, Zap, CircleDollarSign, Clock, CheckCircle2, ChevronRight 
+  AlertTriangle,  Zap, Clock,  ChevronRight 
 } from "lucide-react";
 import type { RepairTicket } from "../types/index";
 
@@ -20,29 +20,14 @@ export function RepairSummary({ ticket }: RepairSummaryProps) {
       icon: <AlertTriangle className="h-4 w-4 text-slate-400" /> 
     },
     { 
-      label: "Warranty Status", 
-      value: "Active · 14 mo left", // Static fallback or dynamic if mapped
-      icon: <ShieldCheck className="h-4 w-4 text-emerald-500" /> 
-    },
-    { 
       label: "Ticket Priority", 
-      value: `${ticket.priority} Weight`, 
+      value: `${ticket.priority} Priority`, 
       icon: <Zap className="h-4 w-4 text-amber-500" /> 
-    },
-    { 
-      label: "Estimated Cost", 
-      value: ticket.repairCost, 
-      icon: <CircleDollarSign className="h-4 w-4 text-slate-400" /> 
     },
     { 
       label: "Assigned Timestamp", 
       value: ticket.assignedAt || "Today · 09:12", 
       icon: <Clock className="h-4 w-4 text-slate-400" /> 
-    },
-    { 
-      label: "Est. Completion (ETC)", 
-      value: ticket.estimatedCompletionTime, 
-      icon: <CheckCircle2 className="h-4 w-4 text-teal-600" /> 
     },
   ];
 

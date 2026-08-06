@@ -29,7 +29,6 @@ export default function WorkspacePage() {
     error,
     isSavingStatus,
     isSavingPart,
-    isSavingCosts,
     inventory,
     partsTotal,
     startRecording,
@@ -41,7 +40,6 @@ export default function WorkspacePage() {
     deleteNote,
     addPart,
     removePart,
-    saveRepairCosts,
   } = useRepairWorkspace();
 
   // A. Dynamic Loading State Mask
@@ -73,13 +71,13 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-slate-900 pb-32 lg:pb-12 font-sans selection:bg-teal-100">
+    <div className="min-h-screen bg-[#FAFAF8] text-slate-900 pb-32 lg:pb-12 font-sans selection:bg-teal-100 ">
       <div className="mx-auto max-w-360 px-4 sm:px-6 lg:px-10 pt-4 space-y-6">
         
         {/* 🟢 SERVER RUNTIME FEEDBACK STRIP */}
         <div className="flex items-center gap-2 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl w-max shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Voltline OS 2026 Engine Connected · Data Stream Hydrated From Prisma Server Node</span>
+          <span className="h-1.5 w-1.5 wrap-normal rounded-full bg-emerald-500 animate-pulse" />
+          <span>VoltOps OS 2026 Engine Connected </span>
         </div>
 
         {/* 1. Master Context Header */}
@@ -111,10 +109,8 @@ export default function WorkspacePage() {
             />
 
             <PartsAllocation inventory={inventory} parts={ticket.parts} total={partsTotal} saving={isSavingPart} onAdd={addPart} onRemove={removePart} />
-            <RepairCostPanel ticket={ticket} partsTotal={partsTotal} saving={isSavingCosts} onSave={saveRepairCosts} />
             
             <InspectionGallery />
-            <TimelineFeed events={ticket.timeline} />
           </div>
 
           {/* Side Intelligence Panel Rail (Right 4 Columns) */}
@@ -125,13 +121,14 @@ export default function WorkspacePage() {
               batterySerial={ticket.batteryPackSerial} 
             />
             <AICopilot />
+            <TimelineFeed events={ticket.timeline} />
           </aside>
 
         </div>
       </div>
 
       {/* 4. Tablet/Mobile Responsive Quick Action Bar */}
-      <QuickActionBar onVoicePress={isRecording ? stopRecording : startRecording} recordActive={isRecording} />
+     
     </div>
   );
 }
@@ -139,41 +136,4 @@ export default function WorkspacePage() {
 /* =========================================================================
    LOCAL ASSY COMPONENT: MOBILE STICKY FOOTER
    ========================================================================= */
-function QuickActionBar({ onVoicePress, recordActive }: { onVoicePress: () => void; recordActive: boolean }) {
-  const primaryActions = [
-    { label: "Status", icon: <Activity className="h-4 w-4" /> },
-    { label: "Note", icon: <StickyNote className="h-4 w-4" /> },
-    { 
-      label: recordActive ? "Stop" : "Voice", 
-      icon: <Mic className="h-4 w-4" />, 
-      overrideAction: onVoicePress,
-      customClass: recordActive ? "text-red-600 bg-red-50 font-bold border-red-200" : "" 
-    },
-    { label: "Photo", icon: <Camera className="h-4 w-4" /> },
-    { label: "Part", icon: <Package className="h-4 w-4" /> },
-    { label: "Done", icon: <CircleCheck className="h-4 w-4" />, highlighted: true },
-  ];
 
-  return (
-    <div className="fixed bottom-4 inset-x-4 lg:hidden z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 p-1.5 flex items-center justify-between gap-1 max-w-md mx-auto">
-        {primaryActions.map((action, i) => (
-          <button
-            key={i}
-            onClick={action.overrideAction ? action.overrideAction : undefined}
-            className={`flex-1 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold tracking-tight transition-all border border-transparent ${
-              action.highlighted
-                ? "bg-slate-900 text-white shadow-sm font-medium"
-                : action.customClass
-                ? action.customClass
-                : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-            }`}
-          >
-            {action.icon}
-            <span>{action.label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}

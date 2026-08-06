@@ -9,6 +9,7 @@ interface CustomerCardProps {
   customer: CustomerProfile;
   vehicleModel: string;
   batterySerial: string;
+  email?: string;
 }
 
 export function CustomerCard({ customer, vehicleModel, batterySerial }: CustomerCardProps) {
@@ -23,7 +24,7 @@ export function CustomerCard({ customer, vehicleModel, batterySerial }: Customer
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold text-slate-900 truncate">{customer.name}</p>
           <p className="text-[11px] font-medium text-slate-400 truncate">
-            Enterprise Fleet Client · ID #C-9021
+            {customer.email}
           </p>
         </div>
         
@@ -45,32 +46,24 @@ export function CustomerCard({ customer, vehicleModel, batterySerial }: Customer
         </div>
 
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Hardware ID</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Phone </span>
           <span className="text-xs font-mono font-bold text-slate-700 mt-0.5 block truncate bg-slate-50 border border-slate-200/40 px-1.5 py-0.5 rounded w-max">
-            {batterySerial}
+            {customer.phone || "N/A"}
           </span>
         </div>
 
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Coverage</span>
-          <span className="text-xs font-semibold text-emerald-600 mt-0.5 flex items-center gap-1">
-            <ShieldCheck className="h-3.5 w-3.5" /> Active Warranty
-          </span>
-        </div>
+      
 
         <div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Lifecycle Trace</span>
           <span className="text-xs font-semibold text-slate-800 mt-0.5 flex items-center gap-1">
-            <History className="h-3.5 w-3.5 text-slate-400" /> {customer.pastRepairsCount} Past Repairs
+            <History className="h-3.5 w-3.5 text-slate-400" /> {customer.pastRepairsCount || 0} Past Repairs
           </span>
         </div>
 
       </div>
 
-      {/* Full Record Deep Link Row */}
-      <button className="w-full h-8.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-all flex items-center justify-center gap-1">
-        Inspect Complete Profile Matrix <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-      </button>
+     
 
     </section>
   );

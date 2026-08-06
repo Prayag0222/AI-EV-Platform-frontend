@@ -5,10 +5,8 @@ import {
   BatteryCharging,
   ChevronLeft,
   Command,
-  History,
   LogOut,
-  PackageOpen,
-  Grid2X2,
+  Home,
   Wrench,
   X,
 } from "lucide-react";
@@ -18,9 +16,9 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   {
-    label: "Workspace",
+    label: "Home",
     path: "/dashboard/technician",
-    icon: Grid2X2,
+    icon: Home,
   },
   {
     label: "Repairs",

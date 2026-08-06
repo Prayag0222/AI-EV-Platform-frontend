@@ -178,21 +178,11 @@ export default function TechnicianWorkspacePage() {
             <span className="text-sec-text">Repairs need your attention.</span>
           </h1>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="h-11 rounded-xl bg-card px-4"><FileText />Logs</Button>
-          <Button className="h-11 rounded-xl px-5 bg-[#0C5C3C] shadow-none hover:bg-[#0C5C3C]/90 text-white"><Sparkles />Diagnosis</Button>
-        </div>
+        
       </section>
 
-      {notice && (
-        <div className="mb-7 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-success/20 bg-emerald-50 px-4 py-3 text-sm">
-          <div className="flex min-w-0 items-center gap-3">
-            <Check className="size-4 shrink-0 text-emerald-600" />
-            <span className='text-gray-700'><strong className='text-primary-text'>New Update:</strong> {notice}</span>
-          </div>
-          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")}><X className="size-4" /></Button>
-        </div>
-      )}
+    
+       
 
       {/* METRIC SUMMARIES */}
       <section className="mb-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -202,40 +192,7 @@ export default function TechnicianWorkspacePage() {
         <MetricCard label="Ready / Completed" value={readyCount.toString()} detail="Fully resolved systems" icon={Check} tone="success" />
       </section>
 
-      {/* MAIN INTERACTION SPLIT */}
-      <div className="grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_330px]">
-        <section className="min-w-0">
-          <div className="mb-5 flex flex-col gap-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Work queue</p>
-            <h2 className="font-display text-gray-800 text-2xl font-semibold tracking-[-0.04em]">Assigned repairs</h2>
-          </div>
-
-          <div className="space-y-3">
-            {visibleRepairs.map((repair) => (
-              <RepairTaskRow 
-                key={repair.id} 
-                repair={repair} 
-                expanded={expanded === repair.id} 
-                onExpand={() => setExpanded(expanded === repair.id ? null : repair.id)} 
-                onAdvance={(newStatus) => advanceRepair(repair.id, newStatus)}
-                onOpenDetails={() => setSelectedTicket(repair)}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* TIMELINE SIDEBAR */}
-        <aside className="space-y-4">
-          <IntelligenceBrief />
-          <BriefingCard icon={CalendarDays} title="Today's schedule" action="Open calendar">
-            <div className="grid grid-cols-[42px_10px_1fr] gap-2 text-xs">
-              <span className="text-muted-foreground">10:30</span>
-              <span className="mt-1.5 size-2 rounded-full bg-success ring-4 ring-success-soft" />
-              <div><p className="font-semibold text-primary-text">S1 Run</p><p className="text-[11px] text-muted-foreground">Bay 04</p></div>
-            </div>
-          </BriefingCard>
-        </aside>
-      </div>
+  
 
       {/* WORKBENCH INTERFACE MODAL POPUP */}
       {selectedTicket && (

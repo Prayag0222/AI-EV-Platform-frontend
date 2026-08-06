@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 
 import { useRepairsManager } from "./hooks/useRepairsManager";
@@ -14,18 +13,7 @@ import {
   RepairQueueSkeleton,
 } from "./components/RepairQueueStates";
 
-const DiagnosticConsole = dynamic(
-  () => import("./components/DiagnosticConsole")
-);
 
-const AiCoPilotPanel = dynamic(
-  () => import("./components/AiCoPilotPanel"),
-  {
-    loading: () => (
-      <div className="h-64 animate-pulse rounded-3xl bg-slate-100" />
-    ),
-  }
-);
 
 export default function TechnicianRepairsPage() {
   const {
@@ -120,19 +108,8 @@ export default function TechnicianRepairsPage() {
             }}
           />
         }
-        diagnosticConsole={
-          <DiagnosticConsole
-            key={selectedTicket?.id ?? "empty"}
-            ticket={selectedTicket}
-            onSaveNotes={saveTechnicianNotes}
-            saveSuccess={saveSuccess}
-          />
-        }
-        aiCoPilot={
-          <AiCoPilotPanel
-            ticket={selectedTicket}
-          />
-        }
+     
+     
       />
     </motion.div>
   );
