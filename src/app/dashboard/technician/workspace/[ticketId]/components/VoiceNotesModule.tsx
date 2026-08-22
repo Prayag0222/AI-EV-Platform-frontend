@@ -113,7 +113,7 @@ export default function VoiceNotesModule({ ticketId, onNoteAdded }: VoiceNotesPr
       </div>
 
       {/* Visual Status Container */}
-      <div className="min-h-[60px] p-3 bg-slate-50 rounded-xl text-xs text-slate-500 flex items-center justify-center border border-transparent">
+      <div className="min-h-15 p-3 bg-slate-50 rounded-xl text-xs text-slate-500 flex items-center justify-center border border-transparent">
         {isRecording && "Listening smoothly... Take your time, pauses are allowed."}
         {!isRecording && audioBlob && "Audio captured successfully! Ready to process."}
         {!isRecording && !audioBlob && "Tap the mic to record your diagnostic brief."}

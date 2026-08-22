@@ -19,12 +19,18 @@ interface Props {
   onSubmit: (payload: AddInventoryPayload) => Promise<string>;
 }
 
-const INITIAL_STATE: AddInventoryPayload = {
+type AddInventoryFormState = Omit<AddInventoryPayload, 'stockLevel' | 'retailPrice' | 'lowStockAlert'> & {
+  stockLevel: string;
+  retailPrice: string;
+  lowStockAlert: string;
+};
+
+const EMPTY_FORM: AddInventoryFormState = {
   partName: '',
   category: '',
-  stockLevel: 0,
-  retailPrice: 0,
-  lowStockAlert: 5,
+  stockLevel: '',
+  retailPrice: '',
+  lowStockAlert: '',
 };
 
 export default function AddInventoryForm({
@@ -33,16 +39,16 @@ export default function AddInventoryForm({
   onSubmit,
 }: Props) {
   const [form, setForm] =
-    useState<AddInventoryPayload>(INITIAL_STATE);
+    useState<AddInventoryFormState>(EMPTY_FORM);
 
   const [saving, setSaving] = useState(false);
 
   const [error, setError] =
     useState<string | null>(null);
 
-  function patch<K extends keyof AddInventoryPayload>(
+  function patch<K extends keyof AddInventoryFormState>(
     key: K,
-    value: AddInventoryPayload[K]
+    value: AddInventoryFormState[K]
   ) {
     setForm((prev) => ({
       ...prev,
@@ -59,9 +65,15 @@ export default function AddInventoryForm({
     setError(null);
 
     try {
-      await onSubmit(form);
+      await onSubmit({
+        partName: form.partName,
+        category: form.category,
+        stockLevel: Number(form.stockLevel),
+        retailPrice: Number(form.retailPrice),
+        lowStockAlert: Number(form.lowStockAlert),
+      });
 
-      setForm(INITIAL_STATE);
+      setForm(EMPTY_FORM);
 
       onClose();
     } catch (err) {
@@ -182,10 +194,7 @@ text-red-600
             min={0}
             value={form.stockLevel}
             onChange={(e) =>
-              patch(
-                'stockLevel',
-                Number(e.target.value)
-              )
+              patch('stockLevel', e.target.value)
             }
           />
 
@@ -198,10 +207,7 @@ text-red-600
             value={form.retailPrice}
             icon={<IndianRupee size={18} />}
             onChange={(e) =>
-              patch(
-                'retailPrice',
-                Number(e.target.value)
-              )
+              patch('retailPrice', e.target.value)
             }
           />
         </div>
@@ -215,10 +221,7 @@ text-red-600
           icon={<AlertTriangle size={18} />}
           hint="You'll be notified when stock reaches this level."
           onChange={(e) =>
-            patch(
-              'lowStockAlert',
-              Number(e.target.value)
-            )
+            patch('lowStockAlert', e.target.value)
           }
         />
       </form>

@@ -25,11 +25,16 @@ interface Props {
   ) => Promise<void>;
 }
 
-const EMPTY: EditInventoryPayload = {
+type EditInventoryFormState = Omit<EditInventoryPayload, 'retailPrice' | 'lowStockAlert'> & {
+  retailPrice: string;
+  lowStockAlert: string;
+};
+
+const EMPTY_FORM: EditInventoryFormState = {
   partName: '',
   category: '',
-  retailPrice: 0,
-  lowStockAlert: 5,
+  retailPrice: '',
+  lowStockAlert: '',
 };
 
 export default function EditInventoryForm({
@@ -38,7 +43,7 @@ export default function EditInventoryForm({
   onSubmit,
 }: Props) {
   const [form, setForm] =
-    useState<EditInventoryPayload>(EMPTY);
+    useState<EditInventoryFormState>(EMPTY_FORM);
 
   const [saving, setSaving] = useState(false);
 
@@ -57,8 +62,8 @@ syncedId.current = item.id;
     setForm({
       partName: item.partName,
       category: item.category,
-      retailPrice: item.retailPrice,
-      lowStockAlert: item.lowStockAlert,
+      retailPrice: String(item.retailPrice),
+      lowStockAlert: String(item.lowStockAlert),
     });
 
     setError(null);
@@ -68,9 +73,9 @@ syncedId.current = item.id;
 
 const inventoryItem = item;
 
-  function patch<K extends keyof EditInventoryPayload>(
+  function patch<K extends keyof EditInventoryFormState>(
     key: K,
-    value: EditInventoryPayload[K]
+    value: EditInventoryFormState[K]
   ) {
     setForm((prev) => ({
       ...prev,
@@ -87,7 +92,12 @@ const inventoryItem = item;
     setError(null);
 
     try {
-      await onSubmit(inventoryItem.id , form);
+      await onSubmit(inventoryItem.id, {
+        partName: form.partName,
+        category: form.category,
+        retailPrice: Number(form.retailPrice),
+        lowStockAlert: Number(form.lowStockAlert),
+      });
 
       onClose();
     } catch (err) {
@@ -243,10 +253,7 @@ text-gray-800
             icon={<IndianRupee size={18} />}
             value={form.retailPrice}
             onChange={(e) =>
-              patch(
-                'retailPrice',
-                Number(e.target.value)
-              )
+              patch('retailPrice', e.target.value)
             }
           />
 
@@ -258,10 +265,7 @@ text-gray-800
             icon={<AlertTriangle size={18} />}
             value={form.lowStockAlert}
             onChange={(e) =>
-              patch(
-                'lowStockAlert',
-                Number(e.target.value)
-              )
+              patch('lowStockAlert', e.target.value)
             }
           />
         </div>

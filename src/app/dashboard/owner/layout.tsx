@@ -28,8 +28,8 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
   }, []);
 
   return (
-    <div className="flex h-screen w-full bg-volt-background text-volt-primary overflow-hidden pb-24">
-
+   <div className="flex h-screen w-full bg-volt-background text-volt-primary overflow-hidden pb-24  lg:pb-0">
+ 
       {/* Sidebar — handles both desktop and mobile drawer internally */}
       <Sidebar
         user={user}

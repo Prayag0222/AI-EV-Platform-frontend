@@ -19,12 +19,12 @@ export default function AddStockForm({
   onClose,
   onSubmit,
 }: Props) {
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
 function handleClose() {
-  setQuantity(0);
+  setQuantity('');
   setError(null);
   onClose();
 }
@@ -32,12 +32,13 @@ function handleClose() {
   if (!item) return null;
 
   const inventoryItem = item;
-  const resultingStock = inventoryItem.stockLevel + quantity;
+  const quantityValue = Number(quantity);
+  const resultingStock = inventoryItem.stockLevel + quantityValue;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (quantity <= 0) {
+    if (quantityValue <= 0) {
       setError('Quantity must be greater than 0.');
       return;
     }
@@ -46,7 +47,7 @@ function handleClose() {
     setError(null);
 
     try {
-      await onSubmit(inventoryItem.id, quantity);
+      await onSubmit(inventoryItem.id, quantityValue);
       handleClose();
     } catch (err) {
       setError(
@@ -138,7 +139,7 @@ function handleClose() {
               </p>
 
               <p className="mt-1 text-2xl font-bold text-blue-600">
-                {quantity}
+                {quantity || 0}
               </p>
             </div>
 
@@ -162,7 +163,7 @@ function handleClose() {
           placeholder="Enter quantity"
           value={quantity}
           onChange={(e) =>
-            setQuantity(Number(e.target.value))
+            setQuantity(e.target.value)
           }
         />
       </form>

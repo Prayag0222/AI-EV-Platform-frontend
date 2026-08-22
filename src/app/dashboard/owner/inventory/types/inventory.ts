@@ -28,7 +28,7 @@ export interface InventoryStats {
 export interface AddInventoryPayload {
   partName: string;
   category: string;
-  stockLevel: number;
+  stockLevel: number | null;
   retailPrice: number;
   lowStockAlert: number;
 }
@@ -36,7 +36,7 @@ export interface AddInventoryPayload {
 export interface EditInventoryPayload {
   partName: string;
   category: string;
-  retailPrice: number;
+  retailPrice: number ;
   lowStockAlert: number;
 }
 

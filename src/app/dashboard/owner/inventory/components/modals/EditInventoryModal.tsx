@@ -10,12 +10,17 @@ interface Props {
   onSubmit: (id: number, payload: EditInventoryPayload) => Promise<void>;
 }
 
+type EditInventoryModalState = Omit<EditInventoryPayload, 'retailPrice' | 'lowStockAlert'> & {
+  retailPrice: string;
+  lowStockAlert: string;
+};
+
 export default function EditInventoryModal({ item, onClose, onSubmit }: Props) {
-  const [form, setForm] = useState<EditInventoryPayload>({
+  const [form, setForm] = useState<EditInventoryModalState>({
     partName: '',
     category: '',
-    retailPrice: 0,
-    lowStockAlert: 5,
+    retailPrice: '',
+    lowStockAlert: '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +32,8 @@ export default function EditInventoryModal({ item, onClose, onSubmit }: Props) {
       setForm({
         partName: item.partName,
         category: item.category,
-        retailPrice: item.retailPrice,
-        lowStockAlert: item.lowStockAlert,
+        retailPrice: String(item.retailPrice),
+        lowStockAlert: String(item.lowStockAlert),
       });
       setError(null);
     }
@@ -36,7 +41,7 @@ export default function EditInventoryModal({ item, onClose, onSubmit }: Props) {
 
   if (!item) return null;
 
-  function patch<K extends keyof EditInventoryPayload>(key: K, value: EditInventoryPayload[K]) {
+  function patch<K extends keyof EditInventoryModalState>(key: K, value: EditInventoryModalState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
@@ -45,7 +50,12 @@ export default function EditInventoryModal({ item, onClose, onSubmit }: Props) {
     setSaving(true);
     setError(null);
     try {
-      await onSubmit(item!.id, form);
+      await onSubmit(item!.id, {
+        partName: form.partName,
+        category: form.category,
+        retailPrice: Number(form.retailPrice),
+        lowStockAlert: Number(form.lowStockAlert),
+      });
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update item.');
@@ -103,7 +113,7 @@ export default function EditInventoryModal({ item, onClose, onSubmit }: Props) {
                 step="0.01"
                 min={0}
                 value={form.retailPrice}
-                onChange={(e) => patch('retailPrice', Number(e.target.value))}
+                onChange={(e) => patch('retailPrice', e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -115,7 +125,7 @@ export default function EditInventoryModal({ item, onClose, onSubmit }: Props) {
                 type="number"
                 min={0}
                 value={form.lowStockAlert}
-                onChange={(e) => patch('lowStockAlert', Number(e.target.value))}
+                onChange={(e) => patch('lowStockAlert', e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
