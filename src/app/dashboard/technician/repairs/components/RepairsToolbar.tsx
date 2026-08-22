@@ -22,7 +22,6 @@ const FILTER_OPTIONS = [
   "DIAGNOSING",
   "IN_SERVICE",
   "RESOLVED",
-  "DELIVERED",
 ] as const;
 
 export default function RepairsToolbar({

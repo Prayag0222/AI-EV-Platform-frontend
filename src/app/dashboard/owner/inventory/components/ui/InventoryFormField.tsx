@@ -72,7 +72,7 @@ ${className}
 absolute
 left-3
 top-1/2
--z-0
+z-0
 -translate-y-1/2
 text-gray-400
 pointer-events-none

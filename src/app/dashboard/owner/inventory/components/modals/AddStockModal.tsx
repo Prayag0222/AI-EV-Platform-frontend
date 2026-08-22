@@ -11,25 +11,26 @@ interface Props {
 }
 
 export default function AddStockModal({ item, onClose, onSubmit }: Props) {
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!item) return null;
 
-  const resultingStock = item.stockLevel + quantity;
+  const quantityValue = Number(quantity);
+  const resultingStock = item.stockLevel + quantityValue;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (quantity <= 0) {
+    if (quantityValue <= 0) {
       setError('Please enter a quantity greater than 0.');
       return;
     }
     setSaving(true);
     setError(null);
     try {
-      await onSubmit(item!.id, quantity);
-      setQuantity(0);
+      await onSubmit(item!.id, quantityValue);
+      setQuantity('');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add stock.');
@@ -81,7 +82,7 @@ export default function AddStockModal({ item, onClose, onSubmit }: Props) {
               type="number"
               min={1}
               value={quantity}
-              onChange={(e) => { setQuantity(Number(e.target.value)); setError(null); }}
+              onChange={(e) => { setQuantity(e.target.value); setError(null); }}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

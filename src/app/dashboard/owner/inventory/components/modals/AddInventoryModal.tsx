@@ -10,22 +10,28 @@ interface Props {
   onSubmit: (payload: AddInventoryPayload) => Promise<string>;
 }
 
-const EMPTY: AddInventoryPayload = {
+type AddInventoryModalState = Omit<AddInventoryPayload, 'stockLevel' | 'retailPrice' | 'lowStockAlert'> & {
+  stockLevel: string;
+  retailPrice: string;
+  lowStockAlert: string;
+};
+
+const EMPTY: AddInventoryModalState = {
   partName: '',
   category: '',
-  stockLevel: 0,
-  retailPrice: 0,
-  lowStockAlert: 5,
+  stockLevel: '',
+  retailPrice: '',
+  lowStockAlert: '',
 };
 
 export default function AddInventoryModal({ open, onClose, onSubmit }: Props) {
-  const [form, setForm] = useState<AddInventoryPayload>(EMPTY);
+  const [form, setForm] = useState<AddInventoryModalState>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!open) return null;
 
-  function patch<K extends keyof AddInventoryPayload>(key: K, value: AddInventoryPayload[K]) {
+  function patch<K extends keyof AddInventoryModalState>(key: K, value: AddInventoryModalState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
@@ -34,7 +40,13 @@ export default function AddInventoryModal({ open, onClose, onSubmit }: Props) {
     setSaving(true);
     setError(null);
     try {
-      const sku = await onSubmit(form);
+      const sku = await onSubmit({
+        partName: form.partName,
+        category: form.category,
+        stockLevel: Number(form.stockLevel),
+        retailPrice: Number(form.retailPrice),
+        lowStockAlert: Number(form.lowStockAlert),
+      });
       alert(`Part added! Auto-generated SKU: ${sku}`);
       setForm(EMPTY);
       onClose();
@@ -89,14 +101,16 @@ export default function AddInventoryModal({ open, onClose, onSubmit }: Props) {
 
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1">Initial Stock</label>
-              <input
-                required
-                type="number"
-                min={0}
-                value={form.stockLevel}
-                onChange={(e) => patch('stockLevel', Number(e.target.value))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+             <input 
+  required 
+  type="number" 
+  min={0} 
+  value={form.stockLevel}
+  onChange={(e) => patch('stockLevel', e.target.value)}
+  placeholder="0"
+  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+/>
+
             </div>
 
             <div>
@@ -107,7 +121,7 @@ export default function AddInventoryModal({ open, onClose, onSubmit }: Props) {
                 step="0.01"
                 min={0}
                 value={form.retailPrice}
-                onChange={(e) => patch('retailPrice', Number(e.target.value))}
+                onChange={(e) => patch('retailPrice', e.target.value)}
                 placeholder="0.00"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -120,7 +134,7 @@ export default function AddInventoryModal({ open, onClose, onSubmit }: Props) {
                 type="number"
                 min={0}
                 value={form.lowStockAlert}
-                onChange={(e) => patch('lowStockAlert', Number(e.target.value))}
+                onChange={(e) => patch('lowStockAlert', e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>

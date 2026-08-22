@@ -49,7 +49,9 @@ export const useRepairsManager = () => {
         throw new Error(ticketsData.error || "Unable to load the repair queue.");
       }
 
-      const fetchedTickets = (ticketsData.tickets || []) as RepairTicket[];
+      const fetchedTickets = ((ticketsData.tickets || []) as RepairTicket[]).filter(
+        (ticket) => ticket.status !== "DELIVERED",
+      );
       setRepairs(fetchedTickets);
       setSelectedTicketId((current) =>
         current && fetchedTickets.some((ticket) => ticket.id === current)
