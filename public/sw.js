@@ -1,4 +1,4 @@
-const CACHE_NAME = "voltops-v1.1.2.2";
+const CACHE_NAME = "voltops-v1.2.0";
 
 const APP_SHELL = [
   "/offline.html",
