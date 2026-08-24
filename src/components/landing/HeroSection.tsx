@@ -52,7 +52,7 @@ export default function HeroSection() {
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
 
         {/* ── Navbar ── */}
-        <header className="relative z-50 flex items-center justify-between px-8 md:px-14 py-5 border-b border-black/[0.07] bg-[#F8F7F4]/80"
+        <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-14 py-5 border-b border-black/[0.07] bg-[#F8F7F4]/95"
           style={{ backdropFilter: "blur(12px)" }}>
           <div className="flex items-center gap-2.5">
             {/* Logo mark */}
@@ -65,26 +65,26 @@ export default function HeroSection() {
           </div>
 
           <nav className="hidden md:flex items-center gap-8 text-[13px] text-slate-500">
-            {["Features", "How It Works", "Pricing"].map((item) => (
-              <a key={item} href={`#${item.toLowerCase().replace(" ", "-")}`}
-                className="hover:text-slate-900 transition-colors">{item}</a>
+            {[{ label: "Features", href: "#features" }, { label: "How It Works", href: "#how-it-works" }, { label: "Get Started", href: "#get-started" }].map((item) => (
+              <a key={item.label} href={item.href}
+                className="hover:text-slate-900 transition-colors">{item.label}</a>
             ))}
           </nav>
 
           <div className="flex items-center gap-3">
             <button onClick={() => router.push("/login")}
-              className="text-[13px] text-slate-500 hover:text-slate-900 transition-colors px-4 py-2">
-              Sign in
+              className="text-[13px] font-semibold text-slate-700 hover:text-slate-900 transition-colors px-4 py-2">
+              Login
             </button>
             <button onClick={() => router.push("/signup")}
               className="text-[13px] font-medium bg-[#111] text-white px-5 py-2.5 rounded-lg hover:bg-black transition-colors shadow-sm">
-              Get started →
+              Sign Up
             </button>
           </div>
         </header>
 
         {/* ── Hero body ── */}
-        <div className="relative z-10 max-w-7xl mx-auto px-8 md:px-14 pt-20 pb-28
+          <div className="relative z-10 max-w-7xl mx-auto px-8 md:px-14 pt-36 pb-28
                         grid lg:grid-cols-[1fr_1.05fr] gap-16 items-center">
 
           {/* ── LEFT: Copy ── */}

@@ -6,7 +6,7 @@ export default function CTASection() {
   const router = useRouter();
 
   return (
-    <section className="border-t border-black/[0.06] bg-slate-950 py-20 md:py-28">
+    <section id="get-started" className="border-t border-black/[0.06] bg-slate-950 py-20 md:py-28">
       <div className="px-5 md:px-10 xl:px-20">
         <div className="max-w-4xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 mb-5">
