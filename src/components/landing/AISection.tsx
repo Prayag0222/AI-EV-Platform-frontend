@@ -29,18 +29,18 @@ export default function AISection() {
   return (
     <section
       id="ai-intelligence"
-      className="py-20 md:py-28 border-t border-black/[0.06] bg-[#F8F7F4]"
+      className="py-20 md:py-28 border-t border-black/6 bg-[#F8F7F4]"
     >
       <div className="px-5 md:px-10 xl:px-20">
         <div className="max-w-4xl mb-14 md:mb-20">
-          <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 mb-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3 py-1.5 mb-5">
             <span className="h-2 w-2 rounded-full bg-violet-500" />
             <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-600">
               Repair Intelligence
             </span>
           </div>
 
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1]">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-none">
             It Doesn&apos;t Just Store Data.
             <br />
             It Learns From Repairs.
@@ -55,7 +55,7 @@ export default function AISection() {
         <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8">
           {/* AI Demo Card */}
           <div className="rounded-3xl border border-violet-100 bg-white overflow-hidden">
-            <div className="p-5 md:p-8 border-b border-black/[0.06]">
+            <div className="p-5 md:p-8 border-b border-black/6">
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-2 w-2 rounded-full bg-slate-400" />
                 <p className="text-xs uppercase tracking-wider text-slate-500">
@@ -63,7 +63,7 @@ export default function AISection() {
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-slate-50 border border-black/[0.06] p-4">
+              <div className="rounded-2xl bg-slate-50 border border-black/6 p-4">
                 <p className="text-sm md:text-base text-slate-700">
                   Battery voltage drops heavily during acceleration.
                 </p>

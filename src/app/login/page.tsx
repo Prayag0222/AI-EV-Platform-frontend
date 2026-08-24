@@ -145,6 +145,7 @@ const [gstNumber, setGstNumber] = useState("");
             value={credentials.email}
             onChange={handleInputChange}
             placeholder="you@example.com"
+            autoComplete="email"
             className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
         </div>
@@ -166,6 +167,8 @@ const [gstNumber, setGstNumber] = useState("");
                   : "password"
               }
               placeholder="••••••••"
+              autoComplete="current-password"
+              aria-label="Password"
               className="w-full h-12 px-4 pr-12 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
 
@@ -176,6 +179,7 @@ const [gstNumber, setGstNumber] = useState("");
                   !showPassword
                 )
               }
+              aria-label={showPassword ? "Hide password" : "Show password"}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
             >
               {showPassword ? (

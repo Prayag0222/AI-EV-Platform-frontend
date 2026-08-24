@@ -35,18 +35,18 @@ export default function ProblemSection() {
   return (
     <section
       id="problem"
-      className="py-20 md:py-28 border-t border-black/[0.06] bg-[#F8F7F4]"
+      className="py-20 md:py-28 border-t border-black/6 bg-[#F8F7F4]"
     >
       <div className="px-5 md:px-10 xl:px-20">
         <div className="max-w-4xl mb-14 md:mb-20">
-          <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 mb-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3 py-1.5 mb-5">
             <span className="h-2 w-2 rounded-full bg-violet-500" />
             <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-600">
               The Problem
             </span>
           </div>
 
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1]">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-none">
             Most Workshops
             <br />
             Don&apos;t Lose Repairs.
@@ -110,7 +110,7 @@ export default function ProblemSection() {
         </div>
 
         {/* Desktop Only */}
-        <div className="hidden md:block mt-16 rounded-3xl border border-black/[0.08] bg-white p-8">
+        <div className="hidden md:block mt-16 rounded-3xl border border-black/8 bg-white p-8">
           <p className="text-sm uppercase tracking-[0.18em] text-slate-400 mb-5">
             Business Impact
           </p>

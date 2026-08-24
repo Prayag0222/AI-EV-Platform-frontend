@@ -13,6 +13,7 @@ interface SignUpData {
   name: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
 export default function SignupPage() {
@@ -26,6 +27,7 @@ export default function SignupPage() {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const handleChange = (
@@ -42,6 +44,28 @@ export default function SignupPage() {
   ) => {
     e.preventDefault();
 
+    const normalizedEmail = formData.email.trim().toLowerCase();
+
+    if (formData.name.trim().length < 2) {
+      toast.error("Please enter your full name.");
+      return;
+    }
+
+    if (!normalizedEmail.endsWith("@gmail.com")) {
+      toast.error("Please use a Gmail address.");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -51,7 +75,9 @@ export default function SignupPage() {
           "Content-Type": "application/json",
         },
           body: JSON.stringify({
-            ...formData,
+            name: formData.name.trim(),
+            email: normalizedEmail,
+            password: formData.password,
             role: "OWNER",
           }),
         }
@@ -102,11 +128,13 @@ export default function SignupPage() {
 
           <input
             required
+            minLength={2}
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
             placeholder="John Doe"
+            autoComplete="name"
             className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
         </div>
@@ -123,6 +151,8 @@ export default function SignupPage() {
             value={formData.email}
             onChange={handleChange}
             placeholder="you@example.com"
+            autoComplete="email"
+            pattern="^[^\s@]+@gmail\.com$"
             className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
         </div>
@@ -135,6 +165,7 @@ export default function SignupPage() {
           <div className="relative">
             <input
               required
+              minLength={6}
               name="password"
               value={formData.password}
               onChange={handleChange}
@@ -144,6 +175,8 @@ export default function SignupPage() {
                   : "password"
               }
               placeholder="••••••••"
+              autoComplete="new-password"
+              aria-describedby="password-requirement"
               className="w-full h-12 px-4 pr-12 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
 
@@ -154,6 +187,7 @@ export default function SignupPage() {
                   !showPassword
                 )
               }
+              aria-label={showPassword ? "Hide password" : "Show password"}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
             >
               {showPassword ? (
@@ -163,6 +197,28 @@ export default function SignupPage() {
               )}
             </button>
           </div>
+
+          <p id="password-requirement" className="mt-2 text-xs text-slate-500">
+            Use at least 6 characters. Any combination is allowed.
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Confirm Password
+          </label>
+
+          <input
+            required
+            minLength={6}
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            type="password"
+            placeholder="Re-enter your password"
+            autoComplete="new-password"
+            className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
+          />
         </div>
 
         <button
