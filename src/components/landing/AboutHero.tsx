@@ -1,16 +1,16 @@
 export default function AboutHero() {
   return (
-    <section className="py-20 md:py-28 border-b border-black/[0.06] bg-[#F8F7F4]">
+    <section className="py-20 md:py-28 border-b border-black/6 bg-[#F8F7F4]">
       <div className="px-5 md:px-10 xl:px-20">
         <div className="max-w-5xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 mb-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3 py-1.5 mb-5">
             <span className="h-2 w-2 rounded-full bg-violet-500" />
             <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-600">
               About VoltOps
             </span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1]">
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-none">
             Building The Intelligence Layer
             <br />
             For EV Repair Businesses.
